@@ -71,7 +71,7 @@ export const tools: Tool[] = [
       "Start on the treble staff with just the lines, then add spaces. Say the note name before you tap.",
     books: [
       {
-        asin: "0739001661",
+        asin: "0882848941",
         title: "Alfred's Essentials of Music Theory, Book 1",
         author: "Andrew Surmani, Karen Farnum Surmani, Morton Manus",
         blurb:
