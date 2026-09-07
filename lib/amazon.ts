@@ -1,5 +1,5 @@
 export function getAmazonAssociateTag() {
-  return process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG || "yourtag-20";
+  return process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG || "jannunzi04-20";
 }
 
 export function amazonProductUrl(asin: string) {
