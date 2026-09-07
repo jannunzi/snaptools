@@ -72,6 +72,15 @@ export function MultiplicationTables() {
   const sessionStartRef = useRef(0);
   const phaseRef = useRef(phase);
   const endingRef = useRef(false);
+  const busyRef = useRef(false);
+  const advanceTimerRef = useRef<number | null>(null);
+
+  const clearAdvanceTimer = () => {
+    if (advanceTimerRef.current !== null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+  };
 
   useEffect(() => {
     phaseRef.current = phase;
@@ -106,6 +115,8 @@ export function MultiplicationTables() {
       setTimeLeft(TIMED_SECONDS);
       setPhase("playing");
       endingRef.current = false;
+      busyRef.current = false;
+      clearAdvanceTimer();
       shownAtRef.current = Date.now();
       sessionStartRef.current = Date.now();
     },
@@ -121,10 +132,11 @@ export function MultiplicationTables() {
 
   const submitAnswer = useCallback(
     (raw: string) => {
-      if (phaseRef.current !== "playing" || feedback) return;
+      if (phaseRef.current !== "playing" || busyRef.current) return;
       const value = raw.trim();
       if (value.length === 0) return;
 
+      busyRef.current = true;
       const correct = Number(value) === product;
       const ms = Date.now() - shownAtRef.current;
       const record: FactRecord = { ...fact, ms, correct };
@@ -140,23 +152,33 @@ export function MultiplicationTables() {
         });
       } else {
         setStreak(0);
-        if (mode === "streak") {
-          window.setTimeout(() => finishSession(), 650);
-          return;
-        }
       }
 
-      window.setTimeout(() => {
-        if (phaseRef.current !== "playing") return;
+      const delay = correct ? 900 : 1600;
+
+      clearAdvanceTimer();
+      advanceTimerRef.current = window.setTimeout(() => {
+        if (!correct && mode === "streak") {
+          busyRef.current = false;
+          finishSession();
+          return;
+        }
+        if (phaseRef.current !== "playing") {
+          busyRef.current = false;
+          return;
+        }
         const upcoming = nextFact(tables, fact, focusFacts);
         setFact(upcoming);
         setInput("");
         setFeedback(null);
         shownAtRef.current = Date.now();
-      }, 550);
+        busyRef.current = false;
+      }, delay);
     },
-    [fact, feedback, finishSession, focusFacts, mode, product, tables],
+    [fact, finishSession, focusFacts, mode, product, tables],
   );
+
+  useEffect(() => () => clearAdvanceTimer(), []);
 
   useEffect(() => {
     if (phase !== "playing" || mode !== "timed") return;
@@ -180,6 +202,7 @@ export function MultiplicationTables() {
 
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (busyRef.current) return;
       if (event.key === "Enter") {
         event.preventDefault();
         submitAnswer(input);
@@ -454,11 +477,19 @@ function PlayPanel({
             {input || "?"}
           </span>
         </p>
-        <p className="mt-3 min-h-6 text-sm font-medium">
+        <p
+          className={`mt-3 min-h-6 text-sm font-semibold ${
+            feedback === "correct"
+              ? "text-ok"
+              : feedback === "wrong"
+                ? "text-bad"
+                : "font-medium text-ink-muted"
+          }`}
+        >
           {feedback === "correct"
-            ? "Yes!"
+            ? `Yes! ${fact.a} × ${fact.b} = ${fact.a * fact.b}`
             : feedback === "wrong"
-              ? `Not quite — ${fact.a} × ${fact.b} = ${fact.a * fact.b}`
+              ? `Not quite. ${fact.a} × ${fact.b} = ${fact.a * fact.b}`
               : "Use the pad or your keyboard"}
         </p>
       </div>
