@@ -22,7 +22,7 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${siteName} — tiny free tools, one a day`,
+    default: `${siteName} — tiny free tools`,
     template: `%s · ${siteName}`,
   },
   description: siteDescription,
@@ -32,6 +32,10 @@ export const metadata: Metadata = {
     "practice sheets",
     "multiplication tables",
     "music note recognition",
+    "spelling practice",
+    "printable coloring",
+    "civics quiz",
+    "USCIS",
     "treble clef",
     "browser tools",
     "no account",

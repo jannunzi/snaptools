@@ -86,6 +86,114 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "spelling-practice",
+    title: "Spelling Practice",
+    tagline: "Hear a word, type the spelling — English, Spanish, or French.",
+    description:
+      "The browser reads a word aloud. Type what you heard. Switch among English, Spanish, and French, keep a score and streak, and hear the word again whenever you need it.",
+    day: 3,
+    publishedOn: "2026-09-08",
+    audience: "Kids and language learners practicing spelling by ear",
+    status: "live",
+    howTo:
+      "Pick a language, then tap Hear word. Type the spelling and press Check. Accents count in Spanish and French. Use Hear again if you missed it — the word stays hidden until you submit.",
+    books: [
+      {
+        asin: "148381176X",
+        title: "Spectrum Spelling, Grade 3",
+        author: "Spectrum",
+        blurb:
+          "Progressive lessons, puzzles, and a speller’s dictionary for everyday English words.",
+      },
+      {
+        asin: "1260453499",
+        title: "Practice Makes Perfect: Basic Spanish",
+        author: "McGraw Hill",
+        blurb:
+          "Short lessons and high-frequency vocabulary for building Spanish from the ground up.",
+      },
+      {
+        asin: "0071453873",
+        title: "Easy French Step-by-Step",
+        author: "Myrna Bell Rochester",
+        blurb:
+          "Grammar and core verbs first, then readings — a standard self-study French start.",
+      },
+    ],
+  },
+  {
+    slug: "printable-coloring",
+    title: "Printable Coloring Pages",
+    tagline: "Original line art to color on screen or on paper.",
+    description:
+      "Animals, mandalas, generic fantasy, and nature pages drawn for SnapTools. Tap a swatch, fill a region, then print or download. No licensed TV or cartoon characters.",
+    day: 4,
+    publishedOn: "2026-09-08",
+    audience: "Kids, parents, and anyone who wants a quiet coloring sheet",
+    status: "live",
+    howTo:
+      "Choose a category and a page. Pick a color, then tap a region to fill it. Print sends the page only. Download saves your colored SVG.",
+    books: [
+      {
+        asin: "0486799875",
+        title: "Creative Haven Magical Mandalas Coloring Book",
+        author: "Alberta Hutchinson",
+        blurb:
+          "Intricate circular designs printed one side per page — a classic adult mandala book.",
+      },
+      {
+        asin: "1780670257",
+        title: "Secret Garden: An Inky Treasure Hunt and Coloring Book",
+        author: "Johanna Basford",
+        blurb:
+          "Original garden line art — flowers, animals, and hidden details to color on paper.",
+      },
+      {
+        asin: "1780671067",
+        title: "Enchanted Forest: An Inky Quest & Coloring Book",
+        author: "Johanna Basford",
+        blurb:
+          "Original woodland and garden line art — nature and fantasy without screen characters.",
+      },
+    ],
+  },
+  {
+    slug: "civics-quiz",
+    title: "USCIS Civics Quiz",
+    tagline: "Practice the official 2025 naturalization civics bank.",
+    description:
+      "All 128 public questions and answers from the 2025 USCIS civics test (M-1778). Take a quick 10, sit an interview-style 20 (pass with 12+), or browse the bank. Current officeholders can change — confirm at USCIS.",
+    day: 5,
+    publishedOn: "2026-09-08",
+    audience: "Applicants studying for the naturalization civics interview",
+    status: "live",
+    howTo:
+      "Start with Quick 10 to warm up. Interview 20 asks up to 20 questions and stops at 12 correct or 9 wrong — the 2025 pass rule. Browse shows every official answer. This tool is not affiliated with USCIS.",
+    books: [
+      {
+        asin: "1637988125",
+        title: "US Citizenship Test Study Guide 2026 and 2027",
+        author: "Trivium Test Prep",
+        blurb:
+          "128 USCIS civics questions with explanations, aligned to the current naturalization exam.",
+      },
+      {
+        asin: "1601703325",
+        title: "Learn About the United States: Quick Civics Lessons",
+        author: "U.S. Citizenship and Immigration Services",
+        blurb:
+          "Short civics lessons that expand on the naturalization questions.",
+      },
+      {
+        asin: "1516730690",
+        title: "US Citizenship Test Study Guide 2026-2027",
+        author: "Mometrix Test Preparation",
+        blurb:
+          "Review of the English and civics tests with detailed answer explanations.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
