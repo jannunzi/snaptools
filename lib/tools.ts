@@ -105,3 +105,18 @@ export function getFeaturedTool() {
 export function getNextToolDay() {
   return Math.max(...tools.map((tool) => tool.day)) + 1;
 }
+
+const NEW_TOOL_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
+
+export function isNewTool(tool: Tool, now = Date.now()) {
+  if (tool.status !== "live") return false;
+  const published = Date.parse(`${tool.publishedOn}T00:00:00.000Z`);
+  if (Number.isNaN(published)) return false;
+  const age = now - published;
+  if (age < 0 || age > NEW_TOOL_WINDOW_MS) return false;
+
+  const newestLive = getLiveTools().reduce((latest, item) =>
+    item.publishedOn >= latest.publishedOn ? item : latest,
+  );
+  return newestLive.slug === tool.slug;
+}

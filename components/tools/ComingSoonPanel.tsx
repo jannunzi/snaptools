@@ -9,7 +9,7 @@ export function ComingSoonPanel({ tool }: ComingSoonPanelProps) {
   return (
     <section className="rounded-2xl border border-dashed border-line bg-surface p-6 sm:p-8">
       <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-        Day {tool.day} is next
+        Coming soon
       </p>
       <h2 className="mt-2 font-display text-2xl text-ink">{tool.title}</h2>
       <p className="mt-3 max-w-xl text-ink-muted">{tool.description}</p>

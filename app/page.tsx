@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ToolCard } from "@/components/ToolCard";
 import { siteDescription, siteName, siteTagline } from "@/lib/site";
-import { getFeaturedTool, getNextToolDay, tools } from "@/lib/tools";
+import { getFeaturedTool, tools } from "@/lib/tools";
 
 export default function Home() {
   const featured = getFeaturedTool();
@@ -24,7 +24,7 @@ export default function Home() {
       <section className="mt-10" aria-labelledby="featured-heading">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 id="featured-heading" className="font-display text-2xl text-ink">
-            Day {featured.day} · Featured
+            Featured
           </h2>
           <Link
             href={`/tools/${featured.slug}`}
@@ -49,13 +49,13 @@ export default function Home() {
 
       <section
         id="new-daily"
-        className="mt-12 rounded-2xl border border-line bg-surface px-5 py-6"
+        className="mt-12 rounded-2xl border border-secondary/35 bg-secondary-soft/50 px-5 py-6"
       >
         <h2 className="font-display text-2xl text-ink">A new tool every day</h2>
         <p className="mt-2 max-w-2xl text-ink-muted">
           SnapTools stays small on purpose. Each day we ship one specific thing
           — a practice sheet, a generator, a quiz — that you can use in the
-          browser and close. Day 2 is live. Day {getNextToolDay()} is next.
+          browser and close.
         </p>
       </section>
     </div>
