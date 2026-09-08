@@ -1,3 +1,4 @@
+import { AmazonBookCover } from "@/components/AmazonBookCover";
 import { amazonDisclosure, amazonProductUrl } from "@/lib/amazon";
 import type { AmazonBook } from "@/lib/tools";
 
@@ -27,28 +28,39 @@ export function AmazonBookBanner({ books }: AmazonBookBannerProps) {
         <p className="text-xs text-ink-muted">{amazonDisclosure}</p>
       </div>
       <ul className="mt-5 grid gap-4 md:grid-cols-3">
-        {books.map((book) => (
-          <li
-            key={book.asin}
-            className="flex flex-col rounded-xl border border-line bg-bg/50 p-4"
-          >
-            <h3 className="text-base font-semibold leading-snug text-ink">
-              {book.title}
-            </h3>
-            <p className="mt-1 text-sm text-ink-muted">{book.author}</p>
-            <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-muted">
-              {book.blurb}
-            </p>
-            <a
-              href={amazonProductUrl(book.asin)}
-              target="_blank"
-              rel="nofollow sponsored noopener noreferrer"
-              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-3 text-sm font-semibold text-accent-ink transition-opacity hover:opacity-90"
+        {books.map((book) => {
+          const href = amazonProductUrl(book.asin);
+          return (
+            <li
+              key={book.asin}
+              className="flex flex-col rounded-xl border border-line bg-bg/50 p-4"
             >
-              View on Amazon
-            </a>
-          </li>
-        ))}
+              <a
+                href={href}
+                target="_blank"
+                rel="nofollow sponsored noopener noreferrer"
+                className="block"
+              >
+                <AmazonBookCover asin={book.asin} title={book.title} />
+              </a>
+              <h3 className="mt-3 text-base font-semibold leading-snug text-ink">
+                {book.title}
+              </h3>
+              <p className="mt-1 text-sm text-ink-muted">{book.author}</p>
+              <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-muted">
+                {book.blurb}
+              </p>
+              <a
+                href={href}
+                target="_blank"
+                rel="nofollow sponsored noopener noreferrer"
+                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-3 text-sm font-semibold text-accent-ink transition-opacity hover:opacity-90"
+              >
+                View on Amazon
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </aside>
   );

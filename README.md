@@ -27,7 +27,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` | `yourtag-20` | Amazon Associates tag appended to every book link |
+| `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` | `jannunzi04-20` | Amazon Associates tag appended to every book link |
 | `NEXT_PUBLIC_SITE_URL` | `https://snaptools.vercel.app` | Canonical URL for sitemap, robots, and Open Graph |
 
 Book links are always:
