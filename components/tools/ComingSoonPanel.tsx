@@ -14,11 +14,15 @@ export function ComingSoonPanel({ tool }: ComingSoonPanelProps) {
       <h2 className="mt-2 font-display text-2xl text-ink">{tool.title}</h2>
       <p className="mt-3 max-w-xl text-ink-muted">{tool.description}</p>
       <p className="mt-4 text-sm text-ink-muted">
-        Add this tool by creating{" "}
+        Add this tool by creating a client component in{" "}
         <code className="rounded bg-surface-muted px-1.5 py-0.5 text-ink">
-          components/tools/MusicNoteRecognition.tsx
+          components/tools
         </code>
-        , marking it <code className="rounded bg-surface-muted px-1.5 py-0.5 text-ink">live</code> in{" "}
+        , marking it{" "}
+        <code className="rounded bg-surface-muted px-1.5 py-0.5 text-ink">
+          live
+        </code>{" "}
+        in{" "}
         <code className="rounded bg-surface-muted px-1.5 py-0.5 text-ink">
           lib/tools.ts
         </code>
