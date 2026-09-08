@@ -1,10 +1,12 @@
 # SnapTools
 
-Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts, no database, no analytics SDKs. Everything runs in the browser. A new tool ships every day.
+Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts, no database, no analytics SDKs. Everything runs in the browser.
 
-**Day 1:** [Multiplication Tables Practice](/tools/multiplication-tables) — pick tables 1–12, then Practice, a 60-second quiz, or Streak mode. Instant feedback, missed/slow-fact review, printable chart.
-
-**Day 2:** [Music Note Recognition](/tools/music-note-recognition) — name the note on a treble staff. Lines-only or lines + spaces, optional ledger lines, Practice or Streak.
+- [Multiplication Tables Practice](/tools/multiplication-tables) — pick tables 1–12, then Practice, a 60-second quiz, or Streak mode. Instant feedback, missed/slow-fact review, printable chart.
+- [Music Note Recognition](/tools/music-note-recognition) — name the note on a treble staff. Lines-only or lines + spaces, optional ledger lines, Practice or Streak.
+- [Spelling Practice](/tools/spelling-practice) — SpeechSynthesis speaks a word; type the spelling in English, Spanish, or French. Score and streak.
+- [Printable Coloring Pages](/tools/printable-coloring) — original line art (animals, mandalas, generic fantasy, nature). Color on screen, then print or download.
+- [USCIS Civics Quiz](/tools/civics-quiz) — official 2025 128-question bank. Quick 10, interview 20 (pass 12+), or browse.
 
 ## Stack
 
@@ -55,15 +57,18 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 
 4. The route `/tools/[slug]` already wraps every tool in `ToolShell` (header, how-to tip, `AmazonBookBanner`). Homepage cards come from the same registry.
 
-That’s it. Do not add accounts, a CMS, or a database just to ship a daily tool.
+That’s it. Do not add accounts, a CMS, or a database just to ship a tool.
 
 ## Site map
 
 | Route | What |
 | --- | --- |
-| `/` | Hero, featured card, tool grid, “new tool daily” note |
-| `/tools/multiplication-tables` | Live Day 1 tool |
-| `/tools/music-note-recognition` | Live Day 2 tool |
+| `/` | Hero, featured card, all-tools directory |
+| `/tools/multiplication-tables` | Live multiplication practice |
+| `/tools/music-note-recognition` | Live treble-staff quiz |
+| `/tools/spelling-practice` | Live EN/ES/FR spelling by ear |
+| `/tools/printable-coloring` | Live original coloring pages |
+| `/tools/civics-quiz` | Live USCIS 2025 civics practice |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 

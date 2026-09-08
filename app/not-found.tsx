@@ -8,7 +8,7 @@ export default function NotFound() {
       </p>
       <h1 className="mt-2 font-display text-4xl text-ink">Tool not found</h1>
       <p className="mt-3 text-ink-muted">
-        That slug is not in the daily registry yet.
+        That slug is not in the tools directory.
       </p>
       <Link
         href="/"
