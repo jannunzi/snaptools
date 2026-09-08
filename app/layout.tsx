@@ -31,6 +31,8 @@ export const metadata: Metadata = {
     "free tools",
     "practice sheets",
     "multiplication tables",
+    "music note recognition",
+    "treble clef",
     "browser tools",
     "no account",
   ],

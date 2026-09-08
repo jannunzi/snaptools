@@ -55,8 +55,7 @@ export default function Home() {
         <p className="mt-2 max-w-2xl text-ink-muted">
           SnapTools stays small on purpose. Each day we ship one specific thing
           — a practice sheet, a generator, a quiz — that you can use in the
-          browser and close. Day {getNextToolDay()} is already named in the
-          registry: music note recognition.
+          browser and close. Day 2 is live. Day {getNextToolDay()} is next.
         </p>
       </section>
     </div>

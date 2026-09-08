@@ -60,15 +60,15 @@ export const tools: Tool[] = [
   {
     slug: "music-note-recognition",
     title: "Music Note Recognition",
-    tagline: "Name the note on the staff.",
+    tagline: "Name the note on the treble staff.",
     description:
-      "A one-screen quiz for treble (and later bass) notes. Hear it, name it, keep a streak. Ships as Day 2.",
+      "A one-screen treble-clef quiz. A note appears on the staff — tap or type C D E F G A B. Instant feedback, a streak counter, and a lines-only warmup before you add spaces.",
     day: 2,
     publishedOn: "2026-09-08",
     audience: "Beginners learning to read notes",
-    status: "coming-soon",
+    status: "live",
     howTo:
-      "Start on the treble staff with just the lines, then add spaces. Say the note name before you tap.",
+      "Start on the treble staff with just the lines (Every Good Boy Does Fine), then add spaces (FACE). Say the letter before you tap. Use Streak when you want the first miss to end the round.",
     books: [
       {
         asin: "0882848941",

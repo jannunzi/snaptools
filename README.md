@@ -4,7 +4,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 
 **Day 1:** [Multiplication Tables Practice](/tools/multiplication-tables) — pick tables 1–12, then Practice, a 60-second quiz, or Streak mode. Instant feedback, missed/slow-fact review, printable chart.
 
-**Day 2 (named, not built):** Music note recognition. The slug is already in `lib/tools.ts`.
+**Day 2:** [Music Note Recognition](/tools/music-note-recognition) — name the note on a treble staff. Lines-only or lines + spaces, optional ledger lines, Practice or Streak.
 
 ## Stack
 
@@ -40,19 +40,17 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 
 ## How to add tomorrow’s tool
 
-Day 2 should be mostly data plus one page of UI.
-
 1. **Register it** in `lib/tools.ts`  
-   Copy the `music-note-recognition` entry (already there as `coming-soon`). Set `status: "live"`, fill `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs.
+   Add a new entry with `status: "live"`, `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs.
 
 2. **Build the tool** as a client component  
-   Add `components/tools/MusicNoteRecognition.tsx`. Keep it browser-only: no auth, no fetch to your own API, no analytics.
+   Add `components/tools/YourTool.tsx`. Keep it browser-only: no auth, no fetch to your own API, no analytics.
 
 3. **Map the slug** in `lib/tool-components.tsx`
 
    ```tsx
-   case "music-note-recognition":
-     return <MusicNoteRecognition />;
+   case "your-tool-slug":
+     return <YourTool />;
    ```
 
 4. The route `/tools/[slug]` already wraps every tool in `ToolShell` (header, how-to tip, `AmazonBookBanner`). Homepage cards come from the same registry.
@@ -63,9 +61,9 @@ That’s it. Do not add accounts, a CMS, or a database just to ship a daily tool
 
 | Route | What |
 | --- | --- |
-| `/` | Hero, Day 1 featured card, tool grid, “new tool daily” note |
+| `/` | Hero, featured card, tool grid, “new tool daily” note |
 | `/tools/multiplication-tables` | Live Day 1 tool |
-| `/tools/music-note-recognition` | Coming-soon stub for Day 2 |
+| `/tools/music-note-recognition` | Live Day 2 tool |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 
