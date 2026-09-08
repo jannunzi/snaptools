@@ -35,7 +35,7 @@ export function ToolCard({ tool, featured = false }: ToolCardProps) {
       <p className="mt-3 text-sm text-ink-muted">{tool.audience}</p>
       <span
         className={`mt-5 inline-flex text-sm font-semibold ${
-          isLive ? "text-accent" : "text-ink-muted"
+          isLive ? "text-secondary" : "text-ink-muted"
         }`}
       >
         {isLive ? "Open tool →" : "On the daily list"}

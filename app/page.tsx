@@ -28,7 +28,7 @@ export default function Home() {
           </h2>
           <Link
             href={`/tools/${featured.slug}`}
-            className="text-sm font-semibold text-accent hover:underline"
+            className="text-sm font-semibold text-secondary hover:underline"
           >
             Open
           </Link>
