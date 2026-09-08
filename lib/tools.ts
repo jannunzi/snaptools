@@ -143,11 +143,11 @@ export const tools: Tool[] = [
           "Intricate circular designs printed one side per page — a classic adult mandala book.",
       },
       {
-        asin: "1497206706",
-        title: "Animal Kingdom Mandalas Coloring Book",
-        author: "Nanna Rosengren",
+        asin: "1780670257",
+        title: "Secret Garden: An Inky Treasure Hunt and Coloring Book",
+        author: "Johanna Basford",
         blurb:
-          "Animals and plants woven into mandalas, with perforated pages for display.",
+          "Original garden line art — flowers, animals, and hidden details to color on paper.",
       },
       {
         asin: "1780671067",
@@ -172,11 +172,11 @@ export const tools: Tool[] = [
       "Start with Quick 10 to warm up. Interview 20 asks up to 20 questions and stops at 12 correct or 9 wrong — the 2025 pass rule. Browse shows every official answer. This tool is not affiliated with USCIS.",
     books: [
       {
-        asin: "016093745X",
-        title: "Civics Flash Cards for the Naturalization Test",
-        author: "U.S. Citizenship and Immigration Services",
+        asin: "1637988125",
+        title: "US Citizenship Test Study Guide 2026 and 2027",
+        author: "Trivium Test Prep",
         blurb:
-          "Official USCIS flash cards for studying civics questions and answers on paper.",
+          "128 USCIS civics questions with explanations, aligned to the current naturalization exam.",
       },
       {
         asin: "1601703325",
@@ -186,11 +186,11 @@ export const tools: Tool[] = [
           "Short civics lessons that expand on the naturalization questions.",
       },
       {
-        asin: "1511579108",
-        title: "Pass the New Citizenship Test",
-        author: "Angelo Tropea",
+        asin: "1516730690",
+        title: "US Citizenship Test Study Guide 2026-2027",
+        author: "Mometrix Test Preparation",
         blurb:
-          "Practice questions and interview-style drills for citizenship study at home.",
+          "Review of the English and civics tests with detailed answer explanations.",
       },
     ],
   },
