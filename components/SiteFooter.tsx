@@ -12,7 +12,7 @@ export function SiteFooter() {
         </p>
         <div className="flex flex-col gap-2 sm:items-end">
           <p>{amazonDisclosure}</p>
-          <Link href="/" className="text-ink hover:text-accent">
+          <Link href="/" className="font-semibold text-secondary-strong hover:text-accent">
             Back to tools
           </Link>
         </div>

@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
       <section className="max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">
           {siteName}
         </p>
         <h1 className="mt-3 font-display text-4xl leading-[1.1] text-ink sm:text-6xl">
@@ -19,6 +19,12 @@ export default function Home() {
         <p className="mt-4 text-lg leading-relaxed text-ink-muted">
           {siteDescription}
         </p>
+        <Link
+          href={`/tools/${featured.slug}`}
+          className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-5 text-base font-bold text-accent-ink hover:brightness-110"
+        >
+          Open featured tool
+        </Link>
       </section>
 
       <section className="mt-10" aria-labelledby="featured-heading">
@@ -28,7 +34,7 @@ export default function Home() {
           </h2>
           <Link
             href={`/tools/${featured.slug}`}
-            className="text-sm font-semibold text-secondary hover:underline"
+            className="text-sm font-bold text-secondary-strong hover:underline"
           >
             Open
           </Link>
@@ -45,18 +51,6 @@ export default function Home() {
             <ToolCard key={tool.slug} tool={tool} />
           ))}
         </div>
-      </section>
-
-      <section
-        id="new-daily"
-        className="mt-12 rounded-2xl border border-secondary/35 bg-secondary-soft/50 px-5 py-6"
-      >
-        <h2 className="font-display text-2xl text-ink">A new tool every day</h2>
-        <p className="mt-2 max-w-2xl text-ink-muted">
-          SnapTools stays small on purpose. Each day we ship one specific thing
-          — a practice sheet, a generator, a quiz — that you can use in the
-          browser and close.
-        </p>
       </section>
     </div>
   );

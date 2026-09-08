@@ -1,48 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #fff8ee;
-  --bg-accent: #ffc056;
+  --bg: #fff4dc;
+  --bg-accent: #ff8c14;
   --surface: #ffffff;
-  --surface-muted: #fff1d2;
-  --ink: #140e09;
-  --ink-muted: #3f342b;
-  --line: #e8a423;
-  --accent: #d12f00;
-  --accent-ink: #fff7f0;
-  --accent-soft: #ffc9a8;
-  --secondary: #068a83;
-  --secondary-ink: #f3fffd;
-  --secondary-soft: #b6f4ee;
-  --ok: #067a4a;
-  --ok-soft: #baf3d4;
-  --bad: #d01818;
-  --bad-soft: #ffc9c4;
-  --ring: #d12f00;
-  --shadow: 0 18px 40px -28px rgb(31 26 20 / 0.45);
+  --surface-muted: #ffe3a8;
+  --ink: #0c0704;
+  --ink-muted: #3a2818;
+  --line: #ff9a12;
+  --accent: #e31c00;
+  --accent-ink: #fffaf4;
+  --accent-soft: #ffb089;
+  --secondary: #00c2b0;
+  --secondary-ink: #002e2a;
+  --secondary-soft: #7af3e6;
+  --secondary-strong: #00665e;
+  --ok: #008a45;
+  --ok-soft: #8ef0b8;
+  --bad: #d4002a;
+  --bad-soft: #ffb3b8;
+  --ring: #e31c00;
+  --shadow: 0 18px 40px -22px rgb(227 28 0 / 0.45);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #14110e;
-    --bg-accent: #3a2410;
-    --surface: #1f1b16;
-    --surface-muted: #2a241c;
-    --ink: #f6efe4;
-    --ink-muted: #d2c4ae;
-    --line: #5a4630;
-    --accent: #ff6b2c;
-    --accent-ink: #2a0d04;
-    --accent-soft: #4a1c0c;
-    --secondary: #3ecfc4;
-    --secondary-ink: #042422;
-    --secondary-soft: #134e4a;
-    --ok: #34d399;
+    --bg: #120e0b;
+    --bg-accent: #7a2e00;
+    --surface: #221b14;
+    --surface-muted: #352616;
+    --ink: #fff4e6;
+    --ink-muted: #e0c9a8;
+    --line: #c46a10;
+    --accent: #ff4d12;
+    --accent-ink: #2a0a00;
+    --accent-soft: #6a1c08;
+    --secondary: #1ee0cc;
+    --secondary-ink: #00332e;
+    --secondary-soft: #0c5c54;
+    --secondary-strong: #5ef0de;
+    --ok: #3ee08a;
     --ok-soft: #163226;
-    --bad: #fb7185;
-    --bad-soft: #3a1818;
-    --ring: #ff6b2c;
-    --shadow: 0 18px 40px -24px rgb(0 0 0 / 0.7);
+    --bad: #ff5a72;
+    --bad-soft: #4a1418;
+    --ring: #ff4d12;
+    --shadow: 0 18px 40px -20px rgb(0 0 0 / 0.75);
   }
 }
 
@@ -60,6 +62,7 @@
   --color-secondary: var(--secondary);
   --color-secondary-ink: var(--secondary-ink);
   --color-secondary-soft: var(--secondary-soft);
+  --color-secondary-strong: var(--secondary-strong);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-bad: var(--bad);
@@ -74,7 +77,8 @@ html {
 
 body {
   background:
-    radial-gradient(1200px 500px at 10% -10%, var(--bg-accent), transparent 55%),
+    radial-gradient(1100px 480px at 8% -12%, color-mix(in srgb, var(--bg-accent) 85%, white), transparent 58%),
+    radial-gradient(800px 360px at 96% 0%, color-mix(in srgb, var(--secondary) 38%, transparent), transparent 52%),
     var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
@@ -82,8 +86,8 @@ body {
 }
 
 ::selection {
-  background: var(--accent-soft);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .font-display {

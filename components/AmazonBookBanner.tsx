@@ -18,7 +18,7 @@ export function AmazonBookBanner({ books }: AmazonBookBannerProps) {
     >
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+          <p className="text-xs font-bold uppercase tracking-wider text-accent">
             Related books
           </p>
           <h2 className="mt-1 font-display text-2xl text-ink">
@@ -54,7 +54,7 @@ export function AmazonBookBanner({ books }: AmazonBookBannerProps) {
                 href={href}
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-3 text-sm font-semibold text-accent-ink transition-opacity hover:opacity-90"
+                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-3 text-sm font-bold text-accent-ink hover:brightness-110"
               >
                 View on Amazon
               </a>

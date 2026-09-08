@@ -86,6 +86,114 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "spelling-practice",
+    title: "Spelling Practice",
+    tagline: "Listen to a word, then type the spelling.",
+    description:
+      "The browser speaks a word in English, Spanish, or French. Type what you hear. Instant feedback, a streak counter, replay, and an optional slow voice.",
+    day: 3,
+    publishedOn: "2026-09-08",
+    audience: "Kids and language learners building everyday spelling",
+    status: "live",
+    howTo:
+      "Start on Easy English. Hear the word, say the letters, then type. Replay if you need it. Switch on Slow speech for new languages. Move to Medium when a 10-word streak feels easy.",
+    books: [
+      {
+        asin: "1483811751",
+        title: "Spectrum Spelling Workbook Grade 2",
+        author: "Spectrum",
+        blurb:
+          "Phonics, sight words, vowels, and compound words with puzzles — a classroom spelling workbook.",
+      },
+      {
+        asin: "0071463380",
+        title: "Easy Spanish Step-By-Step",
+        author: "Barbara Bregstein",
+        blurb:
+          "High-frequency Spanish grammar and vocabulary, built for beginners who want words to stick.",
+      },
+      {
+        asin: "0071453873",
+        title: "Easy French Step-By-Step",
+        author: "Myrna Bell Rochester",
+        blurb:
+          "A clear beginner path through French words and grammar, with practice that matches listen-and-type work.",
+      },
+    ],
+  },
+  {
+    slug: "printable-coloring",
+    title: "Printable Coloring Pages",
+    tagline: "Original line art you can color, print, or download.",
+    description:
+      "Twelve original pages — animals, mandalas, generic fantasy, and nature. Fill shapes on screen, then print or download the SVG. No licensed TV or franchise characters.",
+    day: 4,
+    publishedOn: "2026-09-08",
+    audience: "Kids, families, and anyone who wants a quick coloring break",
+    status: "live",
+    howTo:
+      "Pick a category, tap a page, then tap a color and a shape. White erases. Print for paper, or download the SVG to keep your fills.",
+    books: [
+      {
+        asin: "1780671067",
+        title: "Secret Garden: An Inky Treasure Hunt and Coloring Book",
+        author: "Johanna Basford",
+        blurb:
+          "Original pen-and-ink garden pages — the adult coloring book that started a shelf of inky worlds.",
+      },
+      {
+        asin: "1780674872",
+        title: "Enchanted Forest: An Inky Quest and Coloring Book",
+        author: "Johanna Basford",
+        blurb:
+          "A follow-up forest of original line work. No characters from a show — just trees, creatures, and patterns.",
+      },
+      {
+        asin: "0486494535",
+        title: "Creative Haven In Full Bloom Coloring Book",
+        author: "Ruth Soffer",
+        blurb:
+          "Original botanical line art — sunflowers, lilies, and garden close-ups. No franchise characters.",
+      },
+    ],
+  },
+  {
+    slug: "civics-quiz",
+    title: "US Civics Quiz",
+    tagline: "Practice the official 2025 USCIS civics questions.",
+    description:
+      "A typed practice quiz from the official 128-question 2025 civics list. Quick 10, interview-style 20 (pass at 12), or browse every accepted answer. The real test is oral.",
+    day: 5,
+    publishedOn: "2026-09-08",
+    audience: "Citizenship applicants and anyone studying U.S. civics",
+    status: "live",
+    howTo:
+      "Use Quick 10 to warm up. Use Interview 20 when you want the real pass line (12 of 20). Open Study browse to read every official answer. Check USCIS test updates for names that change after elections.",
+    books: [
+      {
+        asin: "1637988125",
+        title: "US Citizenship Test Study Guide 2026 and 2027",
+        author: "B. Hettinger / Trivium Test Prep",
+        blurb:
+          "Aligned to the 128-question USCIS civics exam, with explanations of government, history, and geography.",
+      },
+      {
+        asin: "B0F1CJ3CWG",
+        title: "US Citizenship Test Study Guide 2025",
+        author: "American Citizenship Study Guide",
+        blurb:
+          "A 2025 study guide with civics Q&A plus reading and writing vocabulary for the interview.",
+      },
+      {
+        asin: "1438002181",
+        title: "U.S. Citizenship Test (Barron's Test Prep)",
+        author: "Gladys E. Alesi",
+        blurb:
+          "Barron’s civics, history, and English practice for the naturalization interview, with application advice.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
@@ -115,8 +223,5 @@ export function isNewTool(tool: Tool, now = Date.now()) {
   const age = now - published;
   if (age < 0 || age > NEW_TOOL_WINDOW_MS) return false;
 
-  const newestLive = getLiveTools().reduce((latest, item) =>
-    item.publishedOn >= latest.publishedOn ? item : latest,
-  );
-  return newestLive.slug === tool.slug;
+  return true;
 }

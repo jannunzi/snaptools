@@ -36,7 +36,7 @@ export function ComingSoonPanel({ tool }: ComingSoonPanelProps) {
         href="/"
         className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-accent px-4 text-sm font-semibold text-accent-ink"
       >
-        Back to today’s tools
+        Back to tools
       </Link>
     </section>
   );

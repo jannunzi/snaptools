@@ -3,7 +3,7 @@ import { siteName } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="no-print border-b border-line/80 bg-surface/80 backdrop-blur-md">
+    <header className="no-print border-b-2 border-accent bg-surface/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="group flex items-center gap-2.5">
           <span
@@ -19,16 +19,10 @@ export function SiteHeader() {
         <nav aria-label="Primary" className="flex items-center gap-4 text-sm">
           <Link
             href="/"
-            className="text-ink-muted transition-colors hover:text-ink"
+            className="font-semibold text-secondary-strong transition-colors hover:text-accent"
           >
             Tools
           </Link>
-          <a
-            href="#new-daily"
-            className="hidden text-ink-muted transition-colors hover:text-ink sm:inline"
-          >
-            New daily
-          </a>
         </nav>
       </div>
     </header>

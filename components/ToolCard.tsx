@@ -16,13 +16,13 @@ export function ToolCard({ tool, featured = false }: ToolCardProps) {
     <>
       <div className="flex items-center justify-between gap-3">
         {showNew ? (
-          <span className="rounded-full bg-secondary-soft px-2.5 py-1 text-xs font-semibold text-secondary">
+          <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-ink">
             New
           </span>
         ) : (
           <span />
         )}
-        <span className="text-xs font-medium uppercase tracking-wide text-ink-muted">
+        <span className="text-xs font-bold uppercase tracking-wide text-accent">
           {isLive ? "Live" : "Coming soon"}
         </span>
       </div>
@@ -34,20 +34,20 @@ export function ToolCard({ tool, featured = false }: ToolCardProps) {
       </p>
       <p className="mt-3 text-sm text-ink-muted">{tool.audience}</p>
       <span
-        className={`mt-5 inline-flex text-sm font-semibold ${
-          isLive ? "text-secondary" : "text-ink-muted"
+        className={`mt-5 inline-flex text-sm font-bold ${
+          isLive ? "text-secondary-strong" : "text-ink-muted"
         }`}
       >
-        {isLive ? "Open tool →" : "On the daily list"}
+        {isLive ? "Open tool →" : "Coming soon"}
       </span>
     </>
   );
 
-  const className = `snap-shadow block rounded-2xl border p-5 transition-transform sm:p-6 ${
+  const className = `snap-shadow block rounded-2xl border-2 p-5 transition-transform sm:p-6 ${
     featured
-      ? "border-secondary/45 bg-surface"
-      : "border-line bg-surface/90"
-  } ${isLive ? "hover:-translate-y-0.5 hover:border-accent/50" : "opacity-90"}`;
+      ? "border-secondary bg-secondary-soft/70"
+      : "border-line bg-surface"
+  } ${isLive ? "hover:-translate-y-0.5 hover:border-accent" : "opacity-90"}`;
 
   return (
     <Link href={href} className={className}>

@@ -1,10 +1,14 @@
 # SnapTools
 
-Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts, no database, no analytics SDKs. Everything runs in the browser. A new tool ships every day.
+Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts, no database, no analytics SDKs. Everything runs in the browser.
 
-**Day 1:** [Multiplication Tables Practice](/tools/multiplication-tables) — pick tables 1–12, then Practice, a 60-second quiz, or Streak mode. Instant feedback, missed/slow-fact review, printable chart.
+**Live tools**
 
-**Day 2:** [Music Note Recognition](/tools/music-note-recognition) — name the note on a treble staff. Lines-only or lines + spaces, optional ledger lines, Practice or Streak.
+- [Multiplication Tables Practice](/tools/multiplication-tables) — pick tables 1–12, then Practice, a 60-second quiz, or Streak mode.
+- [Music Note Recognition](/tools/music-note-recognition) — name the note on a treble staff.
+- [Spelling Practice](/tools/spelling-practice) — listen and type in English, Spanish, or French.
+- [Printable Coloring Pages](/tools/printable-coloring) — original line art to color on screen, print, or download.
+- [US Civics Quiz](/tools/civics-quiz) — official 2025 USCIS 128-question bank, quick 10 or interview-style 20.
 
 ## Stack
 
@@ -38,7 +42,7 @@ https://www.amazon.com/dp/{ASIN}?tag={TAG}
 
 The affiliate disclosure (“As an Amazon Associate we earn from qualifying purchases.”) is rendered on the banner and in the footer.
 
-## How to add tomorrow’s tool
+## How to add a tool
 
 1. **Register it** in `lib/tools.ts`  
    Add a new entry with `status: "live"`, `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs.
@@ -55,15 +59,18 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 
 4. The route `/tools/[slug]` already wraps every tool in `ToolShell` (header, how-to tip, `AmazonBookBanner`). Homepage cards come from the same registry.
 
-That’s it. Do not add accounts, a CMS, or a database just to ship a daily tool.
+That’s it. Do not add accounts, a CMS, or a database just to ship a tool.
 
 ## Site map
 
 | Route | What |
 | --- | --- |
-| `/` | Hero, featured card, tool grid, “new tool daily” note |
-| `/tools/multiplication-tables` | Live Day 1 tool |
-| `/tools/music-note-recognition` | Live Day 2 tool |
+| `/` | Hero, featured card, tool directory |
+| `/tools/multiplication-tables` | Live tool |
+| `/tools/music-note-recognition` | Live tool |
+| `/tools/spelling-practice` | Live tool |
+| `/tools/printable-coloring` | Live tool |
+| `/tools/civics-quiz` | Live tool |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 
