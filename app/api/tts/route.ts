@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
-import type { SpellingLang } from "@/lib/spelling-words";
-import { getXaiApiKey, XAI_TTS_VOICE, xaiHeaders, xaiUrl } from "@/lib/xai";
-import { ttsLanguageByLang } from "@/lib/tts";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
+import { resolveTtsLanguage, resolveTtsVoiceId } from "@/lib/tts";
+import { getXaiApiKey, xaiHeaders, xaiUrl } from "@/lib/xai";
 
 export const dynamic = "force-dynamic";
-
-const LANGS = new Set<SpellingLang>(["en", "es", "fr"]);
 
 export async function GET() {
   return NextResponse.json({ available: Boolean(getXaiApiKey()) });
@@ -35,15 +32,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const text =
-    typeof body === "object" && body && "text" in body
-      ? String((body as { text: unknown }).text ?? "").trim()
-      : "";
-  const languageRaw =
-    typeof body === "object" && body && "language" in body
-      ? String((body as { language: unknown }).language ?? "en")
-      : "en";
-  const language = (LANGS.has(languageRaw as SpellingLang) ? languageRaw : "en") as SpellingLang;
+  const record = typeof body === "object" && body ? (body as Record<string, unknown>) : {};
+  const text = String(record.text ?? "").trim();
+  const language = resolveTtsLanguage(record.language);
+  const voiceId = resolveTtsVoiceId(record.voice_id ?? record.voiceId);
 
   if (!text || text.length > 200) {
     return NextResponse.json({ error: "Text is required (max 200 characters)." }, { status: 400 });
@@ -54,8 +46,8 @@ export async function POST(request: Request) {
     headers: xaiHeaders(apiKey),
     body: JSON.stringify({
       text,
-      voice_id: XAI_TTS_VOICE,
-      language: ttsLanguageByLang[language],
+      voice_id: voiceId,
+      language,
       speed: 0.9,
     }),
     cache: "no-store",
@@ -69,6 +61,8 @@ export async function POST(request: Request) {
         fallback: true,
         status: upstream.status,
         detail: detail.slice(0, 300),
+        voice_id: voiceId,
+        language,
       },
       { status: 502 },
     );
