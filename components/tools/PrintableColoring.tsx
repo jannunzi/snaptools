@@ -1,11 +1,16 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ColoringCanvas,
+  findColoringCanvas,
+} from "@/components/tools/ColoringCanvas";
 import {
   coloringCategories,
   coloringPages,
   type ColoringCategory,
-} from "@/components/tools/coloring-art";
+  type ColoringPage,
+} from "@/lib/coloring-pages";
 
 const PALETTE = [
   "#e31b12",
@@ -22,60 +27,136 @@ const PALETTE = [
   "#fde68a",
 ];
 
+type SessionPage = ColoringPage & { generated?: boolean };
+
 export function PrintableColoring() {
   const [category, setCategory] = useState<ColoringCategory>("animals");
   const [pageId, setPageId] = useState(coloringPages[0].id);
   const [color, setColor] = useState(PALETTE[0]);
-  const [fills, setFills] = useState<Record<string, string>>({});
+  const [revision, setRevision] = useState(0);
+  const [generated, setGenerated] = useState<SessionPage[]>([]);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [imagineReady, setImagineReady] = useState<boolean | null>(null);
+  const [printSrc, setPrintSrc] = useState<string | null>(null);
   const artRef = useRef<HTMLDivElement>(null);
 
-  const pages = useMemo(
-    () => coloringPages.filter((page) => page.category === category),
-    [category],
-  );
-  const page = coloringPages.find((item) => item.id === pageId) ?? pages[0];
+  const pages = useMemo((): SessionPage[] => {
+    const extras = generated.filter((page) => page.category === category);
+    return [
+      ...coloringPages.filter((page) => page.category === category),
+      ...extras,
+    ];
+  }, [category, generated]);
+
+  const page = pages.find((item) => item.id === pageId) ?? pages[0];
 
   const selectCategory = (next: ColoringCategory) => {
     setCategory(next);
-    const first = coloringPages.find((item) => item.category === next);
+    const first =
+      coloringPages.find((item) => item.category === next) ??
+      generated.find((item) => item.category === next);
     if (first) {
       setPageId(first.id);
-      setFills({});
+      setRevision((value) => value + 1);
     }
   };
 
-  const colorRegion = (id: string) => {
-    setFills((prev) => ({ ...prev, [id]: color }));
+  const snapshotCanvas = () => {
+    const canvas = findColoringCanvas(artRef.current);
+    return canvas?.toDataURL("image/png") ?? page.src;
   };
 
-  const printPage = () => window.print();
-
-  const downloadSvg = () => {
-    const svg = artRef.current?.querySelector("svg");
-    if (!svg) return;
-    const clone = svg.cloneNode(true) as SVGSVGElement;
-    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    clone.setAttribute("aria-label", page.title);
-    const blob = new Blob(
-      [new XMLSerializer().serializeToString(clone)],
-      { type: "image/svg+xml;charset=utf-8" },
-    );
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${page.id}-coloring.svg`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const printPage = () => {
+    setPrintSrc(snapshotCanvas());
+    window.setTimeout(() => window.print(), 50);
   };
+
+  const downloadPng = () => {
+    const canvas = findColoringCanvas(artRef.current);
+    if (!canvas) return;
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${page.id}-coloring.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }, "image/png");
+  };
+
+  const generatePage = async () => {
+    if (generating) return;
+    setGenerating(true);
+    setGenerateError(null);
+    try {
+      const response = await fetch("/api/coloring/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category }),
+      });
+      const payload = (await response.json()) as {
+        error?: string;
+        id?: string;
+        title?: string;
+        category?: ColoringCategory;
+        image?: string;
+      };
+      if (!response.ok || !payload.image || !payload.id) {
+        throw new Error(payload.error || "Could not generate a page.");
+      }
+      const next: SessionPage = {
+        id: payload.id,
+        title: payload.title || "New page",
+        category: payload.category || category,
+        src: payload.image,
+        prompt: "",
+        temporary: false,
+        generated: true,
+      };
+      setGenerated((prev) => [next, ...prev]);
+      setPageId(next.id);
+      setRevision((value) => value + 1);
+    } catch (error) {
+      setGenerateError(error instanceof Error ? error.message : "Generate failed.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/coloring/generate")
+      .then((res) => res.json())
+      .then((data: { available?: boolean }) => {
+        if (!cancelled) setImagineReady(Boolean(data.available));
+      })
+      .catch(() => {
+        if (!cancelled) setImagineReady(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div>
       <div className="no-print rounded-2xl border-2 border-line bg-surface p-4 snap-shadow sm:p-6">
-        <h2 className="font-display text-2xl text-ink">Original line art</h2>
+        <h2 className="font-display text-2xl text-ink">Coloring book pages</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          SnapTools drawings only — animals, mandalas, generic fantasy, and
-          nature. No licensed TV or cartoon characters.
+          Black-and-white line art — animals, mandalas, fantasy, and nature. Tap
+          a color, then tap a region. Print or download the page. No licensed TV
+          or cartoon characters.
         </p>
+        {page.temporary ? (
+          <p className="mt-2 text-xs text-ink-muted">
+            Starter pages are temporary stand-ins. Run{" "}
+            <code className="rounded bg-bg px-1">npm run generate:coloring</code>{" "}
+            with <code className="rounded bg-bg px-1">XAI_API_KEY</code> to
+            replace them with Grok Imagine art.
+          </p>
+        ) : null}
 
         <div className="mt-4 flex flex-wrap gap-2">
           {coloringCategories.map((item) => (
@@ -103,7 +184,7 @@ export function PrintableColoring() {
               aria-pressed={page.id === item.id}
               onClick={() => {
                 setPageId(item.id);
-                setFills({});
+                setRevision((value) => value + 1);
               }}
               className={`min-h-11 rounded-xl border-2 px-3 text-sm font-medium ${
                 page.id === item.id
@@ -112,6 +193,11 @@ export function PrintableColoring() {
               }`}
             >
               {item.title}
+              {item.generated ? (
+                <span className="mt-0.5 block text-[11px] font-normal text-ink-muted">
+                  Generated
+                </span>
+              ) : null}
             </button>
           ))}
         </div>
@@ -137,12 +223,16 @@ export function PrintableColoring() {
 
         <div
           ref={artRef}
-          className="mt-5 rounded-2xl border-2 border-line bg-white p-3 text-ink"
+          className="mt-5 overflow-hidden rounded-2xl border-2 border-line bg-white p-3 text-ink"
         >
-          {page.render({ fills, onFill: colorRegion })}
+          <ColoringCanvas
+            src={page.src}
+            color={color}
+            revision={revision}
+          />
         </div>
 
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={printPage}
@@ -152,24 +242,47 @@ export function PrintableColoring() {
           </button>
           <button
             type="button"
-            onClick={downloadSvg}
+            onClick={downloadPng}
             className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-secondary px-4 text-sm font-semibold text-secondary"
           >
-            Download SVG
+            Download PNG
           </button>
           <button
             type="button"
-            onClick={() => setFills({})}
+            onClick={() => setRevision((value) => value + 1)}
             className="inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-sm font-semibold text-ink-muted hover:text-ink"
           >
             Clear color
           </button>
+          <button
+            type="button"
+            onClick={() => void generatePage()}
+            disabled={generating || imagineReady === false}
+            className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-line px-4 text-sm font-semibold text-ink disabled:opacity-50"
+          >
+            {generating ? "Generating…" : "Generate new page"}
+          </button>
         </div>
+        {imagineReady === false ? (
+          <p className="mt-2 text-sm text-ink-muted">
+            Generate new page needs a server-side{" "}
+            <code className="rounded bg-bg px-1">XAI_API_KEY</code>. Starter
+            pages still work.
+          </p>
+        ) : null}
+        {generateError ? (
+          <p className="mt-2 text-sm font-medium text-bad">{generateError}</p>
+        ) : null}
       </div>
 
       <div className="mt-6 hidden print-only">
         <h2 className="mb-3 font-display text-2xl">{page.title}</h2>
-        <div className="text-ink">{page.render({ fills, onFill: () => undefined })}</div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={printSrc ?? page.src}
+          alt={page.title}
+          className="mx-auto max-h-[10in] w-full object-contain"
+        />
       </div>
     </div>
   );

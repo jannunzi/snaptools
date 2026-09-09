@@ -1,0 +1,6 @@
+{
+  "source": "placeholder",
+  "generatedAt": null,
+  "temporary": true,
+  "note": "Replace these PNGs with Grok Imagine output via `npm run generate:coloring` when XAI_API_KEY is available."
+}
