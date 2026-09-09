@@ -91,13 +91,13 @@ export const tools: Tool[] = [
     title: "Spelling Practice",
     tagline: "Hear a word, type the spelling — English, Spanish, or French.",
     description:
-      "The browser reads a word aloud. Type what you heard. Switch among English, Spanish, and French, keep a score and streak, and hear the word again whenever you need it.",
+      "Grok reads a word aloud. Type what you heard. Switch among English, Spanish, and French, keep a score and streak, and hear the word again whenever you need it. Browser speech is the fallback.",
     day: 3,
     publishedOn: "2026-09-08",
     audience: "Kids and language learners practicing spelling by ear",
     status: "live",
     howTo:
-      "Pick a language, then tap Hear word. Type the spelling and press Check. Accents count in Spanish and French. Use Hear again if you missed it — the word stays hidden until you submit.",
+      "Pick a language and start. Grok speaks the word (or use Browser voice if you prefer). Type the spelling and press Check. Accents count in Spanish and French. The word stays hidden until you submit.",
     books: [
       {
         asin: "148381176X",
@@ -125,15 +125,15 @@ export const tools: Tool[] = [
   {
     slug: "printable-coloring",
     title: "Printable Coloring Pages",
-    tagline: "Original line art to color on screen or on paper.",
+    tagline: "Coloring-book line art to color on screen or on paper.",
     description:
-      "Animals, mandalas, generic fantasy, and nature pages drawn for SnapTools. Tap a swatch, fill a region, then print or download. No licensed TV or cartoon characters.",
+      "Animals, mandalas, generic fantasy, and nature pages. Tap a swatch, fill a region, then print or download a PNG. Optional Grok Imagine pages when an API key is set. No licensed TV or cartoon characters.",
     day: 4,
     publishedOn: "2026-09-08",
     audience: "Kids, parents, and anyone who wants a quiet coloring sheet",
     status: "live",
     howTo:
-      "Choose a category and a page. Pick a color, then tap a region to fill it. Print sends the page only. Download saves your colored SVG.",
+      "Choose a category and a page. Pick a color, then tap a region to fill it. Print sends the page only. Download saves your colored PNG. Generate new page asks Grok Imagine for another sheet.",
     books: [
       {
         asin: "0486799875",
