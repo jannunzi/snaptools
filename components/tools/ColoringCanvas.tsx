@@ -130,6 +130,9 @@ export function ColoringCanvas({
     onReadyChange?.(false);
 
     const image = new Image();
+    if (/^https?:\/\//i.test(src)) {
+      image.crossOrigin = "anonymous";
+    }
     image.decoding = "async";
     image.onload = () => {
       if (cancelled) return;

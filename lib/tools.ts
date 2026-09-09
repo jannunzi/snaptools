@@ -91,13 +91,13 @@ export const tools: Tool[] = [
     title: "Spelling Practice",
     tagline: "Hear a word, type the spelling — English, Spanish, or French.",
     description:
-      "Grok reads a word aloud. Type what you heard. Switch among English, Spanish, and French, keep a score and streak, and hear the word again whenever you need it. Browser speech is the fallback.",
+      "Grok reads a word aloud. Type what you heard. English, Spanish, or French, Easy or Challenge banks, and a 10 / 20 / 40 / all set. US or UK English accent, optional Spanish accents, score and streak. Browser speech is the fallback.",
     day: 3,
     publishedOn: "2026-09-08",
     audience: "Kids and language learners practicing spelling by ear",
     status: "live",
     howTo:
-      "Pick a language and start. Grok speaks the word (or use Browser voice if you prefer). Type the spelling and press Check. Accents count in Spanish and French. The word stays hidden until you submit.",
+      "Pick a language, difficulty, and set size (default 10). For English, choose US or UK. Grok speaks the word — type it and press Enter; the box refocuses for the next one. Spanish accent marks are optional unless you turn on Require accent marks. After a set, deal the next batch from the bank.",
     books: [
       {
         asin: "148381176X",
@@ -127,13 +127,13 @@ export const tools: Tool[] = [
     title: "Printable Coloring Pages",
     tagline: "Coloring-book line art to color on screen or on paper.",
     description:
-      "Animals, mandalas, generic fantasy, and nature pages. Tap a swatch, fill a region, then print or download a PNG. Optional Grok Imagine pages when an API key is set. No licensed TV or cartoon characters.",
+      "Animals, mandalas, generic fantasy, and nature. Twelve starter-pack pages stay on the site. Optional Generate makes a this-visit-only sheet (download or print to keep it). No licensed TV or cartoon characters.",
     day: 4,
     publishedOn: "2026-09-08",
     audience: "Kids, parents, and anyone who wants a quiet coloring sheet",
     status: "live",
     howTo:
-      "Choose a category and a page. Pick a color, then tap a region to fill it. Print sends the page only. Download saves your colored PNG. Generate new page asks Grok Imagine for another sheet.",
+      "Choose a category and a starter-pack page. Pick a color, then tap a region. Print or download. Generate new page can take up to a minute and is only for this visit — it is not a permanent link.",
     books: [
       {
         asin: "0486799875",

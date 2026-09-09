@@ -2,28 +2,33 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  bankSize,
+  dealSpellingSet,
+  DEFAULT_SET_SIZE,
+  getSpellingBank,
   getSpellingList,
+  spellingDifficulties,
   spellingLists,
+  spellingMatches,
+  spellingSetSizes,
+  type SpellingDifficulty,
   type SpellingLang,
+  type SpellingSetSize,
 } from "@/lib/spelling-words";
-import type { VoiceSource } from "@/lib/tts";
+import {
+  browserLocaleFor,
+  DEFAULT_ENGLISH_ACCENT,
+  DEFAULT_TTS_VOICE,
+  englishAccents,
+  ttsLanguageFor,
+  ttsVoices,
+  type EnglishAccent,
+  type TtsVoiceId,
+  type VoiceSource,
+} from "@/lib/tts";
 
 type Phase = "setup" | "playing" | "results";
 type Feedback = "correct" | "wrong" | null;
-
-function nextWord(words: string[], last: string | null) {
-  if (words.length === 0) return "";
-  let pick = words[Math.floor(Math.random() * words.length)];
-  for (let i = 0; i < 8 && last && words.length > 1; i += 1) {
-    if (pick !== last) break;
-    pick = words[Math.floor(Math.random() * words.length)];
-  }
-  return pick;
-}
-
-function normalizeSpelling(value: string) {
-  return value.trim().normalize("NFC").toLocaleLowerCase();
-}
 
 function speakWithBrowser(
   word: string,
@@ -51,8 +56,15 @@ function speakWithBrowser(
 
 export function SpellingPractice() {
   const [lang, setLang] = useState<SpellingLang>("en");
+  const [difficulty, setDifficulty] = useState<SpellingDifficulty>("easy");
+  const [setSize, setSetSize] = useState<SpellingSetSize>(DEFAULT_SET_SIZE);
+  const [accent, setAccent] = useState<EnglishAccent>(DEFAULT_ENGLISH_ACCENT);
+  const [voiceId, setVoiceId] = useState<TtsVoiceId>(DEFAULT_TTS_VOICE);
+  const [requireAccents, setRequireAccents] = useState(false);
   const [phase, setPhase] = useState<Phase>("setup");
-  const [word, setWord] = useState("");
+  const [setWords, setSetWords] = useState<string[]>([]);
+  const [remaining, setRemaining] = useState<string[]>([]);
+  const [wordIndex, setWordIndex] = useState(0);
   const [input, setInput] = useState("");
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [score, setScore] = useState(0);
@@ -64,6 +76,7 @@ export function SpellingPractice() {
   const [voiceSource, setVoiceSource] = useState<VoiceSource>("grok");
   const [speaking, setSpeaking] = useState(false);
   const [voiceNote, setVoiceNote] = useState<string | null>(null);
+  const [reshuffledNote, setReshuffledNote] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const busyRef = useRef(false);
@@ -73,6 +86,9 @@ export function SpellingPractice() {
   const voiceSourceRef = useRef<VoiceSource>(voiceSource);
 
   const list = useMemo(() => getSpellingList(lang), [lang]);
+  const bank = useMemo(() => getSpellingBank(lang, difficulty), [lang, difficulty]);
+  const word = setWords[wordIndex] ?? "";
+  const wordsInBank = bankSize(lang, difficulty);
 
   useEffect(() => {
     voiceSourceRef.current = voiceSource;
@@ -136,11 +152,15 @@ export function SpellingPractice() {
     };
   }, []);
 
-  const speakWithGrok = useCallback(async (value: string, language: SpellingLang) => {
+  const speakWithGrok = useCallback(async (value: string) => {
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: value, language }),
+      body: JSON.stringify({
+        text: value,
+        language: ttsLanguageFor(lang, accent),
+        voice_id: voiceId,
+      }),
     });
     if (!response.ok) {
       throw new Error("tts failed");
@@ -162,54 +182,77 @@ export function SpellingPractice() {
     };
     audio.onerror = () => setSpeaking(false);
     await audio.play();
-  }, [stopAudio]);
+  }, [accent, lang, stopAudio, voiceId]);
 
   const hear = useCallback(
     async (value = word) => {
       if (!value) return;
       setVoiceNote(null);
+      const locale = browserLocaleFor(lang, accent);
       if (voiceSourceRef.current === "browser") {
         stopAudio();
         speakWithBrowser(
           value,
-          list.locale,
+          locale,
           () => setSpeaking(true),
           () => setSpeaking(false),
         );
         return;
       }
       try {
-        await speakWithGrok(value, list.id);
+        await speakWithGrok(value);
       } catch {
         speakWithBrowser(
           value,
-          list.locale,
+          locale,
           () => setSpeaking(true),
           () => setSpeaking(false),
         );
         setVoiceNote("Grok voice unavailable — used the browser voice.");
       }
     },
-    [list.id, list.locale, speakWithGrok, stopAudio, word],
+    [accent, lang, speakWithGrok, stopAudio, word],
+  );
+
+  const beginSet = useCallback(
+    (nextRemaining: string[], resetScore: boolean) => {
+      const dealt = dealSpellingSet(nextRemaining, bank, setSize);
+      if (dealt.set.length === 0) return;
+      setSetWords(dealt.set);
+      setRemaining(dealt.remaining);
+      setWordIndex(0);
+      setInput("");
+      setFeedback(null);
+      setPhase("playing");
+      busyRef.current = false;
+      clearAdvanceTimer();
+      setReshuffledNote(
+        dealt.reshuffled && nextRemaining.length === 0 && !resetScore
+          ? "The word bank was reshuffled for this set."
+          : null,
+      );
+      setScore(0);
+      setTried(0);
+      setStreak(0);
+      if (resetScore) {
+        setBestStreak(0);
+      }
+      const first = dealt.set[0];
+      window.setTimeout(() => {
+        void hear(first);
+        inputRef.current?.focus();
+      }, 120);
+    },
+    [bank, hear, setSize],
   );
 
   const startSession = useCallback(() => {
-    const first = nextWord(list.words, null);
-    setWord(first);
-    setInput("");
-    setFeedback(null);
-    setScore(0);
-    setTried(0);
-    setStreak(0);
-    setBestStreak(0);
-    setPhase("playing");
-    busyRef.current = false;
-    clearAdvanceTimer();
-    window.setTimeout(() => {
-      void hear(first);
-      inputRef.current?.focus();
-    }, 120);
-  }, [hear, list]);
+    beginSet([], true);
+  }, [beginSet]);
+
+  const startNextSet = useCallback(() => {
+    beginSet(remaining, false);
+  }, [beginSet, remaining]);
 
   const submit = useCallback(() => {
     if (phase !== "playing" || busyRef.current || !word) return;
@@ -217,11 +260,16 @@ export function SpellingPractice() {
     if (!value) return;
 
     busyRef.current = true;
-    const correct = normalizeSpelling(value) === normalizeSpelling(word);
-    setTried((prev) => prev + 1);
-    setFeedback(correct ? "correct" : "wrong");
+    const matched = spellingMatches(
+      value,
+      word,
+      lang === "es" ? requireAccents : true,
+    );
 
-    if (correct) {
+    setTried((prev) => prev + 1);
+    setFeedback(matched ? "correct" : "wrong");
+
+    if (matched) {
       setScore((prev) => prev + 1);
       setStreak((prev) => {
         const next = prev + 1;
@@ -234,19 +282,34 @@ export function SpellingPractice() {
 
     clearAdvanceTimer();
     advanceTimerRef.current = window.setTimeout(() => {
-      const upcoming = nextWord(list.words, word);
-      setWord(upcoming);
+      const nextIndex = wordIndex + 1;
+      if (nextIndex >= setWords.length) {
+        busyRef.current = false;
+        setPhase("results");
+        setFeedback(null);
+        return;
+      }
+      const upcoming = setWords[nextIndex];
+      setWordIndex(nextIndex);
       setInput("");
       setFeedback(null);
       busyRef.current = false;
       void hear(upcoming);
-      inputRef.current?.focus();
-    }, correct ? 900 : 1800);
-  }, [hear, input, list, phase, word]);
+    }, matched ? 900 : 1800);
+  }, [hear, input, lang, phase, requireAccents, setWords, word, wordIndex]);
 
   useEffect(() => () => clearAdvanceTimer(), []);
 
+  useEffect(() => {
+    if (phase !== "playing" || feedback) return;
+    const frame = window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [feedback, phase, word, wordIndex]);
+
   const accuracy = tried === 0 ? 0 : Math.round((score / tried) * 100);
+  const spanishAccentsOff = lang === "es" && !requireAccents;
 
   return (
     <div className="rounded-2xl border-2 border-line bg-surface p-4 snap-shadow sm:p-6">
@@ -255,7 +318,8 @@ export function SpellingPractice() {
           <h2 className="font-display text-2xl text-ink">Choose a language</h2>
           <p className="mt-1 text-sm text-ink-muted">
             Grok reads the word aloud. Headphones help. The word stays hidden
-            until you check your spelling.
+            until you check your spelling. Pick a set size — the bank is much
+            larger than one round.
           </p>
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
             {spellingLists.map((item) => (
@@ -272,11 +336,103 @@ export function SpellingPractice() {
               >
                 <span className="block font-semibold text-ink">{item.label}</span>
                 <span className="mt-1 block text-sm text-ink-muted">
-                  {item.words.length} words · {item.locale}
+                  {bankSize(item.id, difficulty)} words in this bank
                 </span>
               </button>
             ))}
           </div>
+
+          <fieldset className="mt-5">
+            <legend className="text-sm font-semibold text-ink">Difficulty</legend>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {spellingDifficulties.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={difficulty === item.id}
+                  onClick={() => setDifficulty(item.id)}
+                  className={`rounded-xl border-2 p-3 text-left ${
+                    difficulty === item.id
+                      ? "border-secondary bg-secondary-soft"
+                      : "border-line bg-bg hover:border-secondary/50"
+                  }`}
+                >
+                  <span className="block font-semibold text-ink">{item.label}</span>
+                  <span className="mt-1 block text-sm text-ink-muted">
+                    {item.hint} · {bankSize(lang, item.id)} words
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="mt-5">
+            <legend className="text-sm font-semibold text-ink">Words this set</legend>
+            <p className="mt-1 text-sm text-ink-muted">
+              {wordsInBank} words in the {list.label} {difficulty} bank. A set
+              is just this round — use Next set when you finish.
+            </p>
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              {spellingSetSizes.map((item) => (
+                <button
+                  key={String(item.id)}
+                  type="button"
+                  aria-pressed={setSize === item.id}
+                  onClick={() => setSetSize(item.id)}
+                  className={`min-h-11 rounded-xl border-2 text-sm font-semibold ${
+                    setSize === item.id
+                      ? "border-secondary bg-secondary-soft"
+                      : "border-line bg-bg hover:border-secondary/50"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          {lang === "en" ? (
+            <fieldset className="mt-5">
+              <legend className="text-sm font-semibold text-ink">English accent</legend>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {englishAccents.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={accent === item.id}
+                    onClick={() => setAccent(item.id)}
+                    className={`rounded-xl border-2 p-3 text-left ${
+                      accent === item.id
+                        ? "border-secondary bg-secondary-soft"
+                        : "border-line bg-bg hover:border-secondary/50"
+                    }`}
+                  >
+                    <span className="block font-semibold text-ink">{item.label}</span>
+                    <span className="mt-1 block text-sm text-ink-muted">{item.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+
+          {lang === "es" ? (
+            <label className="mt-5 flex items-start gap-3 rounded-xl border-2 border-line bg-bg px-3 py-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={requireAccents}
+                onChange={(event) => setRequireAccents(event.target.checked)}
+              />
+              <span>
+                <span className="block font-semibold text-ink">Require accent marks</span>
+                <span className="mt-0.5 block text-ink-muted">
+                  {requireAccents
+                    ? "Answers must include accents (áéíóúüñ). Still case-insensitive."
+                    : "Accents optional. corazón and corazon both count."}
+                </span>
+              </span>
+            </label>
+          ) : null}
 
           <fieldset className="mt-5">
             <legend className="text-sm font-semibold text-ink">Voice</legend>
@@ -319,6 +475,26 @@ export function SpellingPractice() {
                 Browser voice (fallback)
               </label>
             </div>
+            {voiceSource === "grok" && grokAvailable !== false ? (
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {ttsVoices.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={voiceId === item.id}
+                    onClick={() => setVoiceId(item.id)}
+                    className={`rounded-xl border-2 px-2 py-2 text-left ${
+                      voiceId === item.id
+                        ? "border-secondary bg-secondary-soft"
+                        : "border-line bg-bg hover:border-secondary/50"
+                    }`}
+                  >
+                    <span className="block text-sm font-semibold text-ink">{item.label}</span>
+                    <span className="block text-xs text-ink-muted">{item.hint}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </fieldset>
 
           <button
@@ -345,7 +521,10 @@ export function SpellingPractice() {
             <Stat label="Score" value={`${score}`} />
             <Stat label="Accuracy" value={`${accuracy}%`} />
             <Stat label="Streak" value={`${streak}`} />
-            <Stat label="Tried" value={`${tried}`} />
+            <Stat
+              label="This set"
+              value={`${Math.min(wordIndex + 1, setWords.length)} / ${setWords.length}`}
+            />
           </div>
 
           <div
@@ -359,11 +538,12 @@ export function SpellingPractice() {
             aria-live="polite"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-secondary">
-              {list.label}
+              {list.label} · {difficulty === "easy" ? "Easy" : "Challenge"}
             </p>
             <p className="mt-2 font-display text-2xl text-ink">
-              Listen, then spell the word
+              Word {wordIndex + 1} of {setWords.length}
             </p>
+            <p className="mt-1 text-sm text-ink-muted">Listen, then spell the word</p>
             <p className="mt-3 font-display text-3xl tracking-[0.35em] text-ink-muted">
               {Array.from({ length: Math.max(word.length, 1) }, () => "•").join(
                 " ",
@@ -378,6 +558,9 @@ export function SpellingPractice() {
                     ? "Playing the word…"
                     : "The word is hidden until you check."}
             </p>
+            {spanishAccentsOff ? (
+              <p className="mt-2 text-xs text-ink-muted">Accents optional.</p>
+            ) : null}
           </div>
 
           <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -388,6 +571,25 @@ export function SpellingPractice() {
             >
               {speaking ? "Playing…" : "Hear word again"}
             </button>
+            {lang === "en" ? (
+              <div className="flex gap-2">
+                {englishAccents.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={accent === item.id}
+                    onClick={() => setAccent(item.id)}
+                    className={`min-h-11 rounded-xl border-2 px-3 text-sm font-semibold ${
+                      accent === item.id
+                        ? "border-secondary bg-secondary-soft"
+                        : "border-line bg-bg"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <label className="inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted">
               <input
                 type="checkbox"
@@ -400,6 +602,16 @@ export function SpellingPractice() {
               />
               Browser voice (fallback)
             </label>
+            {lang === "es" ? (
+              <label className="inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted">
+                <input
+                  type="checkbox"
+                  checked={requireAccents}
+                  onChange={(event) => setRequireAccents(event.target.checked)}
+                />
+                Require accent marks
+              </label>
+            ) : null}
           </div>
           {voiceNote ? (
             <p className="mt-2 text-sm text-ink-muted">{voiceNote}</p>
@@ -422,7 +634,9 @@ export function SpellingPractice() {
               onChange={(event) => setInput(event.target.value)}
               autoComplete="off"
               autoCorrect="off"
+              autoCapitalize="none"
               spellCheck={false}
+              autoFocus
               disabled={Boolean(feedback)}
               className="mt-2 min-h-12 w-full rounded-xl border-2 border-line bg-bg px-3 text-lg text-ink outline-none focus:border-secondary"
             />
@@ -446,7 +660,7 @@ export function SpellingPractice() {
               }}
               className="min-h-11 text-sm font-semibold text-ink-muted hover:text-ink"
             >
-              Finish practice
+              Finish this set
             </button>
           </div>
         </div>
@@ -454,30 +668,44 @@ export function SpellingPractice() {
 
       {phase === "results" ? (
         <div>
-          <h2 className="font-display text-2xl text-ink">Nice work</h2>
+          <h2 className="font-display text-2xl text-ink">Set complete</h2>
           <p className="mt-1 text-sm text-ink-muted">
-            {list.label} spelling by ear. Best streak {bestStreak}.
+            {list.label} · {difficulty === "easy" ? "Easy" : "Challenge"} ·{" "}
+            {setWords.length} words this set. Best streak {bestStreak}.
+            {remaining.length > 0
+              ? ` ${remaining.length} words left in this bank before a reshuffle.`
+              : " Next set reshuffles the full bank."}
           </p>
+          {reshuffledNote ? (
+            <p className="mt-2 text-sm text-ink-muted">{reshuffledNote}</p>
+          ) : null}
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Stat label="Correct" value={`${score}`} />
             <Stat label="Accuracy" value={`${accuracy}%`} />
             <Stat label="Best streak" value={`${bestStreak}`} />
             <Stat label="Tried" value={`${tried}`} />
           </div>
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <button
+              type="button"
+              onClick={startNextSet}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-accent-ink"
+            >
+              Next set
+            </button>
             <button
               type="button"
               onClick={startSession}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-accent-ink"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-secondary px-4 text-sm font-semibold text-secondary"
             >
-              Practice again
+              Reshuffle from the start
             </button>
             <button
               type="button"
               onClick={() => setPhase("setup")}
               className="inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-sm font-semibold text-ink-muted hover:text-ink"
             >
-              Change language
+              Change settings
             </button>
           </div>
         </div>

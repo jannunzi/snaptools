@@ -12,6 +12,8 @@ import {
   type ColoringPage,
 } from "@/lib/coloring-pages";
 
+const GENERATE_TIMEOUT_MS = 90_000;
+
 const PALETTE = [
   "#e31b12",
   "#ffd000",
@@ -90,19 +92,28 @@ export function PrintableColoring() {
     if (generating) return;
     setGenerating(true);
     setGenerateError(null);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS);
     try {
       const response = await fetch("/api/coloring/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ category }),
+        signal: controller.signal,
       });
-      const payload = (await response.json()) as {
+      const payload = (await response.json().catch(() => ({}))) as {
         error?: string;
         id?: string;
         title?: string;
         category?: ColoringCategory;
         image?: string;
       };
+      if (response.status === 429) {
+        throw new Error(
+          payload.error ||
+            "You can generate 4 pages every 2 minutes. Please wait and try again.",
+        );
+      }
       if (!response.ok || !payload.image || !payload.id) {
         throw new Error(payload.error || "Could not generate a page.");
       }
@@ -119,8 +130,15 @@ export function PrintableColoring() {
       setPageId(next.id);
       setRevision((value) => value + 1);
     } catch (error) {
-      setGenerateError(error instanceof Error ? error.message : "Generate failed.");
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setGenerateError(
+          "That took too long. Generation can take about a minute — please try again.",
+        );
+      } else {
+        setGenerateError(error instanceof Error ? error.message : "Generate failed.");
+      }
     } finally {
+      window.clearTimeout(timeout);
       setGenerating(false);
     }
   };
@@ -145,16 +163,21 @@ export function PrintableColoring() {
       <div className="no-print rounded-2xl border-2 border-line bg-surface p-4 snap-shadow sm:p-6">
         <h2 className="font-display text-2xl text-ink">Coloring book pages</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Black-and-white line art — animals, mandalas, fantasy, and nature. Tap
-          a color, then tap a region. Print or download the page. No licensed TV
-          or cartoon characters.
+          The starter pack is 12 pages on this site — stable links you can come
+          back to. Tap a color, then tap a region. Print or download to keep a
+          copy. No licensed TV or cartoon characters.
+        </p>
+        <p className="mt-2 text-sm text-ink-muted">
+          <strong className="font-semibold text-ink">Generate</strong> makes a
+          page for this visit only. It is not saved as a permanent site link —
+          download or print if you want to keep it.
         </p>
         {page.temporary ? (
           <p className="mt-2 text-xs text-ink-muted">
-            Starter pages are temporary stand-ins. Run{" "}
+            This starter page is still a stand-in. Run{" "}
             <code className="rounded bg-bg px-1">npm run generate:coloring</code>{" "}
             with <code className="rounded bg-bg px-1">XAI_API_KEY</code> to
-            replace them with Grok Imagine art.
+            refresh the pack.
           </p>
         ) : null}
 
@@ -195,7 +218,7 @@ export function PrintableColoring() {
               {item.title}
               {item.generated ? (
                 <span className="mt-0.5 block text-[11px] font-normal text-ink-muted">
-                  Generated
+                  This visit only
                 </span>
               ) : null}
             </button>
@@ -223,13 +246,28 @@ export function PrintableColoring() {
 
         <div
           ref={artRef}
-          className="mt-5 overflow-hidden rounded-2xl border-2 border-line bg-white p-3 text-ink"
+          className="relative mt-5 overflow-hidden rounded-2xl border-2 border-line bg-white p-3 text-ink"
         >
           <ColoringCanvas
             src={page.src}
             color={color}
             revision={revision}
           />
+          {generating ? (
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80 px-4 text-center"
+              role="status"
+              aria-live="polite"
+            >
+              <span
+                className="size-8 animate-spin rounded-full border-2 border-line border-t-secondary"
+                aria-hidden
+              />
+              <p className="text-sm font-semibold text-ink">
+                Generating… (can take up to a minute)
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -258,16 +296,26 @@ export function PrintableColoring() {
             type="button"
             onClick={() => void generatePage()}
             disabled={generating || imagineReady === false}
-            className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-line px-4 text-sm font-semibold text-ink disabled:opacity-50"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-line px-4 text-sm font-semibold text-ink disabled:opacity-50"
           >
-            {generating ? "Generating…" : "Generate new page"}
+            {generating ? (
+              <>
+                <span
+                  className="size-4 animate-spin rounded-full border-2 border-ink/20 border-t-ink"
+                  aria-hidden
+                />
+                Generating… (can take up to a minute)
+              </>
+            ) : (
+              "Generate new page"
+            )}
           </button>
         </div>
         {imagineReady === false ? (
           <p className="mt-2 text-sm text-ink-muted">
             Generate new page needs a server-side{" "}
-            <code className="rounded bg-bg px-1">XAI_API_KEY</code>. Starter
-            pages still work.
+            <code className="rounded bg-bg px-1">XAI_API_KEY</code>. The
+            starter pack still works.
           </p>
         ) : null}
         {generateError ? (

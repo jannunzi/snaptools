@@ -6,7 +6,7 @@ export type ColoringPage = {
   category: ColoringCategory;
   src: string;
   prompt: string;
-  /** True when the checked-in PNG is a stand-in until `npm run generate:coloring`. */
+  /** True when the checked-in PNG is still a stand-in, not Imagine art. */
   temporary: boolean;
 };
 
@@ -35,7 +35,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A friendly sitting house cat with whiskers, a striped tail, and a ball of yarn.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "fish",
@@ -45,7 +45,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A cheerful tropical fish with large fins, empty outlined scales, bubbles, and seaweed.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "butterfly",
@@ -55,7 +55,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A butterfly with large patterned wings made of empty outlined cells, beside a flower.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "owl",
@@ -65,7 +65,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A perched owl on a branch with big round outlined eyes and empty feather shapes.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "mandala-petals",
@@ -75,7 +75,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A circular flower mandala with many empty petal rings and geometric cells.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "mandala-star",
@@ -85,7 +85,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A geometric star mandala with an eight-point star, concentric rings, and empty cells.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "castle",
@@ -95,7 +95,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A fairy-tale castle with towers, empty window shapes, a gate, and simple clouds.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "dragon",
@@ -105,7 +105,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A friendly cute garden dragon with wings and empty outlined belly scales among flowers.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "dinosaur",
@@ -115,7 +115,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A friendly smiling stegosaurus with empty outlined back plates and simple plants.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "tree",
@@ -125,7 +125,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A large shade tree with a thick trunk, empty outlined leaf clusters, grass, and a bird.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "flower",
@@ -135,7 +135,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A big sunflower with empty petals, an outlined seed center, stem, leaves, and a butterfly.",
     ),
-    temporary: true,
+    temporary: false,
   },
   {
     id: "sailboat",
@@ -145,7 +145,7 @@ export const coloringPages: ColoringPage[] = [
     prompt: coloringPrompt(
       "A sailboat with two empty outlined sails, a hull, waves, a sun, and a seagull.",
     ),
-    temporary: true,
+    temporary: false,
   },
 ];
 
