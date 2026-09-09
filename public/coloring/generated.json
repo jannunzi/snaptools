@@ -1,6 +1,19 @@
 {
-  "source": "placeholder",
-  "generatedAt": null,
-  "temporary": true,
-  "note": "Replace these PNGs with Grok Imagine output via `npm run generate:coloring` when XAI_API_KEY is available."
+  "source": "grok-imagine-image-2.0",
+  "generatedAt": "2026-09-09T21:11:11.975Z",
+  "temporary": false,
+  "pages": [
+    "cat",
+    "fish",
+    "butterfly",
+    "owl",
+    "mandala-petals",
+    "mandala-star",
+    "castle",
+    "dragon",
+    "dinosaur",
+    "tree",
+    "flower",
+    "sailboat"
+  ]
 }

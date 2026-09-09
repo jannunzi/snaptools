@@ -4,7 +4,7 @@ Twelve portrait pages served from this folder so the tool stays fast (no Imagine
 
 | File | Status |
 | --- | --- |
-| `*.png` | Temporary stand-in line art until `npm run generate:coloring` is run with `XAI_API_KEY` |
-| `generated.json` | Stamp written by the generate script |
+| `*.png` | Grok Imagine (`grok-imagine-image-2.0`) black-and-white coloring outlines |
+| `generated.json` | Stamp written by the generate script (`temporary: false` when live) |
 
-Prompts live in `lib/coloring-pages.ts`. The optional **Generate new page** button calls `/api/coloring/generate` (lightly rate-limited).
+Prompts live in `lib/coloring-pages.ts` and `scripts/generate-coloring.mjs`. Re-run with `XAI_API_KEY` via `npm run generate:coloring`. The optional **Generate new page** button calls `/api/coloring/generate` (lightly rate-limited).
