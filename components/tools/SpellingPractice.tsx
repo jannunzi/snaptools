@@ -25,7 +25,12 @@ function normalizeSpelling(value: string) {
   return value.trim().normalize("NFC").toLocaleLowerCase();
 }
 
-function speakWithBrowser(word: string, locale: string) {
+function speakWithBrowser(
+  word: string,
+  locale: string,
+  onStart?: () => void,
+  onEnd?: () => void,
+) {
   if (typeof window === "undefined" || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(word);
@@ -37,6 +42,10 @@ function speakWithBrowser(word: string, locale: string) {
     voices.find((voice) => voice.lang.toLowerCase() === locale.toLowerCase()) ??
     voices.find((voice) => voice.lang.toLowerCase().startsWith(prefix));
   if (match) utterance.voice = match;
+  utterance.onstart = () => onStart?.();
+  utterance.onend = () => onEnd?.();
+  utterance.onerror = () => onEnd?.();
+  onStart?.();
   window.speechSynthesis.speak(utterance);
 }
 
@@ -112,7 +121,9 @@ export function SpellingPractice() {
         setGrokAvailable(available);
         if (!available) {
           setVoiceSource("browser");
-          setVoiceNote("Grok voice is not configured. Using the browser voice.");
+          setVoiceNote((current) =>
+            current ?? "Grok voice is not configured. Using the browser voice.",
+          );
         }
       })
       .catch(() => {
@@ -159,13 +170,23 @@ export function SpellingPractice() {
       setVoiceNote(null);
       if (voiceSourceRef.current === "browser") {
         stopAudio();
-        speakWithBrowser(value, list.locale);
+        speakWithBrowser(
+          value,
+          list.locale,
+          () => setSpeaking(true),
+          () => setSpeaking(false),
+        );
         return;
       }
       try {
         await speakWithGrok(value, list.id);
       } catch {
-        speakWithBrowser(value, list.locale);
+        speakWithBrowser(
+          value,
+          list.locale,
+          () => setSpeaking(true),
+          () => setSpeaking(false),
+        );
         setVoiceNote("Grok voice unavailable — used the browser voice.");
       }
     },
