@@ -194,6 +194,42 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "division-facts",
+    title: "Division Facts Practice",
+    tagline: "Fact fluency for divisors 1–12.",
+    description:
+      "Pick divisors, then practice, race a 60-second quiz, or see how long you can streak. Instant feedback, missed-fact review, and a printable 1–12 chart. Exact facts only — no remainders.",
+    day: 6,
+    publishedOn: "2026-09-12",
+    audience: "Kids, parents, and teachers building division fluency",
+    status: "live",
+    howTo:
+      "Start with Easy (1, 2, 5, 10). Say the fact out loud, then type the quotient. When you can do 20 in a row, add a harder divisor. Use Timed for a one-minute sprint; use Streak to find the facts that still stall you.",
+    books: [
+      {
+        asin: "1635783046",
+        title: "Humble Math — 100 Days of Timed Tests: Division",
+        author: "Humble Math",
+        blurb:
+          "Daily 0–12 division drills with an answer key. A few minutes a day builds recall.",
+      },
+      {
+        asin: "1589473299",
+        title: "School Zone Multiplication & Division Workbook",
+        author: "School Zone",
+        blurb:
+          "Colorful 3rd–4th grade pages for multiplication and division practice.",
+      },
+      {
+        asin: "B009O4YW9S",
+        title: "School Zone Division 0–12 Flash Cards",
+        author: "School Zone",
+        blurb:
+          "Take-anywhere flash cards for the 1–12 division facts.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
