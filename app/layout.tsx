@@ -35,6 +35,7 @@ export const metadata: Metadata = {
     "spelling practice",
     "printable coloring",
     "civics quiz",
+    "division facts",
     "USCIS",
     "treble clef",
     "browser tools",

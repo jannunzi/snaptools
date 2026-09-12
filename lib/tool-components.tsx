@@ -1,5 +1,6 @@
 import { CivicsQuiz } from "@/components/tools/CivicsQuiz";
 import { ComingSoonPanel } from "@/components/tools/ComingSoonPanel";
+import { DivisionFacts } from "@/components/tools/DivisionFacts";
 import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
@@ -18,6 +19,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <PrintableColoring />;
     case "civics-quiz":
       return <CivicsQuiz />;
+    case "division-facts":
+      return <DivisionFacts />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }
