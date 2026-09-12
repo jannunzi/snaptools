@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MultiplicationChart } from "@/components/tools/MultiplicationChart";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 
 type Mode = "practice" | "timed" | "streak";
 type Phase = "setup" | "playing" | "results";
@@ -74,6 +75,8 @@ export function MultiplicationTables() {
   const endingRef = useRef(false);
   const busyRef = useRef(false);
   const advanceTimerRef = useRef<number | null>(null);
+  const recordsRef = useRef(records);
+  recordsRef.current = records;
 
   const clearAdvanceTimer = () => {
     if (advanceTimerRef.current !== null) {
@@ -102,6 +105,10 @@ export function MultiplicationTables() {
 
   const startSession = useCallback(
     (retry?: Fact[]) => {
+      trackEvent(analyticsEvents.practiceStart, {
+        tool: "multiplication-tables",
+        mode,
+      });
       const selected = tables.length > 0 ? tables : EASY;
       if (tables.length === 0) setTables(EASY);
       const first = nextFact(selected, null, retry);
@@ -110,6 +117,7 @@ export function MultiplicationTables() {
       setInput("");
       setFeedback(null);
       setRecords([]);
+      recordsRef.current = [];
       setStreak(0);
       setBestStreak(0);
       setTimeLeft(TIMED_SECONDS);
@@ -120,15 +128,22 @@ export function MultiplicationTables() {
       shownAtRef.current = Date.now();
       sessionStartRef.current = Date.now();
     },
-    [tables],
+    [mode, tables],
   );
 
   const finishSession = useCallback(() => {
     if (endingRef.current) return;
     endingRef.current = true;
+    const current = recordsRef.current;
+    trackEvent(analyticsEvents.practiceFinish, {
+      tool: "multiplication-tables",
+      mode,
+      score: current.filter((item) => item.correct).length,
+      count: current.length,
+    });
     setPhase("results");
     setFeedback(null);
-  }, []);
+  }, [mode]);
 
   const submitAnswer = useCallback(
     (raw: string) => {
@@ -141,7 +156,11 @@ export function MultiplicationTables() {
       const ms = Date.now() - shownAtRef.current;
       const record: FactRecord = { ...fact, ms, correct };
 
-      setRecords((prev) => [...prev, record]);
+      setRecords((prev) => {
+        const next = [...prev, record];
+        recordsRef.current = next;
+        return next;
+      });
       setFeedback(correct ? "correct" : "wrong");
 
       if (correct) {
@@ -251,6 +270,7 @@ export function MultiplicationTables() {
   };
 
   const printChart = () => {
+    trackEvent(analyticsEvents.printChart, { tool: "multiplication-tables" });
     setShowChart(true);
     window.setTimeout(() => window.print(), 50);
   };

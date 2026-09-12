@@ -37,7 +37,7 @@ export function ToolShell({ tool, children }: ToolShellProps) {
         <p className="mt-1 text-ink">{tool.howTo}</p>
       </div>
       <div className="mt-8">{children}</div>
-      <AmazonBookBanner books={tool.books} />
+      <AmazonBookBanner books={tool.books} tool={tool.slug} />
     </article>
   );
 }

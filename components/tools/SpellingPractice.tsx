@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 import {
   bankSize,
   dealSpellingSet,
@@ -247,12 +248,19 @@ export function SpellingPractice() {
   );
 
   const startSession = useCallback(() => {
+    trackEvent(analyticsEvents.practiceStart, { tool: "spelling-practice" });
     beginSet([], true);
   }, [beginSet]);
 
   const startNextSet = useCallback(() => {
+    trackEvent(analyticsEvents.nextSet, { tool: "spelling-practice" });
     beginSet(remaining, false);
   }, [beginSet, remaining]);
+
+  const reshuffleFromStart = useCallback(() => {
+    trackEvent(analyticsEvents.nextSet, { tool: "spelling-practice" });
+    beginSet([], true);
+  }, [beginSet]);
 
   const submit = useCallback(() => {
     if (phase !== "playing" || busyRef.current || !word) return;
@@ -266,11 +274,13 @@ export function SpellingPractice() {
       lang === "es" ? requireAccents : true,
     );
 
-    setTried((prev) => prev + 1);
+    const nextTried = tried + 1;
+    const nextScore = matched ? score + 1 : score;
+    setTried(nextTried);
     setFeedback(matched ? "correct" : "wrong");
 
     if (matched) {
-      setScore((prev) => prev + 1);
+      setScore(nextScore);
       setStreak((prev) => {
         const next = prev + 1;
         setBestStreak((best) => Math.max(best, next));
@@ -285,6 +295,11 @@ export function SpellingPractice() {
       const nextIndex = wordIndex + 1;
       if (nextIndex >= setWords.length) {
         busyRef.current = false;
+        trackEvent(analyticsEvents.practiceFinish, {
+          tool: "spelling-practice",
+          score: nextScore,
+          count: nextTried,
+        });
         setPhase("results");
         setFeedback(null);
         return;
@@ -296,7 +311,7 @@ export function SpellingPractice() {
       busyRef.current = false;
       void hear(upcoming);
     }, matched ? 900 : 1800);
-  }, [hear, input, lang, phase, requireAccents, setWords, word, wordIndex]);
+  }, [hear, input, lang, phase, requireAccents, score, setWords, tried, word, wordIndex]);
 
   useEffect(() => () => clearAdvanceTimer(), []);
 
@@ -655,6 +670,11 @@ export function SpellingPractice() {
               onClick={() => {
                 clearAdvanceTimer();
                 stopAudio();
+                trackEvent(analyticsEvents.practiceFinish, {
+                  tool: "spelling-practice",
+                  score,
+                  count: tried,
+                });
                 setPhase("results");
                 setFeedback(null);
               }}
@@ -695,7 +715,7 @@ export function SpellingPractice() {
             </button>
             <button
               type="button"
-              onClick={startSession}
+              onClick={reshuffleFromStart}
               className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-secondary px-4 text-sm font-semibold text-secondary"
             >
               Reshuffle from the start
