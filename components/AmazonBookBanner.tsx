@@ -1,12 +1,16 @@
+"use client";
+
 import { AmazonBookCover } from "@/components/AmazonBookCover";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 import { amazonDisclosure, amazonProductUrl } from "@/lib/amazon";
 import type { AmazonBook } from "@/lib/tools";
 
 type AmazonBookBannerProps = {
   books: AmazonBook[];
+  tool: string;
 };
 
-export function AmazonBookBanner({ books }: AmazonBookBannerProps) {
+export function AmazonBookBanner({ books, tool }: AmazonBookBannerProps) {
   if (books.length === 0) {
     return null;
   }
@@ -30,6 +34,11 @@ export function AmazonBookBanner({ books }: AmazonBookBannerProps) {
       <ul className="mt-5 grid gap-4 md:grid-cols-3">
         {books.map((book) => {
           const href = amazonProductUrl(book.asin);
+          const onAmazonClick = () =>
+            trackEvent(analyticsEvents.amazonClick, {
+              tool,
+              asin: book.asin,
+            });
           return (
             <li
               key={book.asin}
@@ -40,6 +49,7 @@ export function AmazonBookBanner({ books }: AmazonBookBannerProps) {
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
                 className="block"
+                onClick={onAmazonClick}
               >
                 <AmazonBookCover asin={book.asin} title={book.title} />
               </a>
@@ -55,6 +65,7 @@ export function AmazonBookBanner({ books }: AmazonBookBannerProps) {
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
                 className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-3 text-sm font-semibold text-accent-ink transition-opacity hover:opacity-90"
+                onClick={onAmazonClick}
               >
                 View on Amazon
               </a>

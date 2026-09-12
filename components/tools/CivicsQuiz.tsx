@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 import {
   USCIS_CIVICS_PAGE,
   USCIS_CIVICS_SOURCE,
@@ -93,6 +94,10 @@ export function CivicsQuiz() {
       setPhase("setup");
       return;
     }
+    trackEvent(analyticsEvents.practiceStart, {
+      tool: "civics-quiz",
+      mode: nextMode,
+    });
     setDeck(deal(nextMode === "interview" ? 20 : 10));
     setIndex(0);
     setSelected([]);
@@ -130,6 +135,12 @@ export function CivicsQuiz() {
       mode === "interview" && (nextCorrect >= 12 || nextWrong >= 9);
     const lastCard = index + 1 >= deck.length;
     if (interviewDone || lastCard) {
+      trackEvent(analyticsEvents.practiceFinish, {
+        tool: "civics-quiz",
+        mode,
+        score: nextCorrect,
+        count: nextCorrect + nextWrong,
+      });
       setPhase("results");
       setFeedback(null);
       return;
@@ -314,6 +325,12 @@ export function CivicsQuiz() {
             <button
               type="button"
               onClick={() => {
+                trackEvent(analyticsEvents.practiceFinish, {
+                  tool: "civics-quiz",
+                  mode,
+                  score: correctCount,
+                  count: correctCount + wrongCount,
+                });
                 setPhase("results");
                 setFeedback(null);
               }}

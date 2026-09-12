@@ -5,6 +5,7 @@ import {
   ColoringCanvas,
   findColoringCanvas,
 } from "@/components/tools/ColoringCanvas";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 import {
   coloringCategories,
   coloringPages,
@@ -70,6 +71,7 @@ export function PrintableColoring() {
   };
 
   const printPage = () => {
+    trackEvent(analyticsEvents.printChart, { tool: "printable-coloring" });
     setPrintSrc(snapshotCanvas());
     window.setTimeout(() => window.print(), 50);
   };
@@ -90,6 +92,10 @@ export function PrintableColoring() {
 
   const generatePage = async () => {
     if (generating) return;
+    trackEvent(analyticsEvents.coloringGenerate, {
+      tool: "printable-coloring",
+      category,
+    });
     setGenerating(true);
     setGenerateError(null);
     const controller = new AbortController();

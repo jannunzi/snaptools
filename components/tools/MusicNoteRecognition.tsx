@@ -8,6 +8,7 @@ import {
   useState,
   type RefObject,
 } from "react";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 
 type NoteName = "C" | "D" | "E" | "F" | "G" | "A" | "B";
 type Mode = "practice" | "streak";
@@ -97,6 +98,8 @@ export function MusicNoteRecognition() {
   const busyRef = useRef(false);
   const advanceTimerRef = useRef<number | null>(null);
   const playPanelRef = useRef<HTMLDivElement>(null);
+  const recordsRef = useRef(records);
+  recordsRef.current = records;
 
   const clearAdvanceTimer = () => {
     if (advanceTimerRef.current !== null) {
@@ -124,11 +127,16 @@ export function MusicNoteRecognition() {
   }, [records]);
 
   const startSession = useCallback(() => {
+    trackEvent(analyticsEvents.practiceStart, {
+      tool: "music-note-recognition",
+      mode,
+    });
     const selected = pool.length > 0 ? pool : notePool("lines", false);
     const first = nextNote(selected, null);
     setNote(first);
     setFeedback(null);
     setRecords([]);
+    recordsRef.current = [];
     setStreak(0);
     setBestStreak(0);
     setPhase("playing");
@@ -137,14 +145,21 @@ export function MusicNoteRecognition() {
     clearAdvanceTimer();
     shownAtRef.current = Date.now();
     window.setTimeout(() => playPanelRef.current?.focus(), 0);
-  }, [pool]);
+  }, [mode, pool]);
 
   const finishSession = useCallback(() => {
     if (endingRef.current) return;
     endingRef.current = true;
+    const current = recordsRef.current;
+    trackEvent(analyticsEvents.practiceFinish, {
+      tool: "music-note-recognition",
+      mode,
+      score: current.filter((item) => item.correct).length,
+      count: current.length,
+    });
     setPhase("results");
     setFeedback(null);
-  }, []);
+  }, [mode]);
 
   const submitAnswer = useCallback(
     (raw: string) => {
@@ -157,7 +172,11 @@ export function MusicNoteRecognition() {
       const ms = Date.now() - shownAtRef.current;
       const record: NoteRecord = { id: note.id, name: note.name, ms, correct };
 
-      setRecords((prev) => [...prev, record]);
+      setRecords((prev) => {
+        const next = [...prev, record];
+        recordsRef.current = next;
+        return next;
+      });
       setFeedback(correct ? "correct" : "wrong");
 
       if (correct) {

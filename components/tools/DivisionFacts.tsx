@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DivisionChart } from "@/components/tools/DivisionChart";
+import { analyticsEvents, trackEvent } from "@/lib/analytics";
 
 type Mode = "practice" | "timed" | "streak";
 type Phase = "setup" | "playing" | "results";
@@ -80,6 +81,8 @@ export function DivisionFacts() {
   const endingRef = useRef(false);
   const busyRef = useRef(false);
   const advanceTimerRef = useRef<number | null>(null);
+  const recordsRef = useRef(records);
+  recordsRef.current = records;
 
   const clearAdvanceTimer = () => {
     if (advanceTimerRef.current !== null) {
@@ -108,6 +111,10 @@ export function DivisionFacts() {
 
   const startSession = useCallback(
     (retry?: Fact[]) => {
+      trackEvent(analyticsEvents.practiceStart, {
+        tool: "division-facts",
+        mode,
+      });
       const selected = divisors.length > 0 ? divisors : EASY;
       if (divisors.length === 0) setDivisors(EASY);
       const first = nextFact(selected, null, retry);
@@ -116,6 +123,7 @@ export function DivisionFacts() {
       setInput("");
       setFeedback(null);
       setRecords([]);
+      recordsRef.current = [];
       setStreak(0);
       setBestStreak(0);
       setTimeLeft(TIMED_SECONDS);
@@ -126,15 +134,22 @@ export function DivisionFacts() {
       shownAtRef.current = Date.now();
       sessionStartRef.current = Date.now();
     },
-    [divisors],
+    [divisors, mode],
   );
 
   const finishSession = useCallback(() => {
     if (endingRef.current) return;
     endingRef.current = true;
+    const current = recordsRef.current;
+    trackEvent(analyticsEvents.practiceFinish, {
+      tool: "division-facts",
+      mode,
+      score: current.filter((item) => item.correct).length,
+      count: current.length,
+    });
     setPhase("results");
     setFeedback(null);
-  }, []);
+  }, [mode]);
 
   const submitAnswer = useCallback(
     (raw: string) => {
@@ -147,7 +162,11 @@ export function DivisionFacts() {
       const ms = Date.now() - shownAtRef.current;
       const record: FactRecord = { ...fact, ms, correct };
 
-      setRecords((prev) => [...prev, record]);
+      setRecords((prev) => {
+        const next = [...prev, record];
+        recordsRef.current = next;
+        return next;
+      });
       setFeedback(correct ? "correct" : "wrong");
 
       if (correct) {
@@ -257,6 +276,7 @@ export function DivisionFacts() {
   };
 
   const printChart = () => {
+    trackEvent(analyticsEvents.printChart, { tool: "division-facts" });
     setShowChart(true);
     window.setTimeout(() => window.print(), 50);
   };
