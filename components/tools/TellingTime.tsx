@@ -265,7 +265,8 @@ export function TellingTime() {
         setStreak(0);
       }
 
-      const delay = correct ? 1400 : 2200;
+      const delay =
+        mode === "timed" ? (correct ? 700 : 1100) : correct ? 2000 : 2800;
 
       clearAdvanceTimer();
       advanceTimerRef.current = window.setTimeout(() => {
