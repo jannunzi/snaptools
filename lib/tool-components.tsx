@@ -5,6 +5,7 @@ import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
+import { TellingTime } from "@/components/tools/TellingTime";
 import type { Tool } from "@/lib/tools";
 
 export function ToolBody({ tool }: { tool: Tool }) {
@@ -21,6 +22,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <CivicsQuiz />;
     case "division-facts":
       return <DivisionFacts />;
+    case "telling-time":
+      return <TellingTime />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }

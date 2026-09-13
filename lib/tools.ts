@@ -230,6 +230,42 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "telling-time",
+    title: "Telling Time Practice",
+    tagline: "Read the analog clock — hours to the minute.",
+    description:
+      "Read an analog clock and type the digital time. Practice, race a 60-second quiz, or see how long you can streak. Instant feedback and missed-time review, from whole hours to the minute.",
+    day: 7,
+    publishedOn: "2026-09-13",
+    audience: "Kids, parents, and teachers practicing analog clocks",
+    status: "live",
+    howTo:
+      "Start with Easy (whole hours). Type the time you see, like 3:00, and press Enter. When that feels easy, move to half hours, then quarters, five-minute marks, and finally every minute. Use Timed for a one-minute sprint; use Streak to find the times that still stall you.",
+    books: [
+      {
+        asin: "1635783259",
+        title: "Humble Math — 100 Days of Money, Fractions, & Telling the Time",
+        author: "Humble Math",
+        blurb:
+          "Daily pages for counting money, fractions, and telling time — hours through minutes, with an answer key.",
+      },
+      {
+        asin: "0938256440",
+        title: "School Zone Time, Money & Fractions Workbook",
+        author: "School Zone",
+        blurb:
+          "Short 1st–2nd grade pages for telling time, counting coins, and simple fractions.",
+      },
+      {
+        asin: "1483826910",
+        title: "The Complete Book of Time and Money, Grades K–3",
+        author: "Carson Dellosa",
+        blurb:
+          "A thick K–3 workbook for analog clocks, hours and minutes, coins, bills, and making change.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
