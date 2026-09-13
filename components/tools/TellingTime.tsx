@@ -265,7 +265,7 @@ export function TellingTime() {
         setStreak(0);
       }
 
-      const delay = correct ? 900 : 1600;
+      const delay = correct ? 1400 : 2200;
 
       clearAdvanceTimer();
       advanceTimerRef.current = window.setTimeout(() => {
@@ -486,32 +486,38 @@ function PlayPanel({
         />
       </div>
 
+      <p
+        className={`mt-5 min-h-8 text-center text-base font-semibold ${
+          feedback === "correct"
+            ? "text-ok"
+            : feedback === "wrong"
+              ? "text-bad"
+              : "font-medium text-ink-muted"
+        }`}
+        aria-live="polite"
+      >
+        {feedback === "correct"
+          ? `Yes! It’s ${expected}.`
+          : feedback === "wrong"
+            ? `Not quite. It’s ${expected}.`
+            : "Type the digital time you see, then press Enter"}
+      </p>
+
       <div
-        className={`mt-6 rounded-2xl border px-4 py-6 text-center sm:px-6 ${
+        className={`mt-3 rounded-2xl border-2 px-4 py-6 text-center sm:px-6 ${
           feedback === "correct"
             ? "animate-pop border-ok bg-ok-soft"
             : feedback === "wrong"
               ? "animate-shake border-bad bg-bad-soft"
               : "border-line bg-bg"
         }`}
-        aria-live="polite"
       >
         <AnalogClock time={clock} />
-        <p
-          className={`mt-4 min-h-6 text-sm font-semibold ${
-            feedback === "correct"
-              ? "text-ok"
-              : feedback === "wrong"
-                ? "text-bad"
-                : "font-medium text-ink-muted"
-          }`}
-        >
-          {feedback === "correct"
-            ? `Yes! It’s ${expected}.`
-            : feedback === "wrong"
-              ? `Not quite. It’s ${expected}.`
-              : "Type the digital time, like 3:45"}
-        </p>
+        {feedback ? (
+          <p className="mt-3 font-display text-3xl tabular-nums text-ink">
+            {expected}
+          </p>
+        ) : null}
       </div>
 
       <form
@@ -713,13 +719,13 @@ function AnalogClock({ time }: { time: ClockTime }) {
         aria-label={clockDescription(time)}
         className="h-auto w-full"
       >
-        <circle cx="100" cy="100" r="96" className="fill-bg-accent" />
+        <circle cx="100" cy="100" r="98" className="fill-bg-accent" />
         <circle
           cx="100"
           cy="100"
-          r="88"
+          r="86"
           className="fill-surface stroke-secondary"
-          strokeWidth="4"
+          strokeWidth="5"
         />
         {Array.from({ length: 60 }, (_, index) => {
           const isHour = index % 5 === 0;
