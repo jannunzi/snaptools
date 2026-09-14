@@ -1,5 +1,6 @@
 import { CivicsQuiz } from "@/components/tools/CivicsQuiz";
 import { ComingSoonPanel } from "@/components/tools/ComingSoonPanel";
+import { CountingMoney } from "@/components/tools/CountingMoney";
 import { DivisionFacts } from "@/components/tools/DivisionFacts";
 import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
@@ -24,6 +25,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <DivisionFacts />;
     case "telling-time":
       return <TellingTime />;
+    case "counting-money":
+      return <CountingMoney />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }

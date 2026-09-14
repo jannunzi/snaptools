@@ -9,6 +9,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [USCIS Civics Quiz](/tools/civics-quiz) — official 2025 128-question bank. Quick 10, interview 20 (pass 12+), or browse.
 - [Division Facts Practice](/tools/division-facts) — pick divisors 1–12, then Practice, a 60-second quiz, or Streak mode. Exact facts only, missed/slow-fact review, printable chart.
 - [Telling Time Practice](/tools/telling-time) — read an analog clock and type the digital time. Whole hours through to the minute; Practice, 60-second quiz, or Streak. Instant feedback and missed-time review.
+- [Counting Money Practice](/tools/counting-money) — count US coins and bills, or make change. Easy coin ID through mixed coins, $1/$5 bills, and make-change; Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
 
 ## Stack
 
@@ -74,6 +75,7 @@ That’s it. Do not add accounts, a CMS, or a database just to ship a tool.
 | `/tools/civics-quiz` | Live USCIS 2025 civics practice |
 | `/tools/division-facts` | Live division facts practice |
 | `/tools/telling-time` | Live analog clock practice |
+| `/tools/counting-money` | Live US money counting and make-change |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 

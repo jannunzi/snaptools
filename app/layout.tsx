@@ -38,6 +38,7 @@ export const metadata: Metadata = {
     "civics quiz",
     "division facts",
     "telling time",
+    "counting money",
     "USCIS",
     "treble clef",
     "browser tools",
