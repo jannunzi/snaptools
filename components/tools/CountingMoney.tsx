@@ -822,20 +822,29 @@ function PlayPanel({
           spellCheck={false}
           autoFocus
           disabled={Boolean(feedback)}
-          placeholder={problem.kind === "identify" ? "25 or $0.25" : "85 or $0.85"}
+          placeholder="25 or $0.25"
           aria-describedby="money-answer-hint"
           className="mt-2 min-h-12 w-full rounded-xl border-2 border-line bg-bg px-3 text-center font-display text-2xl tabular-nums text-ink outline-none focus:border-secondary sm:text-3xl"
         />
         <p id="money-answer-hint" className="mt-2 text-sm text-ink-muted">
           Type cents (25) or dollars ($0.25). Press Enter to check.
         </p>
-        <button
-          type="submit"
-          disabled={Boolean(feedback) || input.trim().length === 0}
-          className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-accent px-4 text-base font-semibold text-accent-ink disabled:opacity-50 sm:w-auto"
-        >
-          Check
-        </button>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <button
+            type="submit"
+            disabled={Boolean(feedback) || input.trim().length === 0}
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-accent px-4 text-base font-semibold text-accent-ink disabled:opacity-50 sm:w-auto"
+          >
+            Check
+          </button>
+          <button
+            type="button"
+            onClick={onFinish}
+            className="inline-flex min-h-12 items-center justify-center px-3 text-sm font-semibold text-ink-muted hover:text-ink"
+          >
+            {mode === "practice" ? "Finish practice" : "End early"}
+          </button>
+        </div>
       </form>
 
       <div className="mx-auto mt-5 grid max-w-sm grid-cols-3 gap-2">
@@ -868,16 +877,6 @@ function PlayPanel({
           className="col-span-2 min-h-14 touch-manipulation rounded-xl bg-accent text-lg font-semibold text-accent-ink"
         >
           OK
-        </button>
-      </div>
-
-      <div className="mt-5 flex justify-center">
-        <button
-          type="button"
-          onClick={onFinish}
-          className="min-h-11 text-sm font-semibold text-ink-muted hover:text-ink"
-        >
-          {mode === "practice" ? "Finish practice" : "End early"}
         </button>
       </div>
     </div>
@@ -1046,7 +1045,7 @@ function TokenTray({
 }) {
   return (
     <ul
-      className="flex flex-wrap items-end justify-center gap-2 sm:gap-3"
+      className="flex flex-wrap items-end justify-center gap-3 sm:gap-4"
       aria-label={label}
     >
       {tokens.map((token, index) => (
@@ -1105,19 +1104,19 @@ function CoinToken({
 }) {
   const size = large
     ? kind === "dime"
-      ? 88
+      ? 104
       : kind === "penny"
-        ? 100
+        ? 116
         : kind === "nickel"
-          ? 108
-          : 120
+          ? 124
+          : 136
     : kind === "dime"
-      ? 56
+      ? 72
       : kind === "penny"
-        ? 64
+        ? 80
         : kind === "nickel"
-          ? 72
-          : 80;
+          ? 88
+          : 96;
 
   const palette = {
     penny: { fill: "#c45c26", rim: "#8a3b14", text: "#2a1208" },
@@ -1151,29 +1150,18 @@ function CoinToken({
         />
         <text
           x="40"
-          y={showValue ? 38 : 44}
+          y="45"
           textAnchor="middle"
           fill={palette.text}
-          fontSize={showValue ? 16 : 13}
-          fontWeight="700"
+          fontSize={showValue ? 20 : 12}
+          fontWeight="800"
         >
           {showValue ? denom.valueLabel : capitalize(denom.name)}
         </text>
-        {showValue ? (
-          <text
-            x="40"
-            y="54"
-            textAnchor="middle"
-            fill={palette.text}
-            fontSize="9"
-            fontWeight="600"
-            opacity="0.85"
-          >
-            {capitalize(denom.name)}
-          </text>
-        ) : null}
       </svg>
-      <figcaption className="sr-only">{label}</figcaption>
+      <figcaption className="text-xs font-semibold text-ink">
+        {capitalize(denom.name)}
+      </figcaption>
     </figure>
   );
 }
@@ -1189,8 +1177,8 @@ function BillToken({
   large: boolean;
   label: string;
 }) {
-  const width = large ? 148 : 112;
-  const height = large ? 72 : 56;
+  const width = large ? 168 : 132;
+  const height = large ? 84 : 66;
   const palette =
     kind === "dollar"
       ? { fill: "#2f9e5a", rim: "#16653a", text: "#f4fff6" }
@@ -1235,29 +1223,18 @@ function BillToken({
         />
         <text
           x="70"
-          y={showValue ? 36 : 40}
+          y="40"
           textAnchor="middle"
           fill={palette.text}
-          fontSize={showValue ? 22 : 12}
+          fontSize={showValue ? 24 : 14}
           fontWeight="800"
         >
           {showValue ? denom.valueLabel : kind === "dollar" ? "ONE" : "FIVE"}
         </text>
-        {showValue ? (
-          <text
-            x="70"
-            y="52"
-            textAnchor="middle"
-            fill={palette.text}
-            fontSize="9"
-            fontWeight="600"
-            opacity="0.9"
-          >
-            {kind === "dollar" ? "ONE" : "FIVE"}
-          </text>
-        ) : null}
       </svg>
-      <figcaption className="sr-only">{label}</figcaption>
+      <figcaption className="text-xs font-semibold text-ink">
+        {capitalize(denom.name)}
+      </figcaption>
     </figure>
   );
 }
