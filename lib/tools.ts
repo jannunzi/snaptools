@@ -266,6 +266,42 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "counting-money",
+    title: "Counting Money Practice",
+    tagline: "Count US coins and bills — or make change.",
+    description:
+      "Count pennies through quarters, add $1 and $5 bills, or make change from a price and payment. Practice, race a 60-second quiz, or see how long you can streak. Instant feedback and missed-item review.",
+    day: 8,
+    publishedOn: "2026-09-14",
+    audience: "Kids, parents, and teachers practicing US money skills",
+    status: "live",
+    howTo:
+      "Start with Easy: name a coin or count a pile of the same coins. Type cents (25) or dollars ($0.25). When that feels easy, mix coins, then add $1 and $5 bills. Challenge is make-change: read the price, count what was paid, and type the change owed. Use Timed for a one-minute sprint; use Streak to find the problems that still stall you.",
+    books: [
+      {
+        asin: "1483831108",
+        title: "Spectrum Counting Money, Grade 2",
+        author: "Spectrum",
+        blurb:
+          "Coins, bills, skip-counting, and making change from a dollar — focused Grade 2 money pages with an answer key.",
+      },
+      {
+        asin: "1589473256",
+        title: "School Zone Time, Money & Fractions Workbook",
+        author: "School Zone",
+        blurb:
+          "Short 1st–2nd grade pages for coin values, adding money, telling time, and simple fractions.",
+      },
+      {
+        asin: "1635783259",
+        title: "Humble Math — 100 Days of Money, Fractions, & Telling the Time",
+        author: "Humble Math",
+        blurb:
+          "Daily pages for counting money, fractions, and telling time — coins through making change, with an answer key.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
