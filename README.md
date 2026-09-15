@@ -39,6 +39,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_URL` | `https://snaptools.vercel.app` | Canonical URL for sitemap, robots, and Open Graph |
 | `XAI_API_KEY` | (none) | Server-only xAI key for Grok TTS, Imagine, and History Timeline fills. Never prefix with `NEXT_PUBLIC_`. |
 | `MONGODB_URI` | (none) | MongoDB Atlas URI for History Timeline event cache. `MONGO_URI` is accepted as a fallback. Without it, seed events still render and Grok fills are not persisted. |
+| `MONGODB_DB` | `snaptools` | Database name. Defaults to `snaptools`. Never writes to the course `web-dev` database, even if that name is in the URI path. |
 
 Book links are always:
 
@@ -93,7 +94,7 @@ Shared UI: `SiteHeader`, `SiteFooter`, `ToolShell`, `AmazonBookBanner`, `ToolCar
 1. Import the GitHub repo in Vercel (Next.js is detected automatically).
 2. Set `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` and `NEXT_PUBLIC_SITE_URL` for Production and Preview.
 3. Set **`XAI_API_KEY`** (sensitive) for Production, Preview, and Development so spelling can use Grok TTS, coloring can generate Imagine pages, and History Timeline can fill missing spans. Get a key at [console.x.ai](https://console.x.ai/). The key stays on the server — never add `NEXT_PUBLIC_`.
-4. Set **`MONGODB_URI`** (sensitive) so History Timeline can persist generated windows. `MONGO_URI` is also read if `MONGODB_URI` is unset. Indexes are created on first successful connection; or run `npm run history:indexes` once against Atlas.
+4. Set **`MONGODB_URI`** (sensitive) so History Timeline can persist generated windows. `MONGO_URI` is also read if `MONGODB_URI` is unset. The cache uses database **`snaptools`** (override with `MONGODB_DB` if needed). It will not write to the course `web-dev` database. Indexes are created on first successful connection; or run `npm run history:indexes` once against Atlas.
 5. Deploy. Other tools do not need a database.
 
 To refresh the checked-in coloring starter pack locally:
@@ -107,7 +108,7 @@ Without a key, spelling falls back to the browser voice, coloring still uses the
 
 ### History Timeline cache
 
-Events are stored in `snaptools.history_event_windows` (or the database name in the URI / `MONGODB_DB`), keyed by **category + granularity + aligned window start**. Zooming in requests finer windows; those fills add detail without repeating a coarse query.
+Events are stored in `snaptools.history_event_windows` (or `MONGODB_DB` if you set a different SnapTools database), keyed by **category + granularity + aligned window start**. Zooming in requests finer windows; those fills add detail without repeating a coarse query. The course `web-dev` database is never used.
 
 ```bash
 # after adding MONGODB_URI to .env.local

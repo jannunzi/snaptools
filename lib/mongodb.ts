@@ -10,19 +10,30 @@ export function getMongoUri() {
   return uri || null;
 }
 
+const COURSE_DB_NAME = "web-dev";
+const DEFAULT_DB_NAME = "snaptools";
+
+function usableDbName(name: string | undefined) {
+  const trimmed = name?.trim() ?? "";
+  if (!trimmed || trimmed === COURSE_DB_NAME) return null;
+  return trimmed;
+}
+
 export function getMongoDbName() {
-  const explicit = process.env.MONGODB_DB?.trim();
+  const explicit = usableDbName(process.env.MONGODB_DB);
   if (explicit) return explicit;
 
   const uri = getMongoUri();
-  if (!uri) return "snaptools";
-  try {
-    const pathname = new URL(uri).pathname.replace(/^\//, "");
-    const name = pathname.split("?")[0]?.trim();
-    return name || "snaptools";
-  } catch {
-    return "snaptools";
+  if (uri) {
+    try {
+      const pathname = new URL(uri).pathname.replace(/^\//, "");
+      const fromUri = usableDbName(pathname.split("?")[0]);
+      if (fromUri) return fromUri;
+    } catch {
+      // Fall through to the SnapTools database.
+    }
   }
+  return DEFAULT_DB_NAME;
 }
 
 export async function getMongoClient() {

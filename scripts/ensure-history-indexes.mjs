@@ -29,14 +29,21 @@ if (!uri) {
   process.exit(1);
 }
 
-let dbName = process.env.MONGODB_DB?.trim() || "";
+function usableDbName(name) {
+  const trimmed = (name ?? "").trim();
+  if (!trimmed || trimmed === "web-dev") return "";
+  return trimmed;
+}
+
+let dbName = usableDbName(process.env.MONGODB_DB);
 if (!dbName) {
   try {
-    dbName = new URL(uri).pathname.replace(/^\//, "").split("?")[0] || "snaptools";
+    dbName = usableDbName(new URL(uri).pathname.replace(/^\//, "").split("?")[0]);
   } catch {
-    dbName = "snaptools";
+    dbName = "";
   }
 }
+if (!dbName) dbName = "snaptools";
 
 const client = new MongoClient(uri);
 await client.connect();
