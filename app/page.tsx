@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ToolCard } from "@/components/ToolCard";
-import { siteDescription, siteName, siteTagline } from "@/lib/site";
+import { siteDescription, siteTagline } from "@/lib/site";
 import { getFeaturedTool, tools } from "@/lib/tools";
 
 export default function Home() {
@@ -8,33 +8,30 @@ export default function Home() {
   const rest = tools.filter((tool) => tool.slug !== featured.slug);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-      <section className="rounded-3xl border-2 border-line bg-surface-muted px-5 py-8 sm:px-8 sm:py-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
-          {siteName}
-        </p>
-        <h1 className="mt-3 font-display text-4xl leading-[1.1] text-ink sm:text-6xl">
+    <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
+      <section className="max-w-3xl">
+        <h1 className="font-display text-[2.5rem] leading-[1.08] text-ink sm:text-6xl">
           {siteTagline}
         </h1>
-        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink">
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted sm:text-xl">
           {siteDescription}
         </p>
-        <Link
-          href={`/tools/${featured.slug}`}
-          className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-5 text-sm font-semibold text-accent-ink"
-        >
+        <Link href={`/tools/${featured.slug}`} className="snap-btn mt-8">
           Open featured tool
         </Link>
       </section>
 
-      <section className="mt-10" aria-labelledby="featured-heading">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 id="featured-heading" className="font-display text-2xl text-ink">
+      <section className="mt-16" aria-labelledby="featured-heading">
+        <div className="mb-4 flex items-baseline justify-between gap-3">
+          <h2
+            id="featured-heading"
+            className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-muted"
+          >
             Featured
           </h2>
           <Link
             href={`/tools/${featured.slug}`}
-            className="text-sm font-semibold text-secondary hover:underline"
+            className="snap-link text-sm"
           >
             Open
           </Link>
@@ -42,8 +39,11 @@ export default function Home() {
         <ToolCard tool={featured} featured />
       </section>
 
-      <section className="mt-10" aria-labelledby="tools-heading">
-        <h2 id="tools-heading" className="font-display text-2xl text-ink">
+      <section className="mt-16" aria-labelledby="tools-heading">
+        <h2
+          id="tools-heading"
+          className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-muted"
+        >
           All tools
         </h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">

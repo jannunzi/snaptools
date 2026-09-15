@@ -151,7 +151,7 @@ export function CivicsQuiz() {
   };
 
   return (
-    <div className="rounded-2xl border-2 border-line bg-surface p-4 snap-shadow sm:p-6">
+    <div className="snap-panel">
       <aside className="rounded-xl border border-secondary/40 bg-secondary-soft/70 px-4 py-3 text-sm text-ink">
         <p className="font-semibold text-secondary">USCIS 2025 civics test</p>
         <p className="mt-1 text-ink">
@@ -245,7 +245,7 @@ export function CivicsQuiz() {
           </div>
 
           <div
-            className={`mt-5 rounded-2xl border-2 px-4 py-5 ${
+            className={`mt-5 rounded-2xl border px-4 py-5 ${
               feedback === "correct"
                 ? "animate-pop border-ok bg-ok-soft"
                 : feedback === "wrong"
@@ -279,7 +279,7 @@ export function CivicsQuiz() {
                     type="button"
                     onClick={() => toggleOption(option)}
                     aria-pressed={isOn}
-                    className={`min-h-12 rounded-xl border-2 px-3 py-2 text-left text-sm font-medium ${
+                    className={`min-h-12 rounded-xl border px-3 py-2 text-left text-sm font-medium ${
                       showKey && official
                         ? "border-ok bg-ok-soft text-ink"
                         : showKey && isOn && !official
@@ -380,7 +380,7 @@ export function CivicsQuiz() {
                 setPhase("setup");
                 setMode("browse");
               }}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-secondary px-4 text-sm font-semibold text-secondary"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-secondary px-4 text-sm font-semibold text-secondary"
             >
               Browse the bank
             </button>
@@ -421,7 +421,7 @@ function BrowsePanel({
         value={query}
         onChange={(event) => onQuery(event.target.value)}
         placeholder="Question, answer, or number"
-        className="mt-2 min-h-12 w-full rounded-xl border-2 border-line bg-bg px-3 text-ink outline-none focus:border-secondary"
+        className="mt-2 min-h-12 w-full rounded-xl border border-line bg-bg px-3 text-ink outline-none focus:border-secondary"
       />
       <p className="mt-2 text-sm text-ink-muted">{items.length} questions</p>
       <ol className="mt-3 space-y-2">
@@ -481,7 +481,7 @@ function ModeButton({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`rounded-xl border-2 p-3 text-left ${
+      className={`rounded-xl border p-3 text-left ${
         active
           ? "border-secondary bg-secondary-soft"
           : "border-line bg-bg hover:border-secondary/40"

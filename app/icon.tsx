@@ -13,10 +13,10 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#e31b12",
-          color: "#fff7f2",
-          fontSize: 20,
-          fontWeight: 700,
+          background: "#1d1d1f",
+          color: "#ffffff",
+          fontSize: 18,
+          fontWeight: 600,
           borderRadius: 8,
         }}
       >

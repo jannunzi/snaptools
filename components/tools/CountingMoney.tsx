@@ -608,7 +608,7 @@ export function CountingMoney() {
   const retryProblems = uniqueProblems([...stats.missed, ...stats.slow]);
 
   return (
-    <div className="no-print rounded-2xl border border-line bg-surface p-4 snap-shadow sm:p-6">
+    <div className="no-print snap-panel">
       {phase === "setup" ? (
         <SetupPanel
           difficulty={difficulty}
@@ -784,7 +784,7 @@ function PlayPanel({
       </p>
 
       <div
-        className={`mt-3 rounded-2xl border-2 px-4 py-6 text-center sm:px-6 ${
+        className={`mt-3 rounded-2xl border px-4 py-6 text-center sm:px-6 ${
           feedback === "correct"
             ? "animate-pop border-ok bg-ok-soft"
             : feedback === "wrong"
@@ -824,7 +824,7 @@ function PlayPanel({
           disabled={Boolean(feedback)}
           placeholder="25 or $0.25"
           aria-describedby="money-answer-hint"
-          className="mt-2 min-h-12 w-full rounded-xl border-2 border-line bg-bg px-3 text-center font-display text-2xl tabular-nums text-ink outline-none focus:border-secondary sm:text-3xl"
+          className="mt-2 min-h-12 w-full rounded-xl border border-line bg-bg px-3 text-center font-display text-2xl tabular-nums text-ink outline-none focus:border-secondary sm:text-3xl"
         />
         <p id="money-answer-hint" className="mt-2 text-sm text-ink-muted">
           Type cents (25) or dollars ($0.25). Press Enter to check.

@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getSiteUrl, siteDescription, siteName, siteTagline } from "@/lib/site";
 import "./globals.css";
 
-const plusJakarta = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -67,11 +61,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${plusJakarta.variable} ${fraunces.variable} h-full`}
-    >
-      <body className="flex min-h-dvh flex-col font-sans antialiased">
+    <html lang="en" className={`${inter.variable} h-full`}>
+      <body
+        className={`${inter.className} flex min-h-dvh flex-col antialiased`}
+      >
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

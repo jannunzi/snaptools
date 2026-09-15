@@ -231,7 +231,7 @@ export function MusicNoteRecognition() {
   }, [feedback, phase, submitAnswer]);
 
   return (
-    <div className="rounded-2xl border border-line bg-surface p-4 snap-shadow sm:p-6">
+    <div className="snap-panel">
       {phase === "setup" ? (
         <SetupPanel
           range={range}

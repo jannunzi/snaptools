@@ -333,7 +333,7 @@ export function TellingTime() {
   const retryTimes = uniqueTimes([...stats.missed, ...stats.slow]);
 
   return (
-    <div className="no-print rounded-2xl border border-line bg-surface p-4 snap-shadow sm:p-6">
+    <div className="no-print snap-panel">
       {phase === "setup" ? (
         <SetupPanel
           difficulty={difficulty}
@@ -505,7 +505,7 @@ function PlayPanel({
       </p>
 
       <div
-        className={`mt-3 rounded-2xl border-2 px-4 py-6 text-center sm:px-6 ${
+        className={`mt-3 rounded-2xl border px-4 py-6 text-center sm:px-6 ${
           feedback === "correct"
             ? "animate-pop border-ok bg-ok-soft"
             : feedback === "wrong"
@@ -545,7 +545,7 @@ function PlayPanel({
           disabled={Boolean(feedback)}
           placeholder="3:45"
           aria-describedby="time-answer-hint"
-          className="mt-2 min-h-12 w-full rounded-xl border-2 border-line bg-bg px-3 text-center font-display text-2xl tabular-nums text-ink outline-none focus:border-secondary sm:text-3xl"
+          className="mt-2 min-h-12 w-full rounded-xl border border-line bg-bg px-3 text-center font-display text-2xl tabular-nums text-ink outline-none focus:border-secondary sm:text-3xl"
         />
         <p id="time-answer-hint" className="mt-2 text-sm text-ink-muted">
           Use hours and minutes, like 7:00 or 12:35. Press Enter to check.
@@ -720,13 +720,13 @@ function AnalogClock({ time }: { time: ClockTime }) {
         aria-label={clockDescription(time)}
         className="h-auto w-full"
       >
-        <circle cx="100" cy="100" r="98" className="fill-bg-accent" />
+        <circle cx="100" cy="100" r="98" className="fill-surface-muted" />
         <circle
           cx="100"
           cy="100"
           r="86"
-          className="fill-surface stroke-secondary"
-          strokeWidth="5"
+          className="fill-surface stroke-line"
+          strokeWidth="2"
         />
         {Array.from({ length: 60 }, (_, index) => {
           const isHour = index % 5 === 0;
@@ -768,7 +768,7 @@ function AnalogClock({ time }: { time: ClockTime }) {
           angle={hourAngle}
           length={42}
           width={6.5}
-          className="stroke-secondary"
+          className="stroke-ink"
         />
         <ClockHand
           angle={minuteAngle}
