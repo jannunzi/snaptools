@@ -535,6 +535,7 @@ export function HistoryTimeline() {
                 pixelsPerYear={pixelsPerYear}
                 visibleStart={visible.start}
                 visibleEnd={visible.end}
+                scrollLeft={viewport.left}
                 loadingKeys={loadingSet}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
@@ -611,6 +612,7 @@ function LaneRow({
   pixelsPerYear,
   visibleStart,
   visibleEnd,
+  scrollLeft,
   loadingKeys,
   selectedId,
   onSelect,
@@ -621,6 +623,7 @@ function LaneRow({
   pixelsPerYear: number;
   visibleStart: number;
   visibleEnd: number;
+  scrollLeft: number;
   loadingKeys: Set<string>;
   selectedId: string | null;
   onSelect: (id: string) => void;
@@ -674,6 +677,9 @@ function LaneRow({
         const swatch = eventSwatch(event.category, event.id, selected);
         const span = eventSpan(event);
         const range = formatYearRange(span.start, span.end);
+        const labelPad = wide
+          ? Math.max(10, Math.min(width - 96, scrollLeft - x + 10))
+          : 10;
         return (
           <div key={event.id} role="listitem">
             <button
@@ -681,15 +687,16 @@ function LaneRow({
               onClick={() => onSelect(event.id)}
               aria-pressed={selected}
               title={`${event.title} · ${range}`}
-              className={`absolute overflow-hidden rounded-xl border px-2.5 text-left transition-[filter,box-shadow] hover:brightness-[0.97] ${
+              className={`absolute overflow-hidden rounded-xl border pr-2.5 text-left transition-[filter,box-shadow] hover:brightness-[0.97] ${
                 selected ? "shadow-[0_0_0_1px_var(--ink)]" : ""
-              } ${wide ? "flex items-center gap-2" : "py-1.5"}`}
+              } ${wide ? "flex items-center gap-2" : "py-1.5 pl-2.5"}`}
               style={{
                 left: x,
                 width,
                 minWidth: POINT_EVENT_MIN_WIDTH,
                 top: LANE_PAD + row * (ROW_HEIGHT + ROW_GAP),
                 height: ROW_HEIGHT,
+                paddingLeft: wide ? labelPad : undefined,
                 background: swatch.background,
                 borderColor: swatch.border,
                 color: swatch.color,
