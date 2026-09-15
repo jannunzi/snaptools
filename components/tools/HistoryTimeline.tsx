@@ -37,9 +37,9 @@ import {
 } from "@/lib/history-timeline";
 
 const TOOL_SLUG = "history-timeline";
-const LANE_HEIGHT = 156;
+const LANE_HEIGHT = 168;
 const AXIS_HEIGHT = 44;
-const CARD_WIDTH = 172;
+const CARD_WIDTH = 168;
 const DEBOUNCE_MS = 280;
 const OVERSCAN_PX = 360;
 
@@ -112,6 +112,7 @@ function accentClass(accent: string) {
 
 export function HistoryTimeline() {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const detailRef = useRef<HTMLElement | null>(null);
   const centerYearRef = useRef(DEFAULT_CENTER_YEAR);
   const loadedRef = useRef(new Set<string>());
   const inflightRef = useRef(new Set<string>());
@@ -384,6 +385,12 @@ export function HistoryTimeline() {
   const selected = selectedId ? eventsById[selectedId] : undefined;
   const loadingSet = useMemo(() => new Set(loadingKeys), [loadingKeys]);
 
+  useEffect(() => {
+    if (selected) {
+      detailRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [selected]);
+
   return (
     <div className="snap-panel overflow-hidden p-0">
       <div className="flex flex-col gap-3 border-b border-line px-4 py-4 sm:px-5">
@@ -441,14 +448,13 @@ export function HistoryTimeline() {
                 className="flex flex-col justify-center gap-1.5 border-t border-line px-2.5 sm:px-3"
                 style={{ height: LANE_HEIGHT }}
               >
-                <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
-                  Lane
-                  <span className="sr-only"> category</span>
+                <label className="sr-only" htmlFor={`lane-${lane.id}`}>
+                  {meta.label} lane category
                 </label>
                 <select
+                  id={`lane-${lane.id}`}
                   className="snap-input min-h-10 px-2 text-sm font-semibold"
                   value={lane.category}
-                  aria-label={`${meta.label} lane category`}
                   onChange={(event) => {
                     const value = event.target.value;
                     if (isHistoryCategory(value)) swapLane(lane.id, value);
@@ -543,7 +549,10 @@ export function HistoryTimeline() {
       </div>
 
       {selected ? (
-        <aside className="border-t border-line bg-secondary-soft/50 px-4 py-4 sm:px-5">
+        <aside
+          ref={detailRef}
+          className="border-t border-line bg-secondary-soft/50 px-4 py-4 sm:px-5"
+        >
           <div className="flex items-start justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">
               {getCategory(selected.category).label}
@@ -603,10 +612,10 @@ function LaneRow({
     (event) =>
       event.category === category &&
       shouldShowEvent(event, granularity) &&
-      event.year < visibleEnd + 40 &&
-      (event.endYear ?? event.year) > visibleStart - 40,
+      event.year < visibleEnd + 30 &&
+      event.year > visibleStart - 80,
   );
-  const packed = packEvents(visibleEvents, pixelsPerYear);
+  const packed = packEvents(visibleEvents, pixelsPerYear, 2);
   const windows = windowsOverlapping(visibleStart, visibleEnd, granularity);
   const pending = windows.filter((window) =>
     loadingKeys.has(windowKey(category, granularity, window.start)),
@@ -614,11 +623,16 @@ function LaneRow({
 
   return (
     <div
-      className="relative border-t border-line"
+      className="relative overflow-hidden border-t border-line"
       style={{ height: LANE_HEIGHT }}
       role="list"
       aria-label={`${meta.label} events`}
     >
+      <div
+        className="pointer-events-none absolute top-0 bottom-0 w-px bg-secondary/50"
+        style={{ left: yearToX(NOW_YEAR, pixelsPerYear) }}
+        aria-hidden
+      />
       {pending.map((window) => (
         <div
           key={`load-${window.start}`}
