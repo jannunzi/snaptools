@@ -327,7 +327,7 @@ export function SpellingPractice() {
   const spanishAccentsOff = lang === "es" && !requireAccents;
 
   return (
-    <div className="rounded-2xl border-2 border-line bg-surface p-4 snap-shadow sm:p-6">
+    <div className="snap-panel">
       {phase === "setup" ? (
         <div>
           <h2 className="font-display text-2xl text-ink">Choose a language</h2>
@@ -343,7 +343,7 @@ export function SpellingPractice() {
                 type="button"
                 aria-pressed={lang === item.id}
                 onClick={() => setLang(item.id)}
-                className={`rounded-xl border-2 p-3 text-left ${
+                className={`rounded-xl border p-3 text-left ${
                   lang === item.id
                     ? "border-secondary bg-secondary-soft"
                     : "border-line bg-bg hover:border-secondary/50"
@@ -366,7 +366,7 @@ export function SpellingPractice() {
                   type="button"
                   aria-pressed={difficulty === item.id}
                   onClick={() => setDifficulty(item.id)}
-                  className={`rounded-xl border-2 p-3 text-left ${
+                  className={`rounded-xl border p-3 text-left ${
                     difficulty === item.id
                       ? "border-secondary bg-secondary-soft"
                       : "border-line bg-bg hover:border-secondary/50"
@@ -394,7 +394,7 @@ export function SpellingPractice() {
                   type="button"
                   aria-pressed={setSize === item.id}
                   onClick={() => setSetSize(item.id)}
-                  className={`min-h-11 rounded-xl border-2 text-sm font-semibold ${
+                  className={`min-h-11 rounded-xl border text-sm font-semibold ${
                     setSize === item.id
                       ? "border-secondary bg-secondary-soft"
                       : "border-line bg-bg hover:border-secondary/50"
@@ -416,7 +416,7 @@ export function SpellingPractice() {
                     type="button"
                     aria-pressed={accent === item.id}
                     onClick={() => setAccent(item.id)}
-                    className={`rounded-xl border-2 p-3 text-left ${
+                    className={`rounded-xl border p-3 text-left ${
                       accent === item.id
                         ? "border-secondary bg-secondary-soft"
                         : "border-line bg-bg hover:border-secondary/50"
@@ -431,7 +431,7 @@ export function SpellingPractice() {
           ) : null}
 
           {lang === "es" ? (
-            <label className="mt-5 flex items-start gap-3 rounded-xl border-2 border-line bg-bg px-3 py-3 text-sm">
+            <label className="mt-5 flex items-start gap-3 rounded-xl border border-line bg-bg px-3 py-3 text-sm">
               <input
                 type="checkbox"
                 className="mt-1"
@@ -453,7 +453,7 @@ export function SpellingPractice() {
             <legend className="text-sm font-semibold text-ink">Voice</legend>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <label
-                className={`flex min-h-12 items-center gap-2 rounded-xl border-2 px-3 text-sm ${
+                className={`flex min-h-12 items-center gap-2 rounded-xl border px-3 text-sm ${
                   voiceSource === "grok"
                     ? "border-secondary bg-secondary-soft"
                     : "border-line bg-bg"
@@ -472,7 +472,7 @@ export function SpellingPractice() {
                 Grok voice
               </label>
               <label
-                className={`flex min-h-12 items-center gap-2 rounded-xl border-2 px-3 text-sm ${
+                className={`flex min-h-12 items-center gap-2 rounded-xl border px-3 text-sm ${
                   voiceSource === "browser"
                     ? "border-secondary bg-secondary-soft"
                     : "border-line bg-bg"
@@ -498,7 +498,7 @@ export function SpellingPractice() {
                     type="button"
                     aria-pressed={voiceId === item.id}
                     onClick={() => setVoiceId(item.id)}
-                    className={`rounded-xl border-2 px-2 py-2 text-left ${
+                    className={`rounded-xl border px-2 py-2 text-left ${
                       voiceId === item.id
                         ? "border-secondary bg-secondary-soft"
                         : "border-line bg-bg hover:border-secondary/50"
@@ -543,7 +543,7 @@ export function SpellingPractice() {
           </div>
 
           <div
-            className={`mt-6 rounded-2xl border-2 px-4 py-8 text-center sm:px-6 ${
+            className={`mt-6 rounded-2xl border px-4 py-8 text-center sm:px-6 ${
               feedback === "correct"
                 ? "animate-pop border-ok bg-ok-soft"
                 : feedback === "wrong"
@@ -582,7 +582,7 @@ export function SpellingPractice() {
             <button
               type="button"
               onClick={() => void hear()}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-secondary bg-secondary-soft px-4 text-sm font-semibold text-secondary"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-secondary bg-secondary-soft px-4 text-sm font-semibold text-secondary"
             >
               {speaking ? "Playing…" : "Hear word again"}
             </button>
@@ -594,7 +594,7 @@ export function SpellingPractice() {
                     type="button"
                     aria-pressed={accent === item.id}
                     onClick={() => setAccent(item.id)}
-                    className={`min-h-11 rounded-xl border-2 px-3 text-sm font-semibold ${
+                    className={`min-h-11 rounded-xl border px-3 text-sm font-semibold ${
                       accent === item.id
                         ? "border-secondary bg-secondary-soft"
                         : "border-line bg-bg"
@@ -653,7 +653,7 @@ export function SpellingPractice() {
               spellCheck={false}
               autoFocus
               disabled={Boolean(feedback)}
-              className="mt-2 min-h-12 w-full rounded-xl border-2 border-line bg-bg px-3 text-lg text-ink outline-none focus:border-secondary"
+              className="mt-2 min-h-12 w-full rounded-xl border border-line bg-bg px-3 text-lg text-ink outline-none focus:border-secondary"
             />
             <button
               type="submit"
@@ -716,7 +716,7 @@ export function SpellingPractice() {
             <button
               type="button"
               onClick={reshuffleFromStart}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-secondary px-4 text-sm font-semibold text-secondary"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-secondary px-4 text-sm font-semibold text-secondary"
             >
               Reshuffle from the start
             </button>

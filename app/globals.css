@@ -1,48 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #fff8e1;
-  --bg-accent: #ffd000;
+  --bg: #f5f5f7;
+  --bg-accent: #fff3c4;
   --surface: #ffffff;
-  --surface-muted: #ffe56a;
-  --ink: #111318;
-  --ink-muted: #3a3f4a;
-  --line: #e6b000;
-  --accent: #e31b12;
-  --accent-ink: #fff7f2;
-  --accent-soft: #ffc4b8;
-  --secondary: #0b5fff;
-  --secondary-ink: #f4f8ff;
-  --secondary-soft: #cfe0ff;
-  --ok: #067a4a;
-  --ok-soft: #baf3d4;
-  --bad: #d01818;
-  --bad-soft: #ffc9c4;
-  --ring: #e31b12;
-  --shadow: 0 18px 40px -28px rgb(31 26 20 / 0.45);
+  --surface-muted: #f5f5f7;
+  --ink: #1d1d1f;
+  --ink-muted: #6e6e73;
+  --line: #d2d2d7;
+  --accent: #1d1d1f;
+  --accent-ink: #ffffff;
+  --accent-soft: #f2f2f4;
+  --secondary: #0071e3;
+  --secondary-ink: #ffffff;
+  --secondary-soft: #e8f1fc;
+  --ok: #248a3d;
+  --ok-soft: #e8f6ec;
+  --bad: #de071c;
+  --bad-soft: #fdecee;
+  --ring: #0071e3;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.04);
+  --radius-panel: 1.25rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #12151c;
-    --bg-accent: #c9a000;
-    --surface: #1b2030;
-    --surface-muted: #2a3560;
-    --ink: #f6f3ea;
-    --ink-muted: #c5c9d6;
-    --line: #3d4f80;
-    --accent: #ff4d2e;
-    --accent-ink: #2a0804;
-    --accent-soft: #5a1a10;
-    --secondary: #4d8dff;
-    --secondary-ink: #061428;
-    --secondary-soft: #163060;
-    --ok: #34d399;
-    --ok-soft: #163226;
-    --bad: #fb7185;
-    --bad-soft: #3a1818;
-    --ring: #ff4d2e;
-    --shadow: 0 18px 40px -24px rgb(0 0 0 / 0.7);
+    --bg: #000000;
+    --bg-accent: #3d3420;
+    --surface: #1d1d1f;
+    --surface-muted: #2c2c2e;
+    --ink: #f5f5f7;
+    --ink-muted: #a1a1a6;
+    --line: #424245;
+    --accent: #f5f5f7;
+    --accent-ink: #1d1d1f;
+    --accent-soft: #2c2c2e;
+    --secondary: #2997ff;
+    --secondary-ink: #001529;
+    --secondary-soft: #0b2a4a;
+    --ok: #32d74b;
+    --ok-soft: #0f2a16;
+    --bad: #ff453a;
+    --bad-soft: #3a1214;
+    --ring: #2997ff;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px rgb(0 0 0 / 0.35);
   }
 }
 
@@ -64,8 +65,10 @@
   --color-ok-soft: var(--ok-soft);
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
-  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: "Inter", "Inter Fallback", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: "Inter", "Inter Fallback", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 html {
@@ -73,36 +76,130 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(1100px 460px at 8% -8%, var(--bg-accent), transparent 52%),
-    radial-gradient(900px 420px at 96% 0%, var(--secondary-soft), transparent 48%),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
   min-height: 100dvh;
 }
 
 ::selection {
-  background: var(--bg-accent);
+  background: var(--secondary-soft);
   color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
 }
 
 .font-display {
   font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  font-weight: 600;
 }
 
 .snap-shadow {
   box-shadow: var(--shadow);
 }
 
-.snap-ribbon {
-  display: flex;
-  height: 8px;
-  width: 100%;
+.snap-panel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
 }
 
-.snap-ribbon > span {
-  flex: 1;
+@media (min-width: 640px) {
+  .snap-panel {
+    padding: 1.75rem;
+  }
+}
+
+.snap-btn {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 980px;
+  background: var(--accent);
+  padding: 0 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  transition: opacity 160ms ease;
+}
+
+.snap-btn:hover {
+  opacity: 0.88;
+}
+
+.snap-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.snap-btn-secondary {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 980px;
+  background: transparent;
+  padding: 0 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink);
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.snap-btn-secondary:hover {
+  background: var(--accent-soft);
+  border-color: var(--ink);
+}
+
+.snap-input {
+  min-height: 2.75rem;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 0.875rem;
+  background: var(--bg);
+  padding: 0 0.85rem;
+  color: var(--ink);
+  outline: none;
+}
+
+.snap-input:focus-visible {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px var(--secondary-soft);
+  outline: none;
+}
+
+.snap-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 980px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.snap-badge-new {
+  background: var(--bg-accent);
+  color: var(--ink);
+}
+
+.snap-badge-live {
+  background: var(--secondary-soft);
+  color: var(--secondary);
+}
+
+.snap-badge-muted {
+  background: var(--surface-muted);
+  color: var(--ink-muted);
 }
 
 @media print {
@@ -136,7 +233,7 @@ body {
     transform: scale(0.96);
   }
   60% {
-    transform: scale(1.03);
+    transform: scale(1.02);
   }
   100% {
     transform: scale(1);
@@ -149,10 +246,10 @@ body {
     transform: translateX(0);
   }
   25% {
-    transform: translateX(-6px);
+    transform: translateX(-4px);
   }
   75% {
-    transform: translateX(6px);
+    transform: translateX(4px);
   }
 }
 

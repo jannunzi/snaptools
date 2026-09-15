@@ -14,10 +14,10 @@ export function AmazonBookCover({ asin, title }: AmazonBookCoverProps) {
   const initial = title.trim().charAt(0).toUpperCase() || "B";
 
   return (
-    <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-surface-muted">
+    <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-surface-muted">
       {failed ? (
         <div
-          className="grid h-full w-full place-items-center bg-accent-soft font-display text-5xl text-accent"
+          className="grid h-full w-full place-items-center bg-accent-soft font-display text-5xl text-ink-muted"
           aria-hidden
         >
           {initial}

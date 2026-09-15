@@ -3,28 +3,23 @@ import { siteName } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="no-print border-b border-line/80 bg-surface/80 backdrop-blur-md">
-      <div className="snap-ribbon" aria-hidden>
-        <span className="bg-bg-accent" />
-        <span className="bg-secondary" />
-        <span className="bg-accent" />
-      </div>
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <header className="no-print sticky top-0 z-20 border-b border-line/70 bg-bg/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3.5 sm:px-8">
         <Link href="/" className="group flex items-center gap-2.5">
           <span
             aria-hidden
-            className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-sm font-bold text-accent-ink"
+            className="grid h-8 w-8 place-items-center rounded-[9px] bg-accent text-[13px] font-semibold text-accent-ink"
           >
             S
           </span>
-          <span className="font-display text-xl tracking-tight text-ink group-hover:text-accent">
+          <span className="text-[17px] font-semibold tracking-tight text-ink group-hover:opacity-70">
             {siteName}
           </span>
         </Link>
-        <nav aria-label="Primary" className="flex items-center gap-4 text-sm">
+        <nav aria-label="Primary" className="flex items-center gap-5 text-sm">
           <Link
             href="/"
-            className="font-semibold text-secondary transition-colors hover:underline"
+            className="font-medium text-ink-muted transition-colors hover:text-ink"
           >
             Tools
           </Link>

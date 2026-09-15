@@ -17,21 +17,23 @@ export function AmazonBookBanner({ books, tool }: AmazonBookBannerProps) {
 
   return (
     <aside
-      className="no-print mt-10 rounded-2xl border border-line bg-surface p-5 sm:p-6"
+      className="no-print mt-14 border-t border-line pt-10"
       aria-label="Related books"
     >
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">
             Related books
           </p>
-          <h2 className="mt-1 font-display text-2xl text-ink">
+          <h2 className="mt-2 font-display text-2xl text-ink sm:text-3xl">
             Keep going on paper
           </h2>
         </div>
-        <p className="text-xs text-ink-muted">{amazonDisclosure}</p>
+        <p className="max-w-sm text-xs text-ink-muted sm:text-right">
+          {amazonDisclosure}
+        </p>
       </div>
-      <ul className="mt-5 grid gap-4 md:grid-cols-3">
+      <ul className="mt-6 grid gap-4 md:grid-cols-3">
         {books.map((book) => {
           const href = amazonProductUrl(book.asin);
           const onAmazonClick = () =>
@@ -40,10 +42,7 @@ export function AmazonBookBanner({ books, tool }: AmazonBookBannerProps) {
               asin: book.asin,
             });
           return (
-            <li
-              key={book.asin}
-              className="flex flex-col rounded-xl border border-line bg-bg/50 p-4"
-            >
+            <li key={book.asin} className="snap-panel flex flex-col">
               <a
                 href={href}
                 target="_blank"
@@ -53,7 +52,7 @@ export function AmazonBookBanner({ books, tool }: AmazonBookBannerProps) {
               >
                 <AmazonBookCover asin={book.asin} title={book.title} />
               </a>
-              <h3 className="mt-3 text-base font-semibold leading-snug text-ink">
+              <h3 className="mt-4 text-base font-semibold leading-snug text-ink">
                 {book.title}
               </h3>
               <p className="mt-1 text-sm text-ink-muted">{book.author}</p>
@@ -64,7 +63,7 @@ export function AmazonBookBanner({ books, tool }: AmazonBookBannerProps) {
                 href={href}
                 target="_blank"
                 rel="nofollow sponsored noopener noreferrer"
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-accent px-3 text-sm font-semibold text-accent-ink transition-opacity hover:opacity-90"
+                className="snap-btn-secondary mt-5"
                 onClick={onAmazonClick}
               >
                 View on Amazon

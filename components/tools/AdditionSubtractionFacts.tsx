@@ -354,7 +354,7 @@ export function AdditionSubtractionFacts() {
 
   return (
     <div>
-      <div className="no-print rounded-2xl border border-line bg-surface p-4 snap-shadow sm:p-6">
+      <div className="no-print snap-panel">
         {phase === "setup" ? (
           <SetupPanel
             ops={ops}

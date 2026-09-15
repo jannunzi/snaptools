@@ -166,7 +166,7 @@ export function PrintableColoring() {
 
   return (
     <div>
-      <div className="no-print rounded-2xl border-2 border-line bg-surface p-4 snap-shadow sm:p-6">
+      <div className="no-print snap-panel">
         <h2 className="font-display text-2xl text-ink">Coloring book pages</h2>
         <p className="mt-1 text-sm text-ink-muted">
           The starter pack is 12 pages on this site — stable links you can come
@@ -215,7 +215,7 @@ export function PrintableColoring() {
                 setPageId(item.id);
                 setRevision((value) => value + 1);
               }}
-              className={`min-h-11 rounded-xl border-2 px-3 text-sm font-medium ${
+              className={`min-h-11 rounded-xl border px-3 text-sm font-medium ${
                 page.id === item.id
                   ? "border-accent bg-accent-soft text-ink"
                   : "border-line bg-bg text-ink hover:border-accent/40"
@@ -241,7 +241,7 @@ export function PrintableColoring() {
                 aria-label={`Use color ${swatch}`}
                 aria-pressed={color === swatch}
                 onClick={() => setColor(swatch)}
-                className={`size-10 rounded-full border-2 ${
+                className={`size-10 rounded-full border ${
                   color === swatch ? "border-ink scale-110" : "border-line"
                 }`}
                 style={{ background: swatch }}
@@ -252,7 +252,7 @@ export function PrintableColoring() {
 
         <div
           ref={artRef}
-          className="relative mt-5 overflow-hidden rounded-2xl border-2 border-line bg-white p-3 text-ink"
+          className="relative mt-5 overflow-hidden rounded-2xl border border-line bg-white p-3 text-ink"
         >
           <ColoringCanvas
             src={page.src}
@@ -287,7 +287,7 @@ export function PrintableColoring() {
           <button
             type="button"
             onClick={downloadPng}
-            className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-secondary px-4 text-sm font-semibold text-secondary"
+            className="inline-flex min-h-12 items-center justify-center rounded-xl border border-secondary px-4 text-sm font-semibold text-secondary"
           >
             Download PNG
           </button>
@@ -302,7 +302,7 @@ export function PrintableColoring() {
             type="button"
             onClick={() => void generatePage()}
             disabled={generating || imagineReady === false}
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-line px-4 text-sm font-semibold text-ink disabled:opacity-50"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-line px-4 text-sm font-semibold text-ink disabled:opacity-50"
           >
             {generating ? (
               <>
