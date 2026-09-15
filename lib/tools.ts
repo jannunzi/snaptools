@@ -302,6 +302,42 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "addition-subtraction-facts",
+    title: "Addition & Subtraction Facts Practice",
+    tagline: "Fact fluency for sums and differences through 20.",
+    description:
+      "Pick addition, subtraction, or both, then practice, race a 60-second quiz, or see how long you can streak. Instant feedback, missed-fact review, and a printable 0–12 addition chart.",
+    day: 9,
+    publishedOn: "2026-09-15",
+    audience: "Kids, parents, and teachers building early fact fluency",
+    status: "live",
+    howTo:
+      "Start with Easy add or subtract (0–5, sums to 10). Say the fact out loud, then type it. When that feels easy, try Medium (through 10), then mixed Challenge through 20. Use Timed for a one-minute sprint; use Streak to find the facts that still stall you.",
+    books: [
+      {
+        asin: "1635783003",
+        title: "Humble Math — 100 Days of Timed Tests: Addition and Subtraction",
+        author: "Humble Math",
+        blurb:
+          "Daily 0–20 addition and subtraction drills with an answer key. A few minutes a day builds recall.",
+      },
+      {
+        asin: "0938256912",
+        title: "School Zone Addition 0–12 Flash Cards",
+        author: "School Zone",
+        blurb:
+          "Take-anywhere flash cards for addition facts through 12 — speed and accuracy in short sessions.",
+      },
+      {
+        asin: "0938256920",
+        title: "School Zone Subtraction 0–12 Flash Cards",
+        author: "School Zone",
+        blurb:
+          "Matching subtraction flash cards for the 0–12 facts — a pocket drill next to the addition deck.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {

@@ -1,3 +1,4 @@
+import { AdditionSubtractionFacts } from "@/components/tools/AdditionSubtractionFacts";
 import { CivicsQuiz } from "@/components/tools/CivicsQuiz";
 import { ComingSoonPanel } from "@/components/tools/ComingSoonPanel";
 import { CountingMoney } from "@/components/tools/CountingMoney";
@@ -27,6 +28,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <TellingTime />;
     case "counting-money":
       return <CountingMoney />;
+    case "addition-subtraction-facts":
+      return <AdditionSubtractionFacts />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }
