@@ -1,5 +1,7 @@
 import {
   eventId,
+  eventOverlaps,
+  NOW_YEAR,
   type HistoryCategoryId,
   type HistoryEvent,
 } from "@/lib/history-timeline";
@@ -50,6 +52,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Qin unifies China",
     "Qin Shi Huang ends the Warring States and standardizes writing, roads, and measures.",
     5,
+    { endYear: -206 },
   ),
   ev(
     "empires",
@@ -104,13 +107,15 @@ export const historySeedEvents: HistoryEvent[] = [
     "Kingdom of Great Britain",
     "The Acts of Union join England and Scotland; a global maritime empire follows.",
     5,
+    { endYear: NOW_YEAR },
   ),
   ev(
     "empires",
-    1991,
-    "Soviet Union dissolves",
-    "The USSR breaks into independent republics, ending the last large Cold War empire.",
+    1922,
+    "Soviet Union",
+    "The USSR spans Eurasia until it breaks into independent republics.",
     5,
+    { endYear: 1991 },
   ),
 
   ev(
@@ -211,6 +216,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Hildegard of Bingen",
     "Abbess, composer, and visionary whose chants still define medieval sacred music.",
     4,
+    { endYear: 1179 },
   ),
   ev(
     "musicians",
@@ -218,6 +224,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Johann Sebastian Bach",
     "Born in Eisenach; later cantatas, passions, and keyboard works shape Western harmony.",
     5,
+    { endYear: 1750 },
   ),
   ev(
     "musicians",
@@ -225,6 +232,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Wolfgang Amadeus Mozart",
     "A Salzburg prodigy whose operas and concertos become Classical-period landmarks.",
     5,
+    { endYear: 1791 },
   ),
   ev(
     "musicians",
@@ -232,6 +240,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Ludwig van Beethoven",
     "Bonn-born composer who stretches the symphony from Classical into Romantic.",
     5,
+    { endYear: 1827 },
   ),
   ev(
     "musicians",
@@ -239,6 +248,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Frédéric Chopin",
     "Polish pianist-composer who makes the piano the Romantic era’s intimate voice.",
     4,
+    { endYear: 1849 },
   ),
   ev(
     "musicians",
@@ -246,6 +256,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Duke Ellington",
     "Composer-bandleader who writes a jazz repertoire as ambitious as any symphony.",
     4,
+    { endYear: 1974 },
   ),
   ev(
     "musicians",
@@ -260,6 +271,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "The Beatles’ first single",
     "Love Me Do begins a pop career that rewrites recording, fandom, and songwriting.",
     5,
+    { endYear: 1970 },
   ),
   ev(
     "musicians",
@@ -378,6 +390,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Zhang Qian’s missions",
     "Han envoys open routes that later writers call the Silk Road.",
     4,
+    { endYear: -126 },
   ),
   ev(
     "explorations",
@@ -393,6 +406,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Columbus reaches the Caribbean",
     "A Castilian-sponsored crossing links Afro-Eurasia to the Americas — with catastrophic cost to Indigenous peoples.",
     5,
+    { endYear: 1504 },
   ),
   ev(
     "explorations",
@@ -400,6 +414,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Vasco da Gama reaches India",
     "A sea route around Africa ties Lisbon to the Indian Ocean spice trade.",
     5,
+    { endYear: 1499 },
   ),
   ev(
     "explorations",
@@ -445,6 +460,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Voyager launches",
     "Twin probes fly the outer planets; Voyager 1 later enters interstellar space.",
     4,
+    { endYear: NOW_YEAR },
   ),
   ev(
     "explorations",
@@ -452,6 +468,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Curiosity lands on Mars",
     "A car-sized rover begins a long chemistry and geology survey of Gale Crater.",
     3,
+    { endYear: NOW_YEAR },
   ),
 
   ev(
@@ -460,6 +477,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Euclid’s Elements",
     "A systematic geometry textbook that remains a model of proof for two millennia.",
     5,
+    { endYear: -270 },
   ),
   ev(
     "science",
@@ -581,6 +599,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "First Impressionist exhibition",
     "Monet, Renoir, Degas and others show modern life outside the Salon.",
     5,
+    { endYear: 1886 },
   ),
   ev(
     "art",
@@ -659,6 +678,7 @@ export const historySeedEvents: HistoryEvent[] = [
     "Title IX",
     "U.S. law bars sex discrimination in federally funded education, transforming school sports.",
     4,
+    { endYear: NOW_YEAR },
   ),
   ev(
     "sports",
@@ -721,9 +741,6 @@ export function seedEventsFor(
   end: number,
 ) {
   return historySeedEvents.filter(
-    (event) =>
-      event.category === category &&
-      event.year < end &&
-      (event.endYear ?? event.year) >= start,
+    (event) => event.category === category && eventOverlaps(event, start, end),
   );
 }

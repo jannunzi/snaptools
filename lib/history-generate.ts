@@ -14,7 +14,9 @@ import { XAI_CHAT_MODEL, xaiChatJson } from "@/lib/xai";
 const SYSTEM_PROMPT = [
   "You are a careful historian writing captions for a horizontal world-history timeline.",
   "Return only JSON of the form {\"events\":[...]} with no markdown.",
-  "Each event must include: year (integer; negative = BCE), optional endYear, title, summary, significance (1-5), projected (boolean).",
+  "Each event must include: year (integer; negative = BCE), endYear (integer or null), title, summary, significance (1-5), projected (boolean).",
+  "For empires, dynasties, wars, lives, voyages, and other spans, set endYear to the conventional end. If it still exists today, set endYear to the present year.",
+  "Point events (an invention, a single work, a single year) use endYear null.",
   "Be accurate. Prefer conventional scholarly dates. Do not invent fake day-level precision.",
   "If the window is after the present year, mark projected true and write cautious forecasts, not science fiction.",
   "No mythology presented as fact. No copyrighted long quotations. One or two sentences per summary.",
@@ -98,7 +100,8 @@ export async function generateHistoryWindow(options: {
     `Granularity: ${options.granularity}. Aim for ${spec.targetCount} distinct events at this resolution.`,
     `Present year: ${NOW_YEAR}. Years after that are forecasts.`,
     `Do not repeat these already-shown titles: ${known}.`,
-    "Return JSON: {\"events\":[{\"year\":1440,\"endYear\":null,\"title\":\"...\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
+    `For long-lived subjects (empires, wars, composers' lives, expeditions) endYear is required.`,
+    "Return JSON: {\"events\":[{\"year\":1526,\"endYear\":1857,\"title\":\"Mughal Empire\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
   ].join("\n");
 
   const payload = await xaiChatJson({

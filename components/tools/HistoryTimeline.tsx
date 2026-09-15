@@ -8,12 +8,16 @@ import {
   useState,
 } from "react";
 import { analyticsEvents, trackEvent } from "@/lib/analytics";
+import { eventSwatch } from "@/lib/history-colors";
 import { historySeedEvents } from "@/lib/history-seed";
 import {
   DEFAULT_CENTER_YEAR,
   DEFAULT_LANES,
   DEFAULT_ZOOM,
   ERA_PRESETS,
+  eventBarMetrics,
+  eventOverlaps,
+  eventSpan,
   formatYear,
   formatYearRange,
   getCategory,
@@ -21,6 +25,7 @@ import {
   historyCategories,
   isHistoryCategory,
   NOW_YEAR,
+  POINT_EVENT_MIN_WIDTH,
   shouldShowEvent,
   ticksForRange,
   timelineWidth,
@@ -37,9 +42,12 @@ import {
 } from "@/lib/history-timeline";
 
 const TOOL_SLUG = "history-timeline";
-const LANE_HEIGHT = 168;
+const LANE_HEIGHT = 176;
 const AXIS_HEIGHT = 44;
-const CARD_WIDTH = 168;
+const ROW_HEIGHT = 48;
+const ROW_GAP = 6;
+const LANE_PAD = 10;
+const PACK_GAP = 8;
 const DEBOUNCE_MS = 280;
 const OVERSCAN_PX = 360;
 
@@ -83,12 +91,20 @@ function packEvents(
   maxRows = 3,
 ) {
   const rowEnds: number[] = [];
-  const packed: { event: HistoryEvent; x: number; row: number }[] = [];
-  const sorted = [...events].sort((a, b) => a.year - b.year);
+  const packed: {
+    event: HistoryEvent;
+    x: number;
+    width: number;
+    wide: boolean;
+    row: number;
+  }[] = [];
+  const sorted = [...events].sort(
+    (a, b) => a.year - b.year || a.title.localeCompare(b.title),
+  );
 
   for (const event of sorted) {
-    const x = yearToX(event.year, pixelsPerYear);
-    let row = rowEnds.findIndex((end) => x >= end + 10);
+    const bar = eventBarMetrics(event, pixelsPerYear);
+    let row = rowEnds.findIndex((end) => bar.x >= end + PACK_GAP);
     if (row === -1) {
       if (rowEnds.length >= maxRows) {
         row = rowEnds.length - 1;
@@ -97,18 +113,16 @@ function packEvents(
         rowEnds.push(0);
       }
     }
-    rowEnds[row] = x + CARD_WIDTH;
-    packed.push({ event, x, row });
+    rowEnds[row] = bar.x + bar.width;
+    packed.push({
+      event,
+      x: bar.x,
+      width: bar.width,
+      wide: bar.wide,
+      row,
+    });
   }
   return packed;
-}
-
-function accentClass(accent: string) {
-  if (accent === "secondary") return "bg-secondary";
-  if (accent === "bad") return "bg-bad";
-  if (accent === "ok") return "bg-ok";
-  if (accent === "muted") return "bg-ink-muted";
-  return "bg-ink";
 }
 
 export function HistoryTimeline() {
@@ -558,7 +572,10 @@ export function HistoryTimeline() {
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">
               {getCategory(selected.category).label}
               <span className="mx-2 text-line">·</span>
-              {formatYearRange(selected.year, selected.endYear ?? selected.year)}
+              {formatYearRange(
+                eventSpan(selected).start,
+                eventSpan(selected).end,
+              )}
               {selected.projected ? (
                 <>
                   <span className="mx-2 text-line">·</span>
@@ -609,14 +626,18 @@ function LaneRow({
   onSelect: (id: string) => void;
 }) {
   const meta = getCategory(category);
+  const overscanYears = OVERSCAN_PX / pixelsPerYear;
   const visibleEvents = events.filter(
     (event) =>
       event.category === category &&
       shouldShowEvent(event, granularity) &&
-      event.year < visibleEnd + 30 &&
-      event.year > visibleStart - 80,
+      eventOverlaps(
+        event,
+        visibleStart - overscanYears,
+        visibleEnd + overscanYears,
+      ),
   );
-  const packed = packEvents(visibleEvents, pixelsPerYear, 2);
+  const packed = packEvents(visibleEvents, pixelsPerYear, 3);
   const windows = windowsOverlapping(visibleStart, visibleEnd, granularity);
   const pending = windows.filter((window) =>
     loadingKeys.has(windowKey(category, granularity, window.start)),
@@ -648,49 +669,59 @@ function LaneRow({
           aria-hidden
         />
       ))}
-      {packed.map(({ event, x, row }) => {
+      {packed.map(({ event, x, width, wide, row }) => {
         const selected = event.id === selectedId;
-        const span =
-          event.endYear && event.endYear > event.year
-            ? (event.endYear - event.year) * pixelsPerYear
-            : 0;
+        const swatch = eventSwatch(event.category, event.id, selected);
+        const span = eventSpan(event);
+        const range = formatYearRange(span.start, span.end);
         return (
           <div key={event.id} role="listitem">
-            {span > CARD_WIDTH / 2 ? (
-              <div
-                className="absolute top-[1.35rem] h-px bg-line"
-                style={{ left: x + 12, width: span }}
-                aria-hidden
-              />
-            ) : null}
             <button
               type="button"
               onClick={() => onSelect(event.id)}
               aria-pressed={selected}
-              className={`absolute w-[10.5rem] rounded-xl border px-2.5 py-1.5 text-left transition-colors ${
-                selected
-                  ? "border-accent bg-accent-soft"
-                  : "border-line bg-surface hover:border-accent/40"
-              }`}
-              style={{ left: x, top: 10 + row * 46 }}
+              title={`${event.title} · ${range}`}
+              className={`absolute overflow-hidden rounded-xl border px-2.5 text-left transition-[filter,box-shadow] hover:brightness-[0.97] ${
+                selected ? "shadow-[0_0_0_1px_var(--ink)]" : ""
+              } ${wide ? "flex items-center gap-2" : "py-1.5"}`}
+              style={{
+                left: x,
+                width,
+                minWidth: POINT_EVENT_MIN_WIDTH,
+                top: LANE_PAD + row * (ROW_HEIGHT + ROW_GAP),
+                height: ROW_HEIGHT,
+                background: swatch.background,
+                borderColor: swatch.border,
+                color: swatch.color,
+              }}
             >
-              <span className="flex items-center gap-1.5">
-                <span
-                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${accentClass(meta.accent)}`}
-                  aria-hidden
-                />
-                <span className="text-[11px] tabular-nums text-ink-muted">
-                  {formatYear(event.year)}
-                </span>
-                {event.projected ? (
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-secondary">
-                    Proj.
+              {wide ? (
+                <>
+                  <span className="min-w-0 truncate text-[13px] font-semibold leading-snug">
+                    {event.title}
                   </span>
-                ) : null}
-              </span>
-              <span className="mt-0.5 block line-clamp-2 text-[13px] font-semibold leading-snug text-ink">
-                {event.title}
-              </span>
+                  <span className="shrink-0 text-[11px] tabular-nums opacity-70">
+                    {range}
+                    {event.projected ? " · Proj." : ""}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[11px] tabular-nums opacity-70">
+                      {formatYear(event.year)}
+                    </span>
+                    {event.projected ? (
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-secondary">
+                        Proj.
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[13px] font-semibold leading-snug">
+                    {event.title}
+                  </span>
+                </>
+              )}
             </button>
           </div>
         );
