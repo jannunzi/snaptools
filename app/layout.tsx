@@ -35,6 +35,8 @@ export const metadata: Metadata = {
     "counting money",
     "addition facts",
     "subtraction facts",
+    "history timeline",
+    "world history",
     "USCIS",
     "treble clef",
     "browser tools",

@@ -1,6 +1,6 @@
 # SnapTools
 
-Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts, no database, no analytics SDKs. Everything runs in the browser.
+Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts. Most tools run entirely in the browser; History Timeline optionally caches generated events in MongoDB so Grok is not asked twice for the same span.
 
 - [Multiplication Tables Practice](/tools/multiplication-tables) — pick tables 1–12, then Practice, a 60-second quiz, or Streak mode. Instant feedback, missed/slow-fact review, printable chart.
 - [Music Note Recognition](/tools/music-note-recognition) — name the note on a treble staff. Lines-only or lines + spaces, optional ledger lines, Practice or Streak.
@@ -11,12 +11,14 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [Telling Time Practice](/tools/telling-time) — read an analog clock and type the digital time. Whole hours through to the minute; Practice, 60-second quiz, or Streak. Instant feedback and missed-time review.
 - [Counting Money Practice](/tools/counting-money) — count US coins and bills, or make change. Easy coin ID through mixed coins, $1/$5 bills, and make-change; Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
 - [Addition & Subtraction Facts Practice](/tools/addition-subtraction-facts) — addition, subtraction, or mixed facts through 20. Easy / Medium / Challenge presets, then Practice, a 60-second quiz, or Streak. Instant feedback, missed/slow-fact review, printable addition chart.
+- [History Timeline](/tools/history-timeline) — horizontal world history (past left, future right) with parallel lanes. Swap a lane’s category, zoom millennia to years, and fill missing spans with Grok. Seeded events show on first paint; MongoDB caches category + time window + granularity.
 
 ## Stack
 
 - Next.js App Router (TypeScript)
 - Tailwind CSS
-- Client tools plus small server routes for xAI (TTS + Imagine)
+- Client tools plus small server routes for xAI (TTS, Imagine, History Timeline chat)
+- Optional MongoDB Atlas cache for History Timeline windows
 - Vercel-ready (`npm run build` must stay green)
 
 ## Local setup
@@ -35,7 +37,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | --- | --- | --- |
 | `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` | `jannunzi04-20` | Amazon Associates tag appended to every book link |
 | `NEXT_PUBLIC_SITE_URL` | `https://snaptools.vercel.app` | Canonical URL for sitemap, robots, and Open Graph |
-| `XAI_API_KEY` | (none) | Server-only xAI key for Grok TTS and Imagine. Never prefix with `NEXT_PUBLIC_`. |
+| `XAI_API_KEY` | (none) | Server-only xAI key for Grok TTS, Imagine, and History Timeline fills. Never prefix with `NEXT_PUBLIC_`. |
+| `MONGODB_URI` | (none) | MongoDB Atlas URI for History Timeline event cache. `MONGO_URI` is accepted as a fallback. Without it, seed events still render and Grok fills are not persisted. |
 
 Book links are always:
 
@@ -51,7 +54,7 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
    Add a new entry with `status: "live"`, `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs.
 
 2. **Build the tool** as a client component  
-   Add `components/tools/YourTool.tsx`. Keep it account-free: no auth, no analytics. Server routes are OK when a secret must stay off the client (see `/api/tts` and `/api/coloring/generate`).
+   Add `components/tools/YourTool.tsx`. Keep it account-free: no auth. Server routes are OK when a secret must stay off the client (see `/api/tts`, `/api/coloring/generate`, and `/api/history-timeline/events`).
 
 3. **Map the slug** in `lib/tool-components.tsx`
 
@@ -62,7 +65,7 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 
 4. The route `/tools/[slug]` already wraps every tool in `ToolShell` (header, how-to tip, `AmazonBookBanner`). Homepage cards come from the same registry.
 
-That’s it. Do not add accounts, a CMS, or a database just to ship a tool.
+That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline is the exception that uses MongoDB as a cache, not as a CMS.
 
 ## Site map
 
@@ -78,6 +81,8 @@ That’s it. Do not add accounts, a CMS, or a database just to ship a tool.
 | `/tools/telling-time` | Live analog clock practice |
 | `/tools/counting-money` | Live US money counting and make-change |
 | `/tools/addition-subtraction-facts` | Live addition and subtraction facts practice |
+| `/tools/history-timeline` | Live multi-lane history timeline |
+| `/api/history-timeline/events` | Cached + generated timeline events |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 
@@ -87,8 +92,9 @@ Shared UI: `SiteHeader`, `SiteFooter`, `ToolShell`, `AmazonBookBanner`, `ToolCar
 
 1. Import the GitHub repo in Vercel (Next.js is detected automatically).
 2. Set `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` and `NEXT_PUBLIC_SITE_URL` for Production and Preview.
-3. Set **`XAI_API_KEY`** (sensitive) for Production, Preview, and Development so spelling can use Grok TTS and coloring can generate Imagine pages. Get a key at [console.x.ai](https://console.x.ai/). The key stays on the server — never add `NEXT_PUBLIC_`.
-4. Deploy. No database or auth providers required.
+3. Set **`XAI_API_KEY`** (sensitive) for Production, Preview, and Development so spelling can use Grok TTS, coloring can generate Imagine pages, and History Timeline can fill missing spans. Get a key at [console.x.ai](https://console.x.ai/). The key stays on the server — never add `NEXT_PUBLIC_`.
+4. Set **`MONGODB_URI`** (sensitive) so History Timeline can persist generated windows. `MONGO_URI` is also read if `MONGODB_URI` is unset. Indexes are created on first successful connection; or run `npm run history:indexes` once against Atlas.
+5. Deploy. Other tools do not need a database.
 
 To refresh the checked-in coloring starter pack locally:
 
@@ -97,7 +103,16 @@ To refresh the checked-in coloring starter pack locally:
 npm run generate:coloring
 ```
 
-Without a key, spelling falls back to the browser voice and coloring still uses the static pages in `public/coloring/`.
+Without a key, spelling falls back to the browser voice, coloring still uses the static pages in `public/coloring/`, and History Timeline still shows seeded events (AI fills stay empty until `XAI_API_KEY` is set).
+
+### History Timeline cache
+
+Events are stored in `snaptools.history_event_windows` (or the database name in the URI / `MONGODB_DB`), keyed by **category + granularity + aligned window start**. Zooming in requests finer windows; those fills add detail without repeating a coarse query.
+
+```bash
+# after adding MONGODB_URI to .env.local
+npm run history:indexes
+```
 
 ```bash
 npm run build

@@ -338,6 +338,42 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "history-timeline",
+    title: "History Timeline",
+    tagline: "Parallel lanes of world history — past left, future right.",
+    description:
+      "Scroll a horizontal timeline with several history lanes at once. Swap a lane from empires to musicians, zoom from millennia to years, and let missing spans fill as you pan. Seeded events show immediately; Grok writes the blanks and MongoDB remembers the window.",
+    day: 10,
+    publishedOn: "2026-09-15",
+    audience: "Students, teachers, and anyone lining up what happened when",
+    status: "live",
+    howTo:
+      "Scroll left for the past, right for the future. Each row is a lane — change its category to put musicians beside empires. Zoom in for decades and years, out for centuries and millennia. Empty stretches fill as you pan; the same category and time window is not asked twice.",
+    books: [
+      {
+        asin: "0062316117",
+        title: "Sapiens: A Brief History of Humankind",
+        author: "Yuval Noah Harari",
+        blurb:
+          "A wide-angle tour from the Cognitive Revolution to the present — useful context beside any lane on the timeline.",
+      },
+      {
+        asin: "030014332X",
+        title: "A Little History of the World",
+        author: "E. H. Gombrich",
+        blurb:
+          "A short, chronological telling of world history written to be read, not crammed — a companion for panning eras.",
+      },
+      {
+        asin: "0393317552",
+        title: "Guns, Germs, and Steel",
+        author: "Jared Diamond",
+        blurb:
+          "Why some societies accumulated empires, crops, and tools first — a long-range view next to the inventions and empires lanes.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
