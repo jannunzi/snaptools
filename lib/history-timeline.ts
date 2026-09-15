@@ -251,13 +251,55 @@ export function formatYearRange(start: number, end: number) {
   return `${formatYear(start)}–${formatYear(end)}`;
 }
 
+export type EventSpan = {
+  start: number;
+  end: number;
+  point: boolean;
+};
+
+/** Pixel width for a one-year / missing-end event so the label stays readable. */
+export const POINT_EVENT_MIN_WIDTH = 118;
+/** Bars at least this wide show title + year range on one line. */
+export const WIDE_EVENT_LABEL_WIDTH = 168;
+
+/**
+ * Map an event onto the time axis.
+ * Missing/equal endYear → point. Future end on a non-projected event → NOW.
+ * Projected forecasts keep their own future end and do not snap to NOW.
+ */
+export function eventSpan(event: HistoryEvent): EventSpan {
+  const start = event.year;
+  if (event.projected) {
+    const end =
+      event.endYear !== undefined && event.endYear > start
+        ? event.endYear
+        : start;
+    return { start, end, point: end <= start };
+  }
+  if (event.endYear === undefined || event.endYear <= start) {
+    return { start, end: start, point: true };
+  }
+  const end = Math.min(event.endYear, NOW_YEAR);
+  return { start, end, point: end <= start };
+}
+
+export function eventBarMetrics(event: HistoryEvent, pixelsPerYear: number) {
+  const span = eventSpan(event);
+  const x = yearToX(span.start, pixelsPerYear);
+  const raw = (span.end - span.start) * pixelsPerYear;
+  const width = span.point
+    ? POINT_EVENT_MIN_WIDTH
+    : Math.max(POINT_EVENT_MIN_WIDTH, raw);
+  return { ...span, x, width, wide: width >= WIDE_EVENT_LABEL_WIDTH };
+}
+
 export function eventOverlaps(
   event: HistoryEvent,
   start: number,
   end: number,
 ) {
-  const eventEnd = event.endYear ?? event.year;
-  return event.year < end && eventEnd >= start;
+  const span = eventSpan(event);
+  return span.start < end && span.end >= start;
 }
 
 export function significanceFloor(granularity: HistoryGranularity) {
