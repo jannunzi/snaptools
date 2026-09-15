@@ -10,6 +10,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [Division Facts Practice](/tools/division-facts) — pick divisors 1–12, then Practice, a 60-second quiz, or Streak mode. Exact facts only, missed/slow-fact review, printable chart.
 - [Telling Time Practice](/tools/telling-time) — read an analog clock and type the digital time. Whole hours through to the minute; Practice, 60-second quiz, or Streak. Instant feedback and missed-time review.
 - [Counting Money Practice](/tools/counting-money) — count US coins and bills, or make change. Easy coin ID through mixed coins, $1/$5 bills, and make-change; Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
+- [Addition & Subtraction Facts Practice](/tools/addition-subtraction-facts) — addition, subtraction, or mixed facts through 20. Easy / Medium / Challenge presets, then Practice, a 60-second quiz, or Streak. Instant feedback, missed/slow-fact review, printable addition chart.
 
 ## Stack
 
@@ -76,6 +77,7 @@ That’s it. Do not add accounts, a CMS, or a database just to ship a tool.
 | `/tools/division-facts` | Live division facts practice |
 | `/tools/telling-time` | Live analog clock practice |
 | `/tools/counting-money` | Live US money counting and make-change |
+| `/tools/addition-subtraction-facts` | Live addition and subtraction facts practice |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 

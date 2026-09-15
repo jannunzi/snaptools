@@ -39,6 +39,8 @@ export const metadata: Metadata = {
     "division facts",
     "telling time",
     "counting money",
+    "addition facts",
+    "subtraction facts",
     "USCIS",
     "treble clef",
     "browser tools",
