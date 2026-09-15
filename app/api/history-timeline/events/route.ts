@@ -16,7 +16,7 @@ import {
   windowKey,
   windowsOverlapping,
 } from "@/lib/history-timeline";
-import { getMongoUri } from "@/lib/mongodb";
+import { getMongoDbName, getMongoUri } from "@/lib/mongodb";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { getXaiApiKey } from "@/lib/xai";
 
@@ -173,7 +173,14 @@ async function handleEvents(input: ParsedRequest, request: Request) {
               source: "missing" as const,
             })),
           ],
-          meta: { mongo, xai: true, generated: 0, cached: cached.size },
+          meta: {
+            mongo,
+            xai: true,
+            generated: 0,
+            cached: cached.size,
+            pending: leftover.length,
+            database: getMongoDbName(),
+          },
         },
         { status: 429 },
       );
@@ -248,6 +255,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
       generated: generatedCount,
       cached: cached.size,
       pending: leftover.length,
+      database: getMongoDbName(),
     },
   });
 }
@@ -258,6 +266,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       mongo: Boolean(getMongoUri()),
       xai: Boolean(getXaiApiKey()),
+      database: getMongoDbName(),
     });
   }
 

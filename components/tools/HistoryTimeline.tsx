@@ -59,6 +59,7 @@ type EventsResponse = {
     generated?: number;
     cached?: number;
     pending?: number;
+    database?: string;
   };
   error?: string;
 };
