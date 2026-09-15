@@ -768,7 +768,7 @@ function AnalogClock({ time }: { time: ClockTime }) {
           angle={hourAngle}
           length={42}
           width={6.5}
-          className="stroke-secondary"
+          className="stroke-ink"
         />
         <ClockHand
           angle={minuteAngle}
