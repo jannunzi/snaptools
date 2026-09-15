@@ -2,7 +2,7 @@
 
 :root {
   --bg: #f5f5f7;
-  --bg-accent: #e8e8ed;
+  --bg-accent: #e8f1fc;
   --surface: #ffffff;
   --surface-muted: #f5f5f7;
   --ink: #1d1d1f;
@@ -11,14 +11,14 @@
   --accent: #1d1d1f;
   --accent-ink: #ffffff;
   --accent-soft: #f2f2f4;
-  --secondary: #1d1d1f;
+  --secondary: #0071e3;
   --secondary-ink: #ffffff;
-  --secondary-soft: #f2f2f4;
+  --secondary-soft: #e8f1fc;
   --ok: #3d6b48;
   --ok-soft: #eef3ef;
   --bad: #8f3d3d;
   --bad-soft: #f6efef;
-  --ring: #1d1d1f;
+  --ring: #0071e3;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.04);
   --radius-panel: 1.25rem;
 }
@@ -26,7 +26,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #000000;
-    --bg-accent: #3a3a3c;
+    --bg-accent: #16324d;
     --surface: #1d1d1f;
     --surface-muted: #2c2c2e;
     --ink: #f5f5f7;
@@ -35,14 +35,14 @@
     --accent: #f5f5f7;
     --accent-ink: #1d1d1f;
     --accent-soft: #2c2c2e;
-    --secondary: #f5f5f7;
-    --secondary-ink: #1d1d1f;
-    --secondary-soft: #2c2c2e;
+    --secondary: #2997ff;
+    --secondary-ink: #001529;
+    --secondary-soft: #0d2744;
     --ok: #6f9a78;
     --ok-soft: #142018;
     --bad: #c07a7a;
     --bad-soft: #261818;
-    --ring: #f5f5f7;
+    --ring: #2997ff;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 28px rgb(0 0 0 / 0.35);
   }
 }
@@ -83,7 +83,7 @@ body {
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: var(--secondary-soft);
   color: var(--ink);
 }
 
@@ -171,9 +171,19 @@ body {
 }
 
 .snap-input:focus-visible {
-  border-color: var(--ink);
-  box-shadow: 0 0 0 4px var(--accent-soft);
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 4px var(--secondary-soft);
   outline: none;
+}
+
+.snap-link {
+  color: var(--secondary);
+  font-weight: 500;
+  transition: opacity 160ms ease;
+}
+
+.snap-link:hover {
+  opacity: 0.72;
 }
 
 .snap-badge {
@@ -187,10 +197,14 @@ body {
   text-transform: uppercase;
 }
 
-.snap-badge-new,
+.snap-badge-new {
+  background: var(--secondary-soft);
+  color: var(--secondary);
+}
+
 .snap-badge-live {
   background: var(--accent-soft);
-  color: var(--ink);
+  color: var(--ink-muted);
 }
 
 .snap-badge-muted {

@@ -196,8 +196,8 @@ export function PrintableColoring() {
               onClick={() => selectCategory(item.id)}
               className={`min-h-10 rounded-full px-3 text-sm font-semibold ${
                 category === item.id
-                  ? "bg-secondary text-secondary-ink"
-                  : "border border-line bg-bg text-ink hover:border-secondary/50"
+                  ? "border border-secondary bg-secondary-soft text-ink"
+                  : "border border-line bg-bg text-ink hover:border-secondary/40"
               }`}
             >
               {item.label}

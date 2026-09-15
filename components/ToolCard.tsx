@@ -16,7 +16,7 @@ export function ToolCard({ tool, featured = false }: ToolCardProps) {
       href={href}
       className={`snap-panel block transition-colors ${
         featured ? "sm:p-8" : ""
-      } ${isLive ? "hover:border-ink/30" : "opacity-80"}`}
+      } ${isLive ? "hover:border-secondary/35" : "opacity-80"}`}
     >
       <div className="flex items-center justify-between gap-3">
         {showNew ? (
@@ -43,7 +43,7 @@ export function ToolCard({ tool, featured = false }: ToolCardProps) {
       <p className="mt-3 text-sm text-ink-muted">{tool.audience}</p>
       <span
         className={`mt-6 inline-flex text-sm font-medium ${
-          isLive ? "text-ink" : "text-ink-muted"
+          isLive ? "snap-link" : "text-ink-muted"
         }`}
       >
         {isLive ? "Open tool" : "Coming soon"}
