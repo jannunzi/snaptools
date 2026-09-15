@@ -8,6 +8,9 @@ export const analyticsEvents = {
   coloringGenerate: "coloring_generate",
   printChart: "print_chart",
   amazonClick: "amazon_click",
+  categorySwap: "category_swap",
+  zoom: "zoom",
+  panFetch: "pan_fetch",
 } as const;
 
 export type AnalyticsEventName =
@@ -21,6 +24,7 @@ export type AnalyticsEventProps = {
   count?: number;
   asin?: string;
   category?: string;
+  granularity?: string;
 };
 
 export function trackEvent(

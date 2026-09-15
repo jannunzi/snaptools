@@ -1,5 +1,6 @@
 import { AdditionSubtractionFacts } from "@/components/tools/AdditionSubtractionFacts";
 import { CivicsQuiz } from "@/components/tools/CivicsQuiz";
+import { HistoryTimeline } from "@/components/tools/HistoryTimeline";
 import { ComingSoonPanel } from "@/components/tools/ComingSoonPanel";
 import { CountingMoney } from "@/components/tools/CountingMoney";
 import { DivisionFacts } from "@/components/tools/DivisionFacts";
@@ -30,6 +31,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <CountingMoney />;
     case "addition-subtraction-facts":
       return <AdditionSubtractionFacts />;
+    case "history-timeline":
+      return <HistoryTimeline />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }

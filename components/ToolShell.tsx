@@ -12,7 +12,11 @@ export function ToolShell({ tool, children }: ToolShellProps) {
   const showNew = isNewTool(tool);
 
   return (
-    <article className="mx-auto w-full max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
+    <article
+      className={`mx-auto w-full px-5 py-10 sm:px-8 sm:py-14 ${
+        tool.slug === "history-timeline" ? "max-w-6xl" : "max-w-5xl"
+      }`}
+    >
       <div className="no-print flex flex-wrap items-center gap-2">
         {showNew ? <span className="snap-badge snap-badge-new">New</span> : null}
         <span

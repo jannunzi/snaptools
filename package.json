@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:coloring": "node scripts/generate-coloring.mjs"
+    "generate:coloring": "node scripts/generate-coloring.mjs",
+    "history:indexes": "node scripts/ensure-history-indexes.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
+    "mongodb": "^7.6.0",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
