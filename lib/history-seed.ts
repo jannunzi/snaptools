@@ -2,6 +2,7 @@ import {
   eventId,
   eventOverlaps,
   NOW_YEAR,
+  partsToYear,
   type HistoryCategoryId,
   type HistoryEvent,
 } from "@/lib/history-timeline";
@@ -204,7 +205,7 @@ export const historySeedEvents: HistoryEvent[] = [
   ),
   ev(
     "inventions",
-    2007,
+    partsToYear(2007, 1, 9),
     "iPhone",
     "A pocket computer with a multitouch screen resets phones, software, and media.",
     4,
@@ -377,6 +378,13 @@ export const historySeedEvents: HistoryEvent[] = [
   ),
   ev(
     "wars",
+    partsToYear(1944, 6, 6),
+    "D-Day",
+    "Allied forces land in Normandy on 6 June 1944, opening the Western Front in France.",
+    5,
+  ),
+  ev(
+    "wars",
     1947,
     "Cold War",
     "The United States and Soviet Union contest influence without direct all-out war.",
@@ -449,7 +457,7 @@ export const historySeedEvents: HistoryEvent[] = [
   ),
   ev(
     "explorations",
-    1969,
+    partsToYear(1969, 7, 20),
     "Apollo 11 Moon landing",
     "Armstrong and Aldrin walk on the Moon; Collins orbits above.",
     5,
@@ -736,7 +744,7 @@ export const historySeedEvents: HistoryEvent[] = [
 ];
 
 export function seedEventsFor(
-  category: HistoryCategoryId,
+  category: string,
   start: number,
   end: number,
 ) {
