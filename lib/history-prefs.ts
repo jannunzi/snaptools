@@ -32,6 +32,7 @@ export type HistoryLanePref = {
   id: string;
   category: TimelineCategoryId;
   hue?: number;
+  label?: string;
 };
 
 export type HistoryTimelinePrefs = {
@@ -132,10 +133,12 @@ export function parseHistoryPrefs(raw: unknown): HistoryTimelinePrefs {
       const category = String(lane.category ?? "");
       if (!isTimelineCategory(category) || !known.has(category)) continue;
       const hue = clampHue(lane.hue);
+      const label = String(lane.label ?? "").trim().slice(0, 32);
       parsed.push({
         id: String(lane.id ?? `lane-${index}`).slice(0, 40) || `lane-${index}`,
         category,
         ...(hue !== null ? { hue } : {}),
+        ...(label.length > 0 ? { label } : {}),
       });
     }
     if (parsed.length > 0) lanes = parsed;

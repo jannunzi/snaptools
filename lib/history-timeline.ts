@@ -222,6 +222,8 @@ export const ZOOM_LEVELS: ZoomLevel[] = [
 
 export const DEFAULT_ZOOM = 1;
 export const DEFAULT_CENTER_YEAR = 1700;
+/** Shared packing budget: 4 lanes × 3 rows, or 1 lane × 12 rows. */
+export const SUB_ROW_BUDGET = 12;
 export const DEFAULT_LANES: HistoryCategoryId[] = [
   "empires",
   "inventions",
@@ -525,6 +527,24 @@ export function xToYear(x: number, pixelsPerYear: number) {
 
 export function timelineWidth(pixelsPerYear: number) {
   return (TIMELINE_END - TIMELINE_START) * pixelsPerYear;
+}
+
+export function subRowsForLanes(
+  laneCount: number,
+  budget = SUB_ROW_BUDGET,
+) {
+  const n = Math.max(1, laneCount);
+  const min = n >= 7 ? 1 : 2;
+  return Math.max(min, Math.floor(budget / n));
+}
+
+export function laneBandHeight(
+  maxRows: number,
+  rowHeight = 48,
+  rowGap = 6,
+  pad = 10,
+) {
+  return pad * 2 + maxRows * rowHeight + Math.max(0, maxRows - 1) * rowGap;
 }
 
 export type TimelineTick = {

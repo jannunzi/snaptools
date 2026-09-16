@@ -31,10 +31,13 @@ import {
   getCategory,
   GRANULARITY,
   historyCategories,
+  isCustomCategoryId,
   isTimelineCategory,
+  laneBandHeight,
   NOW_YEAR,
   pointMinWidth,
   shouldShowEvent,
+  subRowsForLanes,
   ticksForRange,
   timelineWidth,
   TIMELINE_END,
@@ -51,7 +54,6 @@ import {
 } from "@/lib/history-timeline";
 
 const TOOL_SLUG = "history-timeline";
-const LANE_HEIGHT = 176;
 const AXIS_HEIGHT = 44;
 const ROW_HEIGHT = 48;
 const ROW_GAP = 6;
@@ -59,8 +61,9 @@ const LANE_PAD = 10;
 const PACK_GAP = 8;
 const DEBOUNCE_MS = 280;
 const OVERSCAN_PX = 360;
-const GUTTER_CLASS = "w-[10.5rem] shrink-0 sm:w-[12.75rem]";
+const GUTTER_CLASS = "w-[9.5rem] shrink-0 sm:w-[11rem]";
 const HEADER_STICKY_TOP = "3.75rem";
+const CREATE_NEW = "__create__";
 
 type EventsResponse = {
   events?: HistoryEvent[];
@@ -162,6 +165,49 @@ function laneHue(
   return getCategory(lane.category, customCategories).hue;
 }
 
+function laneTitle(
+  lane: HistoryLanePref,
+  customCategories: CustomHistoryCategory[],
+) {
+  if (lane.label && lane.label.trim()) return lane.label.trim();
+  return getCategory(lane.category, customCategories).label;
+}
+
+function GripIcon() {
+  return (
+    <svg
+      viewBox="0 0 12 16"
+      width="12"
+      height="16"
+      aria-hidden
+      className="fill-current opacity-55"
+    >
+      <circle cx="3" cy="3" r="1.35" />
+      <circle cx="9" cy="3" r="1.35" />
+      <circle cx="3" cy="8" r="1.35" />
+      <circle cx="9" cy="8" r="1.35" />
+      <circle cx="3" cy="13" r="1.35" />
+      <circle cx="9" cy="13" r="1.35" />
+    </svg>
+  );
+}
+
+function GearIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden
+      className="fill-none stroke-current"
+      strokeWidth="1.4"
+    >
+      <circle cx="8" cy="8" r="2.1" />
+      <path d="M8 1.7v1.6M8 12.7v1.6M1.7 8h1.6M12.7 8h1.6M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M3.3 12.7l1.1-1.1M11.6 4.4l1.1-1.1" />
+    </svg>
+  );
+}
+
 export function HistoryTimeline() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const detailRef = useRef<HTMLElement | null>(null);
@@ -181,7 +227,8 @@ export function HistoryTimeline() {
     CustomHistoryCategory[]
   >([]);
   const [draftName, setDraftName] = useState("");
-  const [draftHue, setDraftHue] = useState<number>(CUSTOM_HUE_PRESETS[0].hue);
+  const [addChoice, setAddChoice] = useState("");
+  const [configLaneId, setConfigLaneId] = useState<string | null>(null);
   const [eventsById, setEventsById] = useState<Record<string, HistoryEvent>>(
     () => Object.fromEntries(historySeedEvents.map((event) => [event.id, event])),
   );
@@ -544,6 +591,7 @@ export function HistoryTimeline() {
         event.preventDefault();
         applyZoom(zoom - 1);
       } else if (event.key === "Escape") {
+        setConfigLaneId(null);
         setSelectedId(null);
       }
     };
@@ -555,7 +603,9 @@ export function HistoryTimeline() {
     if (!isTimelineCategory(category)) return;
     setLanes((prev) =>
       prev.map((lane) =>
-        lane.id === laneId ? { ...lane, category, hue: undefined } : lane,
+        lane.id === laneId
+          ? { ...lane, category, hue: undefined, label: undefined }
+          : lane,
       ),
     );
     setSelectedId(null);
@@ -571,18 +621,20 @@ export function HistoryTimeline() {
     if (label.length < 2 || customCategories.length >= MAX_CUSTOM) return;
     if (lanes.length >= MAX_LANES) return;
     const id = nextCustomCategoryId(label, customCategories);
+    const hue = CUSTOM_HUE_PRESETS[0].hue;
     const next: CustomHistoryCategory = {
       id,
       label,
-      hue: draftHue,
+      hue,
       hint: "Custom lane",
     };
     setCustomCategories((prev) => [...prev, next]);
     setLanes((prev) => [
       ...prev,
-      { id: nextLaneId(prev), category: id, hue: draftHue },
+      { id: nextLaneId(prev), category: id, hue, label },
     ]);
     setDraftName("");
+    setAddChoice("");
     setSelectedId(null);
     setFillByCategory((prev) => ({
       ...prev,
@@ -595,20 +647,16 @@ export function HistoryTimeline() {
     });
   };
 
-  const removeCustomCategory = (id: string) => {
-    setCustomCategories((prev) => prev.filter((item) => item.id !== id));
-    setLanes((prev) => {
-      const next = prev.filter((lane) => lane.category !== id);
-      return next.length > 0 ? next : defaultHistoryPrefs().lanes;
-    });
-    setSelectedId(null);
-  };
-
-  const hideLane = (laneId: string) => {
-    setLanes((prev) => {
-      if (prev.length <= 1) return prev;
-      return prev.filter((lane) => lane.id !== laneId);
-    });
+  const removeLane = (laneId: string) => {
+    const lane = lanes.find((item) => item.id === laneId);
+    if (!lane || lanes.length <= 1) return;
+    setLanes((prev) => prev.filter((item) => item.id !== laneId));
+    if (isCustomCategoryId(lane.category)) {
+      setCustomCategories((prev) =>
+        prev.filter((item) => item.id !== lane.category),
+      );
+    }
+    if (configLaneId === laneId) setConfigLaneId(null);
     setSelectedId(null);
   };
 
@@ -618,10 +666,30 @@ export function HistoryTimeline() {
       if (prev.some((lane) => lane.category === category)) return prev;
       return [...prev, { id: nextLaneId(prev), category }];
     });
+    setAddChoice("");
     setFillByCategory((prev) => ({
       ...prev,
       [category]: prev[category] ?? { status: "loading" },
     }));
+  };
+
+  const renameLane = (laneId: string, label: string) => {
+    const trimmed = label.trim().slice(0, 32);
+    setLanes((prev) =>
+      prev.map((lane) =>
+        lane.id === laneId
+          ? { ...lane, ...(trimmed ? { label: trimmed } : { label: undefined }) }
+          : lane,
+      ),
+    );
+    const lane = lanes.find((item) => item.id === laneId);
+    if (lane && isCustomCategoryId(lane.category) && trimmed) {
+      setCustomCategories((prev) =>
+        prev.map((item) =>
+          item.id === lane.category ? { ...item, label: trimmed } : item,
+        ),
+      );
+    }
   };
 
   const moveLane = (laneId: string, direction: -1 | 1) => {
@@ -687,17 +755,16 @@ export function HistoryTimeline() {
     () => new Set(lanes.map((lane) => lane.category)),
     [lanes],
   );
-  const hiddenOptions = useMemo(
-    () => [
-      ...historyCategories
+  const addOptions = useMemo(
+    () =>
+      historyCategories
         .filter((item) => !usedCategories.has(item.id))
         .map((item) => ({ id: item.id, label: item.label })),
-      ...customCategories
-        .filter((item) => !usedCategories.has(item.id))
-        .map((item) => ({ id: item.id, label: item.label })),
-    ],
-    [customCategories, usedCategories],
+    [usedCategories],
   );
+  const maxPackRows = subRowsForLanes(lanes.length);
+  const bandHeight = laneBandHeight(maxPackRows, ROW_HEIGHT, ROW_GAP, LANE_PAD);
+  const configLane = lanes.find((lane) => lane.id === configLaneId);
 
   useEffect(() => {
     if (selected) {
@@ -753,109 +820,64 @@ export function HistoryTimeline() {
           className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
           onSubmit={(event) => {
             event.preventDefault();
-            addCustomCategory();
+            if (addChoice === CREATE_NEW) addCustomCategory();
+            else if (isTimelineCategory(addChoice)) showCategoryLane(addChoice);
           }}
         >
-          <label className="min-w-[12rem] flex-1 text-xs font-medium text-ink-muted">
-            New category
-            <input
-              className="snap-input mt-1 min-h-10 w-full px-2.5 text-sm font-normal text-ink"
-              value={draftName}
-              onChange={(event) => setDraftName(event.target.value)}
-              placeholder="WWII, philosophy, ships…"
-              maxLength={32}
-              autoComplete="off"
-            />
-          </label>
-          <fieldset className="border-0 p-0">
-            <legend className="text-xs font-medium text-ink-muted">Color</legend>
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              {CUSTOM_HUE_PRESETS.map((preset) => {
-                const swatch = hueSwatch(preset.hue);
-                const selectedHue = draftHue === preset.hue;
-                return (
-                  <button
-                    key={preset.hue}
-                    type="button"
-                    title={preset.label}
-                    aria-pressed={selectedHue}
-                    aria-label={preset.label}
-                    onClick={() => setDraftHue(preset.hue)}
-                    className="h-8 w-8 rounded-full border"
-                    style={{
-                      background: swatch.background,
-                      borderColor: selectedHue ? "var(--ink)" : swatch.border,
-                      boxShadow: selectedHue
-                        ? "0 0 0 2px var(--bg), 0 0 0 3px var(--ink)"
-                        : undefined,
-                    }}
-                  />
-                );
-              })}
-            </div>
-          </fieldset>
-          <button
-            type="submit"
-            className="snap-btn min-h-10 px-3 text-sm"
-            disabled={
-              draftName.trim().length < 2 ||
-              customCategories.length >= MAX_CUSTOM ||
-              lanes.length >= MAX_LANES
-            }
-          >
+          <label className="min-w-[12rem] text-xs font-medium text-ink-muted">
             Add lane
-          </button>
-          {hiddenOptions.length > 0 ? (
-            <label className="text-xs font-medium text-ink-muted">
-              Show hidden
-              <select
-                className="snap-input mt-1 min-h-10 min-w-[10rem] px-2.5 text-sm font-normal text-ink"
-                value=""
-                disabled={lanes.length >= MAX_LANES}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (isTimelineCategory(value)) showCategoryLane(value);
-                  event.target.value = "";
-                }}
-              >
-                <option value="">Choose a lane…</option>
-                {hiddenOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
+            <select
+              className="snap-input mt-1 min-h-10 min-w-[14rem] px-2.5 text-sm font-normal text-ink"
+              value={addChoice}
+              disabled={lanes.length >= MAX_LANES}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value === CREATE_NEW) {
+                  setAddChoice(CREATE_NEW);
+                  return;
+                }
+                if (isTimelineCategory(value)) showCategoryLane(value);
+                else setAddChoice("");
+              }}
+            >
+              <option value="">Choose a category…</option>
+              {addOptions.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+              {customCategories.length < MAX_CUSTOM ? (
+                <option value={CREATE_NEW}>Create new…</option>
+              ) : null}
+            </select>
+          </label>
+          {addChoice === CREATE_NEW ? (
+            <label className="min-w-[12rem] flex-1 text-xs font-medium text-ink-muted">
+              Name
+              <input
+                className="snap-input mt-1 min-h-10 w-full px-2.5 text-sm font-normal text-ink"
+                value={draftName}
+                onChange={(event) => setDraftName(event.target.value)}
+                placeholder="WWII, philosophy, ships…"
+                maxLength={32}
+                autoComplete="off"
+              />
             </label>
           ) : null}
+          <button
+            type="submit"
+            className="snap-btn min-h-10 min-w-10 px-0 text-lg"
+            aria-label="Add lane"
+            disabled={
+              lanes.length >= MAX_LANES ||
+              (addChoice === CREATE_NEW
+                ? draftName.trim().length < 2
+                : !isTimelineCategory(addChoice))
+            }
+          >
+            +
+          </button>
         </form>
-        {customCategories.length > 0 ? (
-          <ul className="flex flex-wrap gap-1.5" aria-label="Custom categories">
-            {customCategories.map((item) => {
-              const swatch = hueSwatch(item.hue);
-              return (
-                <li key={item.id}>
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs text-ink"
-                    style={{
-                      background: swatch.background,
-                      borderColor: swatch.border,
-                    }}
-                  >
-                    {item.label}
-                    <button
-                      type="button"
-                      className="font-medium text-ink-muted hover:text-ink"
-                      onClick={() => removeCustomCategory(item.id)}
-                      aria-label={`Delete ${item.label}`}
-                    >
-                      ×
-                    </button>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        ) : null}
       </div>
 
       <div>
@@ -913,99 +935,58 @@ export function HistoryTimeline() {
 
         <div className="flex">
           <div className={`${GUTTER_CLASS} border-r border-line`}>
-            {lanes.map((lane, index) => {
-              const meta = getCategory(lane.category, customCategories);
+            {lanes.map((lane) => {
+              const title = laneTitle(lane, customCategories);
               const hue = laneHue(lane, customCategories);
               const band = laneBand(lane.category, hue);
               return (
                 <div
                   key={lane.id}
-                  className="flex flex-col justify-center gap-1.5 border-t border-line px-2.5 sm:px-3"
-                  style={{ height: LANE_HEIGHT, background: band.background }}
-                  draggable
-                  onDragStart={() => {
-                    dragLaneId.current = lane.id;
-                  }}
+                  className="flex items-start gap-1.5 border-t border-line px-2 py-2.5 sm:px-2.5"
+                  style={{ height: bandHeight, background: band.background }}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={() => onDropLane(lane.id)}
                 >
-                  <label className="sr-only" htmlFor={`lane-${lane.id}`}>
-                    {meta.label} lane category
-                  </label>
-                  <select
-                    id={`lane-${lane.id}`}
-                    className="snap-input min-h-9 px-2 text-sm font-semibold"
-                    value={lane.category}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      if (isTimelineCategory(value)) swapLane(lane.id, value);
+                  <button
+                    type="button"
+                    className="mt-0.5 grid min-h-8 min-w-7 cursor-grab place-items-center rounded-md text-ink-muted hover:bg-surface/80 hover:text-ink active:cursor-grabbing"
+                    aria-label={`Reorder ${title}. Use up or down arrow keys.`}
+                    draggable
+                    onDragStart={() => {
+                      dragLaneId.current = lane.id;
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "ArrowUp") {
+                        event.preventDefault();
+                        moveLane(lane.id, -1);
+                      } else if (event.key === "ArrowDown") {
+                        event.preventDefault();
+                        moveLane(lane.id, 1);
+                      }
                     }}
                   >
-                    {categoryOptions.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex flex-wrap items-center gap-1">
-                    <button
-                      type="button"
-                      className="min-h-8 min-w-8 rounded-lg border border-line bg-surface text-xs text-ink hover:border-ink"
-                      aria-label={`Move ${meta.label} up`}
-                      disabled={index === 0}
-                      onClick={() => moveLane(lane.id, -1)}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      className="min-h-8 min-w-8 rounded-lg border border-line bg-surface text-xs text-ink hover:border-ink"
-                      aria-label={`Move ${meta.label} down`}
-                      disabled={index === lanes.length - 1}
-                      onClick={() => moveLane(lane.id, 1)}
-                    >
-                      ↓
-                    </button>
-                    <button
-                      type="button"
-                      className="min-h-8 rounded-lg border border-line bg-surface px-2 text-xs text-ink hover:border-ink disabled:opacity-40"
-                      aria-label={`Hide ${meta.label} lane`}
-                      disabled={lanes.length <= 1}
-                      onClick={() => hideLane(lane.id)}
-                    >
-                      Hide
-                    </button>
-                  </div>
-                  <div
-                    className="flex flex-wrap gap-1"
-                    role="group"
-                    aria-label={`${meta.label} color`}
-                  >
-                    {CUSTOM_HUE_PRESETS.map((preset) => {
-                      const swatch = hueSwatch(preset.hue);
-                      const active =
-                        hue !== undefined &&
-                        Math.abs(((hue % 360) + 360) % 360 - preset.hue) < 0.5;
-                      return (
-                        <button
-                          key={preset.hue}
-                          type="button"
-                          title={preset.label}
-                          aria-pressed={active}
-                          aria-label={`${meta.label} ${preset.label}`}
-                          onClick={() => setLaneColor(lane.id, preset.hue)}
-                          className="h-4 w-4 rounded-full border"
-                          style={{
-                            background: swatch.background,
-                            borderColor: active ? "var(--ink)" : swatch.border,
-                          }}
-                        />
-                      );
-                    })}
-                  </div>
-                  <p className="hidden text-[11px] leading-snug text-ink-muted sm:block">
-                    {meta.hint}
+                    <GripIcon />
+                  </button>
+                  <p className="min-w-0 flex-1 pt-1 text-sm font-semibold leading-snug text-ink">
+                    {title}
                   </p>
+                  <button
+                    type="button"
+                    className="grid min-h-8 min-w-8 place-items-center rounded-md text-ink-muted hover:bg-surface/80 hover:text-ink"
+                    aria-label={`Configure ${title}`}
+                    onClick={() => setConfigLaneId(lane.id)}
+                  >
+                    <GearIcon />
+                  </button>
+                  <button
+                    type="button"
+                    className="grid min-h-8 min-w-8 place-items-center rounded-md text-ink-muted hover:bg-surface/80 hover:text-ink disabled:opacity-30"
+                    aria-label={`Remove ${title} lane`}
+                    disabled={lanes.length <= 1}
+                    onClick={() => removeLane(lane.id)}
+                  >
+                    ×
+                  </button>
                 </div>
               );
             })}
@@ -1017,23 +998,6 @@ export function HistoryTimeline() {
             aria-label="History timeline, past on the left, future on the right"
           >
             <div className="relative" style={{ width }}>
-              <div
-                className="pointer-events-none absolute inset-0 z-0"
-                aria-hidden
-              >
-                {gridTicks.map((tick) => (
-                  <div
-                    key={`grid-${tick.year}`}
-                    className="absolute top-0 bottom-0 w-px bg-ink/10"
-                    style={{ left: yearToX(tick.year, pixelsPerYear) }}
-                  />
-                ))}
-                <div
-                  className="absolute top-0 bottom-0 w-px bg-secondary/45"
-                  style={{ left: yearToX(NOW_YEAR, pixelsPerYear) }}
-                />
-              </div>
-
               {lanes.map((lane) => (
                 <LaneRow
                   key={lane.id}
@@ -1044,6 +1008,8 @@ export function HistoryTimeline() {
                   granularity={granularity}
                   pixelsPerYear={pixelsPerYear}
                   minWidth={minEventWidth}
+                  maxRows={maxPackRows}
+                  height={bandHeight}
                   visibleStart={visible.start}
                   visibleEnd={visible.end}
                   scrollLeft={camera.left}
@@ -1054,6 +1020,25 @@ export function HistoryTimeline() {
                   onRetry={() => fillNow([lane.category])}
                 />
               ))}
+              <div
+                className="pointer-events-none absolute inset-0 z-20"
+                aria-hidden
+              >
+                {gridTicks.map((tick) => (
+                  <div
+                    key={`grid-${tick.year}`}
+                    className="absolute top-0 bottom-0 w-px"
+                    style={{
+                      left: yearToX(tick.year, pixelsPerYear),
+                      background: "light-dark(rgb(29 29 31 / 0.16), rgb(245 245 247 / 0.18))",
+                    }}
+                  />
+                ))}
+                <div
+                  className="absolute top-0 bottom-0 w-px bg-secondary/45"
+                  style={{ left: yearToX(NOW_YEAR, pixelsPerYear) }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -1077,6 +1062,21 @@ export function HistoryTimeline() {
           Arrow keys pan · +/− zoom
         </p>
       </div>
+
+      {configLane ? (
+        <LaneConfigDialog
+          lane={configLane}
+          customCategories={customCategories}
+          categoryOptions={categoryOptions.filter(
+            (item) =>
+              item.id === configLane.category || !usedCategories.has(item.id),
+          )}
+          onClose={() => setConfigLaneId(null)}
+          onColor={(hue) => setLaneColor(configLane.id, hue)}
+          onRename={(label) => renameLane(configLane.id, label)}
+          onCategory={(category) => swapLane(configLane.id, category)}
+        />
+      ) : null}
 
       {selected ? (
         <aside
@@ -1107,7 +1107,10 @@ export function HistoryTimeline() {
               Close
             </button>
           </div>
-          <h3 className="mt-1 font-display text-xl text-ink">{selected.title}</h3>
+          <p className="mt-1 text-sm text-ink-muted">
+            {getCategory(selected.category, customCategories).hint}
+          </p>
+          <h3 className="mt-2 font-display text-xl text-ink">{selected.title}</h3>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-ink-muted">
             {selected.summary}
           </p>
@@ -1128,6 +1131,8 @@ function LaneRow({
   granularity,
   pixelsPerYear,
   minWidth,
+  maxRows,
+  height,
   visibleStart,
   visibleEnd,
   scrollLeft,
@@ -1144,6 +1149,8 @@ function LaneRow({
   granularity: HistoryGranularity;
   pixelsPerYear: number;
   minWidth: number;
+  maxRows: number;
+  height: number;
   visibleStart: number;
   visibleEnd: number;
   scrollLeft: number;
@@ -1165,14 +1172,14 @@ function LaneRow({
         visibleEnd + overscanYears,
       ),
   );
-  const packed = packEvents(visibleEvents, pixelsPerYear, minWidth, 3);
+  const packed = packEvents(visibleEvents, pixelsPerYear, minWidth, maxRows);
   const band = laneBand(category, hue);
   const empty = packed.length === 0;
 
   return (
     <div
       className="relative overflow-hidden border-t border-line"
-      style={{ height: LANE_HEIGHT, background: band.background }}
+      style={{ height, background: band.background }}
       role="list"
       aria-label={`${meta.label} events`}
       aria-busy={fill?.status === "loading"}
@@ -1272,6 +1279,125 @@ function LaneRow({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function LaneConfigDialog({
+  lane,
+  customCategories,
+  categoryOptions,
+  onClose,
+  onColor,
+  onRename,
+  onCategory,
+}: {
+  lane: HistoryLanePref;
+  customCategories: CustomHistoryCategory[];
+  categoryOptions: Array<{ id: string; label: string }>;
+  onClose: () => void;
+  onColor: (hue: number) => void;
+  onRename: (label: string) => void;
+  onCategory: (category: TimelineCategoryId) => void;
+}) {
+  const title = laneTitle(lane, customCategories);
+  const hue = laneHue(lane, customCategories);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = dialogRef.current?.querySelector<HTMLElement>("input, button");
+    node?.focus();
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/25 p-4 sm:items-center"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lane-config-title"
+        className="w-full max-w-md rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow)]"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <h2 id="lane-config-title" className="font-display text-lg text-ink">
+            Lane settings
+          </h2>
+          <button
+            type="button"
+            className="text-sm font-medium text-ink-muted hover:text-ink"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+        <label className="mt-4 block text-xs font-medium text-ink-muted">
+          Name
+          <input
+            className="snap-input mt-1 min-h-10 w-full px-2.5 text-sm font-normal text-ink"
+            defaultValue={title}
+            maxLength={32}
+            onBlur={(event) => onRename(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                onRename((event.target as HTMLInputElement).value);
+              }
+            }}
+          />
+        </label>
+        <label className="mt-3 block text-xs font-medium text-ink-muted">
+          Category
+          <select
+            className="snap-input mt-1 min-h-10 w-full px-2.5 text-sm font-normal text-ink"
+            value={lane.category}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (isTimelineCategory(value)) onCategory(value);
+            }}
+          >
+            {categoryOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <fieldset className="mt-3 border-0 p-0">
+          <legend className="text-xs font-medium text-ink-muted">Color</legend>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {CUSTOM_HUE_PRESETS.map((preset) => {
+              const swatch = hueSwatch(preset.hue);
+              const active =
+                hue !== undefined &&
+                Math.abs((((hue % 360) + 360) % 360) - preset.hue) < 0.5;
+              return (
+                <button
+                  key={preset.hue}
+                  type="button"
+                  title={preset.label}
+                  aria-pressed={active}
+                  aria-label={preset.label}
+                  onClick={() => onColor(preset.hue)}
+                  className="h-8 w-8 rounded-full border"
+                  style={{
+                    background: swatch.background,
+                    borderColor: active ? "var(--ink)" : swatch.border,
+                    boxShadow: active
+                      ? "0 0 0 2px var(--bg), 0 0 0 3px var(--ink)"
+                      : undefined,
+                  }}
+                />
+              );
+            })}
+          </div>
+        </fieldset>
+      </div>
     </div>
   );
 }

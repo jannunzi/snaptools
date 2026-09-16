@@ -343,13 +343,13 @@ export const tools: Tool[] = [
     title: "History Timeline",
     tagline: "Parallel lanes of world history — past left, future right.",
     description:
-      "Scroll a horizontal timeline with several history lanes at once. Color, hide, or reorder the rows, add your own categories, zoom from millennia to days, and let missing spans fill as you pan. Seeded events show immediately; Grok writes the blanks and MongoDB remembers the window.",
+      "Scroll a horizontal timeline with several history lanes at once. Add, remove, or drag-reorder the rows, set a lane’s color in its config, zoom from millennia to days, and let missing spans fill as you pan. Seeded events show immediately; Grok writes the blanks and MongoDB remembers the window.",
     day: 10,
     publishedOn: "2026-09-15",
     audience: "Students, teachers, and anyone lining up what happened when",
     status: "live",
     howTo:
-      "Scroll left for the past, right for the future. Each row is a lane — change its category or color, reorder it, or hide it and add it back later. Zoom from millennia through months, weeks, and days. Lanes, colors, zoom, and scroll restore on reload. A new custom lane starts filling for the window you are looking at.",
+      "Scroll left for the past, right for the future. Add a lane from the dropdown, drag the grip to reorder, or remove it with ×. The gear opens color and rename. Zoom from millennia through days. Lanes, colors, zoom, and scroll restore on reload. A new custom lane starts filling for the window you are looking at.",
     books: [
       {
         asin: "0062316117",
