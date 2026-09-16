@@ -8,6 +8,7 @@ import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
+import { StatesAndCapitals } from "@/components/tools/StatesAndCapitals";
 import { TellingTime } from "@/components/tools/TellingTime";
 import type { Tool } from "@/lib/tools";
 
@@ -33,6 +34,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <AdditionSubtractionFacts />;
     case "history-timeline":
       return <HistoryTimeline />;
+    case "states-and-capitals":
+      return <StatesAndCapitals />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }

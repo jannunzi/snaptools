@@ -37,6 +37,8 @@ export const metadata: Metadata = {
     "subtraction facts",
     "history timeline",
     "world history",
+    "states and capitals",
+    "US geography",
     "USCIS",
     "treble clef",
     "browser tools",
