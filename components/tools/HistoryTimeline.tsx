@@ -149,7 +149,7 @@ export function HistoryTimeline() {
     CustomHistoryCategory[]
   >([]);
   const [draftName, setDraftName] = useState("");
-  const [draftHue, setDraftHue] = useState(CUSTOM_HUE_PRESETS[0].hue);
+  const [draftHue, setDraftHue] = useState<number>(CUSTOM_HUE_PRESETS[0].hue);
   const [eventsById, setEventsById] = useState<Record<string, HistoryEvent>>(
     () => Object.fromEntries(historySeedEvents.map((event) => [event.id, event])),
   );
