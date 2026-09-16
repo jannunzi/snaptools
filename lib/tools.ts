@@ -374,6 +374,42 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "states-and-capitals",
+    title: "US States & Capitals",
+    tagline: "Name the capital — or the state.",
+    description:
+      "Practice all 50 U.S. states and capitals. Capital from state, state from capital, or mixed. Multiple choice or type-the-answer, by Census region, with a quick 10, a full 50, or a streak.",
+    day: 11,
+    publishedOn: "2026-09-16",
+    audience: "Kids, parents, and anyone brushing up on U.S. geography",
+    status: "live",
+    howTo:
+      "Pick a direction and a region. Use multiple choice to warm up, then type the answer. Quick 10 is a short set; Full 50 covers every state in the filter. Streak ends on the first miss. Turn on postal abbreviations if you want a hint on capital-from-state questions.",
+    books: [
+      {
+        asin: "0593196899",
+        title: "Fun with 50 States",
+        author: "Nicole Claesen",
+        blurb:
+          "Maps, mazes, and state facts for ages 6–10 — capitals, nicknames, and landmarks without a worksheet stack.",
+      },
+      {
+        asin: "B0CKZ1L3RT",
+        title: "All About The 50 States Workbook",
+        author: "Julie K. Tolleson",
+        blurb:
+          "One research page per state — capital, geography, and places of interest for a short sit-down after the quiz.",
+      },
+      {
+        asin: "B0CHG91SMP",
+        title: "United States Activity and Fun Fact Book",
+        author: "Mrs Huntington",
+        blurb:
+          "Two pages per state with maps, capitals, and puzzles — a homeschool-style paper companion to the practice set.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
