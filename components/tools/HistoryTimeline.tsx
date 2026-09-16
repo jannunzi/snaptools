@@ -155,18 +155,27 @@ function GripIcon() {
 function GearIcon() {
   return (
     <svg
-      viewBox="0 0 16 16"
-      width="14"
-      height="14"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
       aria-hidden
-      className="fill-none stroke-current"
-      strokeWidth="1.4"
+      className="fill-current"
     >
-      <circle cx="8" cy="8" r="2.1" />
-      <path d="M8 1.7v1.6M8 12.7v1.6M1.7 8h1.6M12.7 8h1.6M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M3.3 12.7l1.1-1.1M11.6 4.4l1.1-1.1" />
+      <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.5.5 0 0 0-.48-.41h-3.84a.5.5 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.73 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.12.22.37.3.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z" />
     </svg>
   );
 }
+
+function LaneSpinner() {
+  return (
+    <span
+      className="size-3.5 shrink-0 animate-spin rounded-full border-2 border-ink/20 border-t-ink"
+      aria-hidden
+    />
+  );
+}
+
+const SPARSE_COMPLETE_MAX = 2;
 
 export function HistoryTimeline() {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -291,10 +300,15 @@ export function HistoryTimeline() {
             return !loadedRef.current.has(key) && !inflightRef.current.has(key);
           });
           if (needed.length === 0) {
-            setFillByCategory((prev) => ({
-              ...prev,
-              [category]: prev[category] ?? { status: "ready" },
-            }));
+            const waiting = windows.some((window) =>
+              inflightRef.current.has(windowKey(category, gran, window.start)),
+            );
+            if (!waiting) {
+              setFillByCategory((prev) => ({
+                ...prev,
+                [category]: { status: "ready" },
+              }));
+            }
             return;
           }
 
@@ -503,9 +517,33 @@ export function HistoryTimeline() {
 
   useEffect(() => {
     if (!prefsReady) return;
+    const categories = lanes.map((lane) => lane.category);
+    setFillByCategory((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const category of categories) {
+        if (prev[category]?.status === "error") continue;
+        const windows = windowsOverlapping(
+          visible.start,
+          visible.end,
+          granularity,
+        );
+        const covered =
+          windows.length > 0 &&
+          windows.every((window) =>
+            loadedRef.current.has(windowKey(category, granularity, window.start)),
+          );
+        const nextStatus = covered ? "ready" : "loading";
+        if (prev[category]?.status !== nextStatus) {
+          next[category] = { status: nextStatus };
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
     const timer = window.setTimeout(() => {
       void fetchRange(
-        lanes.map((lane) => lane.category),
+        categories,
         visible.start,
         visible.end,
         granularity,
@@ -965,7 +1003,7 @@ export function HistoryTimeline() {
                   <button
                     type="button"
                     className="grid min-h-8 min-w-8 place-items-center rounded-md text-ink-muted hover:bg-surface/80 hover:text-ink"
-                    aria-label={`Configure ${title}`}
+                    aria-label="Lane settings"
                     onClick={() => setConfigLaneId(lane.id)}
                   >
                     <GearIcon />
@@ -1006,7 +1044,7 @@ export function HistoryTimeline() {
                   visibleEnd={visible.end}
                   scrollLeft={camera.left}
                   selectedId={selectedId}
-                  fill={fillByCategory[lane.category]}
+                  fill={fillByCategory[lane.category] ?? { status: "loading" }}
                   xai={status.xai}
                   onSelect={setSelectedId}
                   onRetry={() => fillNow([lane.category])}
@@ -1190,6 +1228,14 @@ function LaneRow({
   );
   const band = laneBand(category, hue);
   const empty = packed.length === 0;
+  const fillStatus = fill?.status ?? "loading";
+  const showLoading = fillStatus === "loading" || fillStatus === "idle";
+  const showError =
+    !showLoading &&
+    (fillStatus === "error" ||
+      (category.startsWith("custom-") && xai === false && empty));
+  const showComplete =
+    !showError && !showLoading && packed.length <= SPARSE_COMPLETE_MAX;
 
   return (
     <div
@@ -1197,7 +1243,7 @@ function LaneRow({
       style={{ height, background: band.background }}
       role="list"
       aria-label={`${meta.label} events`}
-      aria-busy={fill?.status === "loading"}
+      aria-busy={showLoading}
       data-lane-id={laneId}
       onDragOver={(event) => {
         event.preventDefault();
@@ -1205,15 +1251,25 @@ function LaneRow({
       }}
       onDrop={() => onDropLane(laneId)}
     >
-      {empty ? (
+      {showLoading || showError || showComplete ? (
         <div
-          className="pointer-events-auto absolute inset-y-0 flex items-center"
-          style={{ left: scrollLeft + 16, width: "min(24rem, 72%)" }}
+          className={`absolute z-30 flex items-center ${
+            empty ? "inset-y-0" : ""
+          } ${showError ? "pointer-events-auto" : "pointer-events-none"}`}
+          style={{
+            left: scrollLeft + 16,
+            width: "min(22rem, 70%)",
+            ...(empty ? {} : { bottom: 8 }),
+          }}
+          role="status"
+          aria-live="polite"
         >
-          {fill?.status === "loading" ? (
-            <p className="text-sm text-ink-muted">Filling this lane…</p>
-          ) : fill?.status === "error" ||
-            (category.startsWith("custom-") && xai === false) ? (
+          {showLoading ? (
+            <span className="inline-flex items-center gap-2 rounded-full bg-surface/85 px-2.5 py-1 text-[12px] text-ink-muted shadow-[0_0_0_1px_var(--line)] backdrop-blur-sm">
+              <LaneSpinner />
+              Filling this era…
+            </span>
+          ) : showError ? (
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm text-ink-muted">
                 {fill?.note ||
@@ -1230,7 +1286,9 @@ function LaneRow({
               </button>
             </div>
           ) : (
-            <p className="text-sm text-ink-muted">Nothing in this window yet.</p>
+            <p className="text-[12px] text-ink-muted/80">
+              That's all we have for this range
+            </p>
           )}
         </div>
       ) : null}
