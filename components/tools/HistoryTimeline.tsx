@@ -506,14 +506,6 @@ export function HistoryTimeline() {
     }
   }, [selected]);
 
-  if (!prefsReady) {
-    return (
-      <div className="snap-panel min-h-[28rem] p-5">
-        <p className="text-sm text-ink-muted">Restoring timeline…</p>
-      </div>
-    );
-  }
-
   return (
     <div className="snap-panel overflow-hidden p-0">
       <div className="flex flex-col gap-3 border-b border-line px-4 py-4 sm:px-5">
