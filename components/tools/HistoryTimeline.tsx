@@ -355,29 +355,39 @@ export function HistoryTimeline() {
             const missing =
               payload.windows?.some((window) => window.source === "missing") ??
               false;
-            if (payload.error || (fill && missing && pending === 0 && !payload.events?.length)) {
+            const empty = !payload.events?.length;
+            const xai = payload.meta?.xai === true;
+            if (payload.error) {
               setFillByCategory((prev) => ({
                 ...prev,
                 [category]: {
                   status: "error",
-                  note:
-                    payload.error ||
-                    (payload.meta?.xai === false
-                      ? "This lane needs a server key to fill."
-                      : "Could not fill this lane. Retry?"),
+                  note: payload.error,
                 },
               }));
+            } else if (fill && missing && empty && (!xai || pending === 0)) {
+              setFillByCategory((prev) => ({
+                ...prev,
+                [category]: {
+                  status: "error",
+                  note: xai
+                    ? "Could not fill this lane. Retry?"
+                    : "This lane needs a server key to fill.",
+                },
+              }));
+            } else if (fill && missing && pending > 0 && xai) {
+              setFillByCategory((prev) => ({
+                ...prev,
+                [category]: { status: "loading" },
+              }));
+              window.setTimeout(() => {
+                void fetchRange([category], start, end, gran, true);
+              }, 500);
             } else {
               setFillByCategory((prev) => ({
                 ...prev,
                 [category]: { status: "ready" },
               }));
-            }
-
-            if (fill && payload.meta?.xai && pending > 0) {
-              window.setTimeout(() => {
-                void fetchRange([category], start, end, gran, true);
-              }, 500);
             }
           } catch {
             setFillByCategory((prev) => ({
@@ -401,18 +411,20 @@ export function HistoryTimeline() {
   );
 
   const fillNow = useCallback(
-    (categories: TimelineCategoryId[]) => {
+    (categories: TimelineCategoryId[], markLoading = true) => {
       const node = scrollerRef.current;
       const left = node ? node.scrollLeft : cameraRef.current.left;
       const viewWidth = node
         ? node.clientWidth || 720
         : cameraRef.current.width;
       const range = visibleYears(left, viewWidth, pixelsPerYear);
-      for (const category of categories) {
-        setFillByCategory((prev) => ({
-          ...prev,
-          [category]: { status: "loading" },
-        }));
+      if (markLoading) {
+        for (const category of categories) {
+          setFillByCategory((prev) => ({
+            ...prev,
+            [category]: { status: "loading" },
+          }));
+        }
       }
       void fetchRange(categories, range.start, range.end, granularity, true);
     },
@@ -475,7 +487,10 @@ export function HistoryTimeline() {
 
   useEffect(() => {
     if (!prefsReady) return;
-    fillNow(lanes.map((lane) => lane.category));
+    fillNow(
+      lanes.map((lane) => lane.category),
+      false,
+    );
   }, [fillNow, lanes, prefsReady]);
 
   useEffect(() => {
@@ -1034,6 +1049,7 @@ export function HistoryTimeline() {
                   scrollLeft={camera.left}
                   selectedId={selectedId}
                   fill={fillByCategory[lane.category]}
+                  xai={status.xai}
                   onSelect={setSelectedId}
                   onRetry={() => fillNow([lane.category])}
                 />
@@ -1117,6 +1133,7 @@ function LaneRow({
   scrollLeft,
   selectedId,
   fill,
+  xai,
   onSelect,
   onRetry,
 }: {
@@ -1132,6 +1149,7 @@ function LaneRow({
   scrollLeft: number;
   selectedId: string | null;
   fill?: LaneFillState;
+  xai: boolean | null;
   onSelect: (id: string) => void;
   onRetry: () => void;
 }) {
@@ -1162,13 +1180,19 @@ function LaneRow({
       {empty ? (
         <div
           className="pointer-events-auto absolute inset-y-0 flex items-center"
-          style={{ left: scrollLeft + 16, width: "min(22rem, 70%)" }}
+          style={{ left: scrollLeft + 16, width: "min(24rem, 72%)" }}
         >
           {fill?.status === "loading" ? (
             <p className="text-sm text-ink-muted">Filling this lane…</p>
-          ) : fill?.status === "error" ? (
+          ) : fill?.status === "error" ||
+            (category.startsWith("custom-") && xai === false) ? (
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm text-ink-muted">{fill.note}</p>
+              <p className="text-sm text-ink-muted">
+                {fill?.note ||
+                  (xai === false
+                    ? "This lane needs a server key to fill."
+                    : "Could not fill this lane.")}
+              </p>
               <button
                 type="button"
                 className="snap-btn-secondary min-h-8 px-3 text-xs"

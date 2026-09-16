@@ -232,7 +232,7 @@ export const DEFAULT_LANES: HistoryCategoryId[] = [
 export const ERA_PRESETS = [
   { id: "ancient", label: "Ancient", start: -3000, end: -500, zoom: 1 },
   { id: "classical", label: "Classical", start: -800, end: 500, zoom: 1 },
-  { id: "medieval", label: "Medieval", start: 500, end: 1500, zoom: 1 },
+  { id: "medieval", label: "Medieval", start: 500, end: 1200, zoom: 1 },
   { id: "early-modern", label: "Early modern", start: 1450, end: 1800, zoom: 2 },
   { id: "modern", label: "Modern", start: 1800, end: NOW_YEAR, zoom: 2 },
   { id: "future", label: "Future", start: NOW_YEAR, end: 2100, zoom: 2 },

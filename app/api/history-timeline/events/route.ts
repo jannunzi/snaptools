@@ -163,7 +163,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
   let generatedCount = 0;
 
   if (generateNow.length > 0 && !apiKey) {
-    for (const window of generateNow) {
+    for (const window of [...generateNow, ...leftover]) {
       const key = windowKey(category, granularity, window.start);
       const seed = seedEventsFor(category, window.start, window.end);
       statuses.push({
@@ -258,13 +258,15 @@ async function handleEvents(input: ParsedRequest, request: Request) {
     }
   }
 
-  for (const window of leftover) {
-    const seed = seedEventsFor(category, window.start, window.end);
-    statuses.push({
-      ...window,
-      key: windowKey(category, granularity, window.start),
-      source: seed.length > 0 ? "seed" : "missing",
-    });
+  if (apiKey || generateNow.length === 0) {
+    for (const window of leftover) {
+      const seed = seedEventsFor(category, window.start, window.end);
+      statuses.push({
+        ...window,
+        key: windowKey(category, granularity, window.start),
+        source: seed.length > 0 ? "seed" : "missing",
+      });
+    }
   }
 
   return NextResponse.json({
@@ -275,7 +277,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
       xai: Boolean(apiKey),
       generated: generatedCount,
       cached: cached.size,
-      pending: leftover.length,
+      pending: apiKey ? leftover.length : 0,
       database: getMongoDbName(),
     },
   });
