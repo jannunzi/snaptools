@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { withoutMisfitEvents } from "@/lib/history-fit";
 import {
   loadCachedWindows,
+  purgeMisfitCachedEvents,
   purgeRetiredHistoryEvents,
   saveGeneratedWindow,
 } from "@/lib/history-cache";
@@ -119,6 +121,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
           [...RETIRED_HISTORY_EVENT_IDS],
           [...RETIRED_HISTORY_EVENT_TITLES],
         );
+        await purgeMisfitCachedEvents("empires");
       }
       cached = await loadCachedWindows(category, granularity, windows);
     } catch {
@@ -136,7 +139,9 @@ async function handleEvents(input: ParsedRequest, request: Request) {
     const seed = seedEventsFor(category, window.start, window.end);
     const hit = cached.get(key);
     if (hit) {
-      collected.push(withoutRetiredHistoryEvents(hit.events));
+      collected.push(
+        withoutMisfitEvents(withoutRetiredHistoryEvents(hit.events), category),
+      );
       collected.push(seed);
       statuses.push({ ...window, key, source: "cache" });
       continue;
@@ -179,7 +184,10 @@ async function handleEvents(input: ParsedRequest, request: Request) {
       return NextResponse.json(
         {
           error: "Too many timeline fills. Try again in a moment.",
-          events: withoutRetiredHistoryEvents(mergeEvents(...collected)),
+          events: withoutMisfitEvents(
+            withoutRetiredHistoryEvents(mergeEvents(...collected)),
+            category,
+          ),
           windows: [
             ...statuses,
             ...generateNow.map((window) => ({
@@ -270,7 +278,10 @@ async function handleEvents(input: ParsedRequest, request: Request) {
   }
 
   return NextResponse.json({
-    events: withoutRetiredHistoryEvents(mergeEvents(...collected)),
+    events: withoutMisfitEvents(
+      withoutRetiredHistoryEvents(mergeEvents(...collected)),
+      category,
+    ),
     windows: statuses.sort((a, b) => a.start - b.start),
     meta: {
       mongo,

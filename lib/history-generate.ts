@@ -1,3 +1,4 @@
+import { eventFitsCategory } from "@/lib/history-fit";
 import {
   eventId,
   formatYearRange,
@@ -23,6 +24,7 @@ const SYSTEM_PROMPT = [
   "If the window is after the present year, mark projected true and write cautious forecasts, not science fiction.",
   "No mythology presented as fact. No copyrighted long quotations. One or two sentences per summary.",
   "Titles stay short. Events must belong to the requested category and fall inside the year window.",
+  "Empires means polities, dynasties, and states — never battles, sieges, campaigns, or wars. Battle of Tours, the Umayyad siege of Constantinople, and similar fights belong only in Wars. If the category is Empires, do not list military actions even when they involve an empire.",
   "For Empires include long-lived states when they fall in the window — examples: Roman Republic (c. 509–27 BCE), Roman Empire (27 BCE–476 CE, West), Eastern Roman / Byzantine Empire (330–1453), Sassanid (to 651), Umayyad, Abbasid, Carolingian, Holy Roman Empire (from 800/962), Tang, Song, First Bulgarian Empire, Ghana Empire, Khmer Empire. Do not treat 27 BCE as the start of Rome as a state.",
   "If the category label is a specific subject (for example WWII, fashion, or ships), fill that subject in the window — do not substitute a generic world-history list.",
 ].join(" ");
@@ -94,7 +96,7 @@ function parseGeneratedEvents(
     const projected =
       Boolean(row.projected) || year > NOW_YEAR || (endYear ?? year) > NOW_YEAR;
 
-    events.push({
+    const event: HistoryEvent = {
       id: eventId(category, year, title),
       category,
       year,
@@ -105,7 +107,9 @@ function parseGeneratedEvents(
       projected,
       source: "ai",
       granularity,
-    });
+    };
+    if (!eventFitsCategory(event, category)) continue;
+    events.push(event);
   }
 
   return events;

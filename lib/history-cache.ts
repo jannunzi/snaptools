@@ -1,4 +1,5 @@
 import type { Collection, Db } from "mongodb";
+import { eventFitsCategory } from "@/lib/history-fit";
 import {
   type HistoryEvent,
   type HistoryGranularity,
@@ -157,6 +158,36 @@ export async function purgeRetiredHistoryEvents(
       },
     );
     modified += result.modifiedCount;
+  }
+
+  return modified;
+}
+
+/**
+ * Drop battles/sieges that were generated into Empires windows, and any
+ * event whose stamped category does not match the window.
+ */
+export async function purgeMisfitCachedEvents(
+  category: TimelineCategoryId = "empires",
+) {
+  const db = await getMongoDb();
+  if (!db) return 0;
+
+  const collection = await windowsCollection(db);
+  const rows = await collection.find({ category }).toArray();
+  const now = new Date();
+  let modified = 0;
+
+  for (const row of rows) {
+    const next = row.events.filter((event) =>
+      eventFitsCategory(event, category),
+    );
+    if (next.length === row.events.length) continue;
+    await collection.updateOne(
+      { key: row.key },
+      { $set: { events: next, updatedAt: now } },
+    );
+    modified += 1;
   }
 
   return modified;

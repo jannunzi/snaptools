@@ -21,10 +21,11 @@ import {
   saveHistoryPrefs,
   type HistoryLanePref,
 } from "@/lib/history-prefs";
+import { eventFitsCategory } from "@/lib/history-fit";
+import { packEventsStable } from "@/lib/history-pack";
 import { historySeedEvents, isRetiredHistoryEvent } from "@/lib/history-seed";
 import {
   ERA_PRESETS,
-  eventBarMetrics,
   eventOverlaps,
   eventSpan,
   formatYearRange,
@@ -58,7 +59,6 @@ const AXIS_HEIGHT = 44;
 const ROW_HEIGHT = 48;
 const ROW_GAP = 6;
 const LANE_PAD = 10;
-const PACK_GAP = 8;
 const DEBOUNCE_MS = 280;
 const OVERSCAN_PX = 360;
 const GUTTER_CLASS = "w-[9.5rem] shrink-0 sm:w-[11rem]";
@@ -102,46 +102,6 @@ function debounce<T extends (...args: never[]) => void>(fn: T, wait: number) {
   return wrapped;
 }
 
-function packEvents(
-  events: HistoryEvent[],
-  pixelsPerYear: number,
-  minWidth: number,
-  maxRows = 3,
-) {
-  const rowEnds: number[] = [];
-  const packed: {
-    event: HistoryEvent;
-    x: number;
-    width: number;
-    wide: boolean;
-    row: number;
-  }[] = [];
-  const sorted = [...events].sort(
-    (a, b) => a.year - b.year || a.title.localeCompare(b.title),
-  );
-
-  for (const event of sorted) {
-    const bar = eventBarMetrics(event, pixelsPerYear, minWidth);
-    let row = rowEnds.findIndex((end) => bar.x >= end + PACK_GAP);
-    if (row === -1) {
-      if (rowEnds.length >= maxRows) {
-        row = rowEnds.length - 1;
-      } else {
-        row = rowEnds.length;
-        rowEnds.push(0);
-      }
-    }
-    rowEnds[row] = bar.x + bar.width;
-    packed.push({
-      event,
-      x: bar.x,
-      width: bar.width,
-      wide: bar.wide,
-      row,
-    });
-  }
-  return packed;
-}
 
 function visibleYears(
   left: number,
@@ -379,6 +339,7 @@ export function HistoryTimeline() {
                 const next = { ...prev };
                 for (const event of payload.events ?? []) {
                   if (isRetiredHistoryEvent(event)) continue;
+                  if (!eventFitsCategory(event, event.category)) continue;
                   next[event.id] = event;
                 }
                 return next;
@@ -734,7 +695,12 @@ export function HistoryTimeline() {
   };
 
   const allEvents = useMemo(
-    () => Object.values(eventsById).filter((event) => !isRetiredHistoryEvent(event)),
+    () =>
+      Object.values(eventsById).filter(
+        (event) =>
+          !isRetiredHistoryEvent(event) &&
+          eventFitsCategory(event, event.category),
+      ),
     [eventsById],
   );
   const selected = selectedId ? eventsById[selectedId] : undefined;
@@ -1193,18 +1159,35 @@ function LaneRow({
   onDropLane: (targetId: string) => void;
 }) {
   const meta = getCategory(category, customCategories);
+  const stickyRows = useRef(new Map<string, number>());
+  const prevMaxRows = useRef(maxRows);
+  if (prevMaxRows.current !== maxRows) {
+    for (const [id, row] of stickyRows.current) {
+      if (row >= maxRows) stickyRows.current.delete(id);
+    }
+    prevMaxRows.current = maxRows;
+  }
   const overscanYears = OVERSCAN_PX / pixelsPerYear;
-  const visibleEvents = events.filter(
+  const laneEvents = events.filter(
     (event) =>
       event.category === category &&
-      shouldShowEvent(event, granularity) &&
-      eventOverlaps(
-        event,
-        visibleStart - overscanYears,
-        visibleEnd + overscanYears,
-      ),
+      eventFitsCategory(event, category) &&
+      shouldShowEvent(event, granularity),
   );
-  const packed = packEvents(visibleEvents, pixelsPerYear, minWidth, maxRows);
+  const packedAll = packEventsStable(
+    laneEvents,
+    pixelsPerYear,
+    minWidth,
+    maxRows,
+    stickyRows.current,
+  );
+  const packed = packedAll.filter((item) =>
+    eventOverlaps(
+      item.event,
+      visibleStart - overscanYears,
+      visibleEnd + overscanYears,
+    ),
+  );
   const band = laneBand(category, hue);
   const empty = packed.length === 0;
 

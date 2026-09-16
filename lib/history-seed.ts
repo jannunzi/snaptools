@@ -403,6 +403,21 @@ export const historySeedEvents: HistoryEvent[] = [
   ),
   ev(
     "wars",
+    717,
+    "Umayyad siege of Constantinople",
+    "Maslama’s Umayyad army and fleet fail to take the Byzantine capital; Greek fire and the Theodosian Walls hold.",
+    4,
+    { endYear: 718 },
+  ),
+  ev(
+    "wars",
+    732,
+    "Battle of Tours",
+    "Charles Martel’s Franks halt an Umayyad raid near Poitiers — a war, not an empire.",
+    4,
+  ),
+  ev(
+    "wars",
     1096,
     "First Crusade",
     "Latin armies take Jerusalem; a long era of crusading and Levantine states begins.",
@@ -840,6 +855,12 @@ export const RETIRED_HISTORY_EVENT_IDS = new Set([
 
 export const RETIRED_HISTORY_EVENT_TITLES = new Set([
   "Roman Empire begins",
+  "Battle of Tours",
+  "Umayyad siege of Constantinople",
+  "Siege of Constantinople",
+  "Second Arab siege of Constantinople",
+  "Battle of Talas",
+  "Battle of the Talas",
 ]);
 
 export function isRetiredHistoryEvent(event: {
