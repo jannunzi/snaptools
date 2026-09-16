@@ -530,6 +530,7 @@ export function timelineWidth(pixelsPerYear: number) {
 export type TimelineTick = {
   year: number;
   label: boolean;
+  grid: boolean;
   text: string;
 };
 
@@ -558,6 +559,7 @@ export function ticksForRange(
     marks.push({
       year,
       label,
+      grid: label,
       text: formatTimelineInstant(year, granularity),
     });
   }
@@ -576,9 +578,11 @@ function civilTicksForRange(
     const yearStart = Math.ceil(start);
     const yearEnd = Math.min(-1, Math.floor(end));
     for (let y = yearStart; y <= yearEnd && marks.length < maxMarks; y += 1) {
+      const label = y % 10 === 0 || granularity !== "day";
       marks.push({
         year: y,
-        label: y % 10 === 0 || granularity !== "day",
+        label,
+        grid: label,
         text: formatYear(y),
       });
     }
@@ -595,9 +599,11 @@ function civilTicksForRange(
       const year = partsToYear(y, month, 1);
       if (year > end + 1e-9) break;
       if (year >= start - 1 / 12) {
+        const label = month === 1 || month === 4 || month === 7 || month === 10;
         marks.push({
           year,
-          label: true,
+          label,
+          grid: true,
           text: month === 1 ? String(y) : (MONTH_LABELS[month - 1] ?? ""),
         });
       }
@@ -620,11 +626,18 @@ function civilTicksForRange(
       const year = y + doy / 365;
       if (year > end + 1e-9) break;
       if (year >= start - 7 / 365) {
-        const weekIndex = Math.floor(doy / 7);
+        const parts = yearToParts(year);
+        const monthStart = parts.day <= 7;
         marks.push({
           year,
-          label: weekIndex % 2 === 0,
-          text: formatTimelineInstant(year, "week"),
+          label: monthStart,
+          grid: true,
+          text:
+            parts.month === 1 && monthStart
+              ? String(y)
+              : monthStart
+                ? (MONTH_LABELS[parts.month - 1] ?? "")
+                : "",
         });
       }
       doy += 7;
@@ -643,9 +656,11 @@ function civilTicksForRange(
     const year = partsToYear(y, month, day);
     if (year > end + 1e-9) break;
     if (year >= start - 1 / 365) {
+      const major = day === 1 || day === 8 || day === 15 || day === 22;
       marks.push({
         year,
-        label: day === 1 || day === 8 || day === 15 || day === 22,
+        label: major,
+        grid: major,
         text:
           day === 1
             ? `${MONTH_LABELS[month - 1] ?? ""} ${y}`

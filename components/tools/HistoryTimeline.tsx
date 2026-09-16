@@ -190,7 +190,10 @@ export function HistoryTimeline() {
       ),
     [granularity, visible.end, visible.start, zoomSpec.labelEvery, zoomSpec.tick],
   );
-  const majorTicks = useMemo(() => ticks.filter((tick) => tick.label), [ticks]);
+  const gridTicks = useMemo(
+    () => ticks.filter((tick) => tick.grid),
+    [ticks],
+  );
 
   const persistPrefs = useCallback(() => {
     saveHistoryPrefs({
@@ -685,7 +688,7 @@ export function HistoryTimeline() {
               className="pointer-events-none absolute inset-0 z-0"
               aria-hidden
             >
-              {majorTicks.map((tick) => (
+              {gridTicks.map((tick) => (
                 <div
                   key={`grid-${tick.year}`}
                   className="absolute top-0 bottom-0 w-px bg-ink/10"
