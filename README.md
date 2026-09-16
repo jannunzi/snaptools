@@ -11,7 +11,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [Telling Time Practice](/tools/telling-time) — read an analog clock and type the digital time. Whole hours through to the minute; Practice, 60-second quiz, or Streak. Instant feedback and missed-time review.
 - [Counting Money Practice](/tools/counting-money) — count US coins and bills, or make change. Easy coin ID through mixed coins, $1/$5 bills, and make-change; Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
 - [Addition & Subtraction Facts Practice](/tools/addition-subtraction-facts) — addition, subtraction, or mixed facts through 20. Easy / Medium / Challenge presets, then Practice, a 60-second quiz, or Streak. Instant feedback, missed/slow-fact review, printable addition chart.
-- [History Timeline](/tools/history-timeline) — horizontal world history (past left, future right) with parallel lanes. Swap a lane’s category or add your own, zoom millennia to days, and fill missing spans with Grok. Zoom and scroll restore on reload. Seeded events show on first paint; MongoDB caches category + time window + granularity.
+- [History Timeline](/tools/history-timeline) — horizontal world history (past left, future right) with parallel lanes. Color, hide, or reorder rows, add your own categories, zoom millennia to days, and fill missing spans with Grok. Lanes, colors, zoom, and scroll restore on reload. Seeded events show on first paint; MongoDB caches category + time window + granularity.
 - [US States & Capitals](/tools/states-and-capitals) — name the capital or the state. Multiple choice or type-the-answer, Census regions, Quick 10 / Full 50 / Streak, optional postal hint, missed-pair review.
 
 ## Stack

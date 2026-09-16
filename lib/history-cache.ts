@@ -121,3 +121,43 @@ export async function saveGeneratedWindow(input: {
   );
   return doc;
 }
+
+/**
+ * Pull retired seed ids out of cached windows so stale Rome captions
+ * do not keep rendering next to the corrected seed bars.
+ */
+export async function purgeRetiredHistoryEvents(
+  ids: string[],
+  titles: string[] = [],
+) {
+  const db = await getMongoDb();
+  if (!db || (ids.length === 0 && titles.length === 0)) return 0;
+
+  const collection = await windowsCollection(db);
+  const now = new Date();
+  let modified = 0;
+
+  if (ids.length > 0) {
+    const result = await collection.updateMany(
+      { "events.id": { $in: ids } },
+      {
+        $pull: { events: { id: { $in: ids } } },
+        $set: { updatedAt: now },
+      },
+    );
+    modified += result.modifiedCount;
+  }
+
+  if (titles.length > 0) {
+    const result = await collection.updateMany(
+      { "events.title": { $in: titles } },
+      {
+        $pull: { events: { title: { $in: titles } } },
+        $set: { updatedAt: now },
+      },
+    );
+    modified += result.modifiedCount;
+  }
+
+  return modified;
+}

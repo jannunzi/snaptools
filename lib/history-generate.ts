@@ -23,6 +23,8 @@ const SYSTEM_PROMPT = [
   "If the window is after the present year, mark projected true and write cautious forecasts, not science fiction.",
   "No mythology presented as fact. No copyrighted long quotations. One or two sentences per summary.",
   "Titles stay short. Events must belong to the requested category and fall inside the year window.",
+  "For Empires include long-lived states when they fall in the window — examples: Roman Republic (c. 509–27 BCE), Roman Empire (27 BCE–476 CE, West), Eastern Roman / Byzantine Empire (330–1453), Sassanid (to 651), Umayyad, Abbasid, Carolingian, Holy Roman Empire (from 800/962), Tang, Song, First Bulgarian Empire, Ghana Empire, Khmer Empire. Do not treat 27 BCE as the start of Rome as a state.",
+  "If the category label is a specific subject (for example WWII, fashion, or ships), fill that subject in the window — do not substitute a generic world-history list.",
 ].join(" ");
 
 function clampSignificance(value: unknown): 1 | 2 | 3 | 4 | 5 {

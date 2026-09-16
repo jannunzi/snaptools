@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
-import { loadCachedWindows, saveGeneratedWindow } from "@/lib/history-cache";
+import {
+  loadCachedWindows,
+  purgeRetiredHistoryEvents,
+  saveGeneratedWindow,
+} from "@/lib/history-cache";
 import { generateHistoryWindow, historyGenerateModel } from "@/lib/history-generate";
-import { seedEventsFor } from "@/lib/history-seed";
+import {
+  RETIRED_HISTORY_EVENT_IDS,
+  RETIRED_HISTORY_EVENT_TITLES,
+  seedEventsFor,
+  withoutRetiredHistoryEvents,
+} from "@/lib/history-seed";
 import {
   clampYear,
   GRANULARITY,
@@ -105,6 +114,12 @@ async function handleEvents(input: ParsedRequest, request: Request) {
   let mongo = mongoConfigured;
   if (mongoConfigured) {
     try {
+      if (category === "empires") {
+        await purgeRetiredHistoryEvents(
+          [...RETIRED_HISTORY_EVENT_IDS],
+          [...RETIRED_HISTORY_EVENT_TITLES],
+        );
+      }
       cached = await loadCachedWindows(category, granularity, windows);
     } catch {
       mongo = false;
@@ -121,7 +136,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
     const seed = seedEventsFor(category, window.start, window.end);
     const hit = cached.get(key);
     if (hit) {
-      collected.push(hit.events);
+      collected.push(withoutRetiredHistoryEvents(hit.events));
       collected.push(seed);
       statuses.push({ ...window, key, source: "cache" });
       continue;
@@ -164,7 +179,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
       return NextResponse.json(
         {
           error: "Too many timeline fills. Try again in a moment.",
-          events: mergeEvents(...collected),
+          events: withoutRetiredHistoryEvents(mergeEvents(...collected)),
           windows: [
             ...statuses,
             ...generateNow.map((window) => ({
@@ -253,7 +268,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
   }
 
   return NextResponse.json({
-    events: mergeEvents(...collected),
+    events: withoutRetiredHistoryEvents(mergeEvents(...collected)),
     windows: statuses.sort((a, b) => a.start - b.start),
     meta: {
       mongo,

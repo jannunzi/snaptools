@@ -174,7 +174,7 @@ export const ZOOM_LEVELS: ZoomLevel[] = [
     granularity: "millennium",
     pixelsPerYear: 0.3,
     tick: 500,
-    labelEvery: 500,
+    labelEvery: 1000,
   },
   {
     level: 1,
@@ -546,16 +546,16 @@ export function ticksForRange(
   }
 
   const step = tick > 0 ? tick : 1;
+  const labelStep = labelEvery > 0 ? labelEvery : step;
+  // Align to year 0 so panning does not phase-shift 100/200 into 150/250.
   const first = Math.ceil(start / step - 1e-9) * step;
   const marks: TimelineTick[] = [];
   const maxMarks = 240;
   for (let i = 0; i < maxMarks; i += 1) {
     const year = first + i * step;
     if (year > end + 1e-9) break;
-    const offset = year - first;
     const label =
-      Math.abs(Math.round(offset / labelEvery) * labelEvery - offset) <
-      step / 3;
+      Math.abs(Math.round(year / labelStep) * labelStep - year) < step / 3;
     marks.push({
       year,
       label,

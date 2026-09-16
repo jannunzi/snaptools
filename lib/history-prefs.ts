@@ -14,20 +14,24 @@ import {
 
 export const HISTORY_PREFS_KEY = "snaptools.history-timeline.v1";
 
+export const MAX_LANES = 12;
+export const MAX_CUSTOM = 16;
+
 export const CUSTOM_HUE_PRESETS = [
-  { hue: 32, label: "Sand" },
-  { hue: 210, label: "Slate" },
-  { hue: 322, label: "Rose" },
-  { hue: 10, label: "Clay" },
-  { hue: 92, label: "Sage" },
+  { hue: 46, label: "Straw" },
+  { hue: 212, label: "Slate" },
+  { hue: 328, label: "Rose" },
+  { hue: 6, label: "Clay" },
+  { hue: 88, label: "Sage" },
   { hue: 260, label: "Lilac" },
   { hue: 0, label: "Stone" },
-  { hue: 48, label: "Straw" },
+  { hue: 28, label: "Sand" },
 ] as const;
 
 export type HistoryLanePref = {
   id: string;
   category: TimelineCategoryId;
+  hue?: number;
 };
 
 export type HistoryTimelinePrefs = {
@@ -70,6 +74,15 @@ export function nextCustomCategoryId(
   return `custom-${Date.now().toString(36)}`;
 }
 
+export function nextLaneId(existing: HistoryLanePref[]) {
+  const taken = new Set(existing.map((item) => item.id));
+  for (let i = 0; i < 80; i += 1) {
+    const id = `lane-${i}`;
+    if (!taken.has(id)) return id;
+  }
+  return `lane-${Date.now().toString(36)}`;
+}
+
 export function parseHistoryPrefs(raw: unknown): HistoryTimelinePrefs {
   const defaults = defaultHistoryPrefs();
   if (!raw || typeof raw !== "object") return defaults;
@@ -86,7 +99,7 @@ export function parseHistoryPrefs(raw: unknown): HistoryTimelinePrefs {
 
   const customCategories: CustomHistoryCategory[] = [];
   if (Array.isArray(row.customCategories)) {
-    for (const item of row.customCategories.slice(0, 24)) {
+    for (const item of row.customCategories.slice(0, MAX_CUSTOM)) {
       if (!item || typeof item !== "object") continue;
       const cat = item as Record<string, unknown>;
       const id = String(cat.id ?? "");
@@ -113,24 +126,19 @@ export function parseHistoryPrefs(raw: unknown): HistoryTimelinePrefs {
   let lanes = defaults.lanes;
   if (Array.isArray(row.lanes) && row.lanes.length > 0) {
     const parsed: HistoryLanePref[] = [];
-    for (const [index, item] of row.lanes.slice(0, 6).entries()) {
+    for (const [index, item] of row.lanes.slice(0, MAX_LANES).entries()) {
       if (!item || typeof item !== "object") continue;
       const lane = item as Record<string, unknown>;
       const category = String(lane.category ?? "");
       if (!isTimelineCategory(category) || !known.has(category)) continue;
+      const hue = clampHue(lane.hue);
       parsed.push({
         id: String(lane.id ?? `lane-${index}`).slice(0, 40) || `lane-${index}`,
         category,
+        ...(hue !== null ? { hue } : {}),
       });
     }
-    if (parsed.length > 0) {
-      while (parsed.length < defaults.lanes.length) {
-        const fallback = defaults.lanes[parsed.length];
-        if (fallback) parsed.push(fallback);
-        else break;
-      }
-      lanes = parsed;
-    }
+    if (parsed.length > 0) lanes = parsed;
   }
 
   return { zoom, centerYear, lanes, customCategories };
