@@ -855,12 +855,6 @@ export const RETIRED_HISTORY_EVENT_IDS = new Set([
 
 export const RETIRED_HISTORY_EVENT_TITLES = new Set([
   "Roman Empire begins",
-  "Battle of Tours",
-  "Umayyad siege of Constantinople",
-  "Siege of Constantinople",
-  "Second Arab siege of Constantinople",
-  "Battle of Talas",
-  "Battle of the Talas",
 ]);
 
 export function isRetiredHistoryEvent(event: {
