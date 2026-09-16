@@ -11,7 +11,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [Telling Time Practice](/tools/telling-time) — read an analog clock and type the digital time. Whole hours through to the minute; Practice, 60-second quiz, or Streak. Instant feedback and missed-time review.
 - [Counting Money Practice](/tools/counting-money) — count US coins and bills, or make change. Easy coin ID through mixed coins, $1/$5 bills, and make-change; Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
 - [Addition & Subtraction Facts Practice](/tools/addition-subtraction-facts) — addition, subtraction, or mixed facts through 20. Easy / Medium / Challenge presets, then Practice, a 60-second quiz, or Streak. Instant feedback, missed/slow-fact review, printable addition chart.
-- [History Timeline](/tools/history-timeline) — horizontal world history (past left, future right) with parallel lanes. Swap a lane’s category, zoom millennia to years, and fill missing spans with Grok. Seeded events show on first paint; MongoDB caches category + time window + granularity.
+- [History Timeline](/tools/history-timeline) — horizontal world history (past left, future right) with parallel lanes. Swap a lane’s category or add your own, zoom millennia to days, and fill missing spans with Grok. Zoom and scroll restore on reload. Seeded events show on first paint; MongoDB caches category + time window + granularity.
 
 ## Stack
 
@@ -108,7 +108,7 @@ Without a key, spelling falls back to the browser voice, coloring still uses the
 
 ### History Timeline cache
 
-Events are stored in `snaptools.history_event_windows` (or `MONGODB_DB` if you set a different SnapTools database), keyed by **category + granularity + aligned window start**. Zooming in requests finer windows; those fills add detail without repeating a coarse query. The course `web-dev` database is never used.
+Events are stored in `snaptools.history_event_windows` (or `MONGODB_DB` if you set a different SnapTools database), keyed by **category + granularity + aligned window start**. Zooming in (including months, weeks, and days) requests finer windows; those fills add detail without repeating a coarse query. Custom lane names travel with the request so Grok can fill user-defined categories. Zoom, scroll position, and personal categories are stored in the browser (`localStorage`). The course `web-dev` database is never used.
 
 ```bash
 # after adding MONGODB_URI to .env.local

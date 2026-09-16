@@ -1,9 +1,9 @@
 import type { Collection, Db } from "mongodb";
 import {
-  type HistoryCategoryId,
   type HistoryEvent,
   type HistoryGranularity,
   type HistoryWindow,
+  type TimelineCategoryId,
   windowKey,
 } from "@/lib/history-timeline";
 import { getMongoDb } from "@/lib/mongodb";
@@ -12,7 +12,7 @@ export const HISTORY_WINDOWS_COLLECTION = "history_event_windows";
 
 export type CachedHistoryWindow = {
   key: string;
-  category: HistoryCategoryId;
+  category: TimelineCategoryId;
   granularity: HistoryGranularity;
   windowStart: number;
   windowEnd: number;
@@ -60,7 +60,7 @@ async function windowsCollection(db: Db) {
 }
 
 export async function loadCachedWindows(
-  category: HistoryCategoryId,
+  category: TimelineCategoryId,
   granularity: HistoryGranularity,
   windows: HistoryWindow[],
 ) {
@@ -69,17 +69,17 @@ export async function loadCachedWindows(
     return new Map<string, CachedHistoryWindow>();
   }
 
-  const starts = windows.map((window) => window.start);
+  const keys = windows.map((window) =>
+    windowKey(category, granularity, window.start),
+  );
   const collection = await windowsCollection(db);
-  const rows = await collection
-    .find({ category, granularity, windowStart: { $in: starts } })
-    .toArray();
+  const rows = await collection.find({ key: { $in: keys } }).toArray();
 
   return new Map(rows.map((row) => [row.key, row]));
 }
 
 export async function saveGeneratedWindow(input: {
-  category: HistoryCategoryId;
+  category: TimelineCategoryId;
   granularity: HistoryGranularity;
   window: HistoryWindow;
   events: HistoryEvent[];

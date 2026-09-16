@@ -4,19 +4,21 @@ import {
   GRANULARITY,
   getCategory,
   NOW_YEAR,
-  type HistoryCategoryId,
+  partsToYear,
   type HistoryEvent,
   type HistoryGranularity,
   type HistoryWindow,
+  type TimelineCategoryId,
 } from "@/lib/history-timeline";
 import { XAI_CHAT_MODEL, xaiChatJson } from "@/lib/xai";
 
 const SYSTEM_PROMPT = [
   "You are a careful historian writing captions for a horizontal world-history timeline.",
   "Return only JSON of the form {\"events\":[...]} with no markdown.",
-  "Each event must include: year (integer; negative = BCE), endYear (integer or null), title, summary, significance (1-5), projected (boolean).",
+  "Each event must include: year (number; negative = BCE), endYear (number or null), title, summary, significance (1-5), projected (boolean).",
+  "Optional month (1-12) and day (1-31) refine the start date when the civil date is known.",
   "For empires, dynasties, wars, lives, voyages, and other spans, set endYear to the conventional end. If it still exists today, set endYear to the present year.",
-  "Point events (an invention, a single work, a single year) use endYear null.",
+  "Point events (an invention, a single work, a single day) use endYear null.",
   "Be accurate. Prefer conventional scholarly dates. Do not invent fake day-level precision.",
   "If the window is after the present year, mark projected true and write cautious forecasts, not science fiction.",
   "No mythology presented as fact. No copyrighted long quotations. One or two sentences per summary.",
@@ -32,15 +34,36 @@ function clampSignificance(value: unknown): 1 | 2 | 3 | 4 | 5 {
   return 5;
 }
 
-function asYear(value: unknown) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return null;
-  return Math.round(n);
+function asInstant(
+  row: Record<string, unknown>,
+  granularity: HistoryGranularity,
+) {
+  const year = Number(row.year);
+  if (!Number.isFinite(year)) return null;
+
+  const fine =
+    granularity === "month" ||
+    granularity === "week" ||
+    granularity === "day";
+
+  if (!fine) return Math.round(year);
+  if (year < 0) return Math.round(year);
+
+  const month = Number(row.month);
+  const day = Number(row.day);
+  if (Number.isFinite(month) && month >= 1 && month <= 12) {
+    return partsToYear(
+      Math.trunc(year),
+      month,
+      Number.isFinite(day) ? day : 1,
+    );
+  }
+  return year;
 }
 
 function parseGeneratedEvents(
   payload: unknown,
-  category: HistoryCategoryId,
+  category: TimelineCategoryId,
   window: HistoryWindow,
   granularity: HistoryGranularity,
 ): HistoryEvent[] {
@@ -52,7 +75,7 @@ function parseGeneratedEvents(
   for (const item of list) {
     if (!item || typeof item !== "object") continue;
     const row = item as Record<string, unknown>;
-    const year = asYear(row.year);
+    const year = asInstant(row, granularity);
     if (year === null) continue;
     if (year < window.start - slack || year >= window.end + slack) continue;
 
@@ -60,7 +83,10 @@ function parseGeneratedEvents(
     const summary = String(row.summary ?? "").trim().slice(0, 280);
     if (!title || !summary) continue;
 
-    const endYearRaw = asYear(row.endYear);
+    const endYearRaw = asInstant(
+      { year: row.endYear, month: row.endMonth, day: row.endDay },
+      granularity,
+    );
     const endYear =
       endYearRaw !== null && endYearRaw > year ? endYearRaw : undefined;
     const projected =
@@ -83,25 +109,46 @@ function parseGeneratedEvents(
   return events;
 }
 
+function precisionHint(granularity: HistoryGranularity) {
+  if (granularity === "day") {
+    return "Prefer events with a known calendar day. Include month and day. Skip undated year-only items unless nothing dated exists.";
+  }
+  if (granularity === "week") {
+    return "Prefer events dated to a week or day. Include month and day when known.";
+  }
+  if (granularity === "month") {
+    return "Prefer events dated to a month. Include month (and day when known).";
+  }
+  return "Year-level dates are enough. Do not invent a month or day.";
+}
+
 export async function generateHistoryWindow(options: {
   apiKey: string;
-  category: HistoryCategoryId;
+  category: TimelineCategoryId;
+  categoryLabel?: string;
   granularity: HistoryGranularity;
   window: HistoryWindow;
   knownTitles: string[];
 }): Promise<HistoryEvent[]> {
   const spec = GRANULARITY[options.granularity];
-  const category = getCategory(options.category);
+  const category = getCategory(options.category, [
+    {
+      id: options.category,
+      label: options.categoryLabel || getCategory(options.category).label,
+      hue: 210,
+    },
+  ]);
   const known = options.knownTitles.slice(0, 16).join("; ") || "none";
 
   const user = [
     `Category: ${category.label} — ${category.hint}`,
-    `Window: ${formatYearRange(options.window.start, options.window.end)} (start inclusive, end exclusive).`,
+    `Window: ${formatYearRange(options.window.start, options.window.end, options.granularity)} (start inclusive, end exclusive).`,
     `Granularity: ${options.granularity}. Aim for ${spec.targetCount} distinct events at this resolution.`,
+    precisionHint(options.granularity),
     `Present year: ${NOW_YEAR}. Years after that are forecasts.`,
     `Do not repeat these already-shown titles: ${known}.`,
     `For long-lived subjects (empires, wars, composers' lives, expeditions) endYear is required.`,
-    "Return JSON: {\"events\":[{\"year\":1526,\"endYear\":1857,\"title\":\"Mughal Empire\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
+    "Return JSON: {\"events\":[{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
   ].join("\n");
 
   const payload = await xaiChatJson({

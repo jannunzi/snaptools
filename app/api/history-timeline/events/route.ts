@@ -5,14 +5,14 @@ import { seedEventsFor } from "@/lib/history-seed";
 import {
   clampYear,
   GRANULARITY,
-  isHistoryCategory,
   isHistoryGranularity,
+  isTimelineCategory,
   mergeEvents,
   TIMELINE_END,
   TIMELINE_START,
-  type HistoryCategoryId,
   type HistoryEvent,
   type HistoryGranularity,
+  type TimelineCategoryId,
   windowKey,
   windowsOverlapping,
 } from "@/lib/history-timeline";
@@ -38,7 +38,8 @@ type ParsedRequest =
   | { ok: false; error: string }
   | {
       ok: true;
-      category: HistoryCategoryId;
+      category: TimelineCategoryId;
+      categoryLabel?: string;
       granularity: HistoryGranularity;
       start: number;
       end: number;
@@ -47,6 +48,7 @@ type ParsedRequest =
 
 function readRequest(input: {
   category?: unknown;
+  categoryLabel?: unknown;
   start?: unknown;
   end?: unknown;
   granularity?: unknown;
@@ -60,8 +62,9 @@ function readRequest(input: {
     fillRaw === 1 ||
     fillRaw === "1" ||
     fillRaw === "true";
+  const categoryLabel = String(input.categoryLabel ?? "").trim().slice(0, 48);
 
-  if (!isHistoryCategory(categoryRaw)) {
+  if (!isTimelineCategory(categoryRaw)) {
     return { ok: false, error: "Unknown category." };
   }
   if (!isHistoryGranularity(granularityRaw)) {
@@ -77,6 +80,7 @@ function readRequest(input: {
   return {
     ok: true,
     category: categoryRaw,
+    categoryLabel: categoryLabel || undefined,
     granularity: granularityRaw,
     start,
     end,
@@ -91,7 +95,7 @@ function jsonError(message: string, status: number) {
 async function handleEvents(input: ParsedRequest, request: Request) {
   if (!input.ok) return jsonError(input.error, 400);
 
-  const { category, granularity, start, end, fill } = input;
+  const { category, categoryLabel, granularity, start, end, fill } = input;
   const windows = windowsOverlapping(start, end, granularity);
   const spec = GRANULARITY[granularity];
   const apiKey = getXaiApiKey();
@@ -131,7 +135,8 @@ async function handleEvents(input: ParsedRequest, request: Request) {
       });
       continue;
     }
-    if (seed.length >= spec.minSeed) {
+    // minSeed 0 means "always ask at this zoom" (year / month / week / day).
+    if (spec.minSeed > 0 && seed.length >= spec.minSeed) {
       statuses.push({ ...window, key, source: "seed" });
       continue;
     }
@@ -194,6 +199,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
         const events = await generateHistoryWindow({
           apiKey,
           category,
+          categoryLabel,
           granularity,
           window,
           knownTitles: known,
@@ -273,6 +279,7 @@ export async function GET(request: Request) {
   return handleEvents(
     readRequest({
       category: url.searchParams.get("category"),
+      categoryLabel: url.searchParams.get("categoryLabel"),
       start: url.searchParams.get("start"),
       end: url.searchParams.get("end"),
       granularity: url.searchParams.get("granularity"),
@@ -296,6 +303,7 @@ export async function POST(request: Request) {
   return handleEvents(
     readRequest({
       category: body.category,
+      categoryLabel: body.categoryLabel,
       start: body.start,
       end: body.end,
       granularity: body.granularity,

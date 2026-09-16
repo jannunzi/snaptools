@@ -3,37 +3,43 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { analyticsEvents, trackEvent } from "@/lib/analytics";
-import { eventSwatch } from "@/lib/history-colors";
+import { eventSwatch, hueSwatch } from "@/lib/history-colors";
+import {
+  CUSTOM_HUE_PRESETS,
+  defaultHistoryPrefs,
+  loadHistoryPrefs,
+  nextCustomCategoryId,
+  saveHistoryPrefs,
+  type HistoryLanePref,
+} from "@/lib/history-prefs";
 import { historySeedEvents } from "@/lib/history-seed";
 import {
-  DEFAULT_CENTER_YEAR,
-  DEFAULT_LANES,
-  DEFAULT_ZOOM,
   ERA_PRESETS,
   eventBarMetrics,
   eventOverlaps,
   eventSpan,
-  formatYear,
   formatYearRange,
   getCategory,
   GRANULARITY,
   historyCategories,
-  isHistoryCategory,
+  isTimelineCategory,
   NOW_YEAR,
-  POINT_EVENT_MIN_WIDTH,
+  pointMinWidth,
   shouldShowEvent,
   ticksForRange,
   timelineWidth,
   TIMELINE_END,
   TIMELINE_START,
-  type HistoryCategoryId,
+  type CustomHistoryCategory,
   type HistoryEvent,
   type HistoryGranularity,
+  type TimelineCategoryId,
   windowKey,
   windowsOverlapping,
   xToYear,
@@ -50,8 +56,7 @@ const LANE_PAD = 10;
 const PACK_GAP = 8;
 const DEBOUNCE_MS = 280;
 const OVERSCAN_PX = 360;
-
-type Lane = { id: string; category: HistoryCategoryId };
+const MAX_CUSTOM = 16;
 
 type EventsResponse = {
   events?: HistoryEvent[];
@@ -88,6 +93,7 @@ function debounce<T extends (...args: never[]) => void>(fn: T, wait: number) {
 function packEvents(
   events: HistoryEvent[],
   pixelsPerYear: number,
+  minWidth: number,
   maxRows = 3,
 ) {
   const rowEnds: number[] = [];
@@ -103,7 +109,7 @@ function packEvents(
   );
 
   for (const event of sorted) {
-    const bar = eventBarMetrics(event, pixelsPerYear);
+    const bar = eventBarMetrics(event, pixelsPerYear, minWidth);
     let row = rowEnds.findIndex((end) => bar.x >= end + PACK_GAP);
     if (row === -1) {
       if (rowEnds.length >= maxRows) {
@@ -128,22 +134,25 @@ function packEvents(
 export function HistoryTimeline() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const detailRef = useRef<HTMLElement | null>(null);
-  const centerYearRef = useRef(DEFAULT_CENTER_YEAR);
+  const centerYearRef = useRef(defaultHistoryPrefs().centerYear);
   const loadedRef = useRef(new Set<string>());
   const inflightRef = useRef(new Set<string>());
   const didCenter = useRef(false);
+  const customRef = useRef<CustomHistoryCategory[]>([]);
 
-  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
-  const [lanes, setLanes] = useState<Lane[]>(() =>
-    DEFAULT_LANES.map((category, index) => ({
-      id: `lane-${index}`,
-      category,
-    })),
+  const [prefsReady, setPrefsReady] = useState(false);
+  const [zoom, setZoom] = useState(defaultHistoryPrefs().zoom);
+  const [lanes, setLanes] = useState<HistoryLanePref[]>(
+    () => defaultHistoryPrefs().lanes,
   );
+  const [customCategories, setCustomCategories] = useState<
+    CustomHistoryCategory[]
+  >([]);
+  const [draftName, setDraftName] = useState("");
+  const [draftHue, setDraftHue] = useState<number>(CUSTOM_HUE_PRESETS[0].hue);
   const [eventsById, setEventsById] = useState<Record<string, HistoryEvent>>(
     () => Object.fromEntries(historySeedEvents.map((event) => [event.id, event])),
   );
-  const [loadingKeys, setLoadingKeys] = useState<string[]>([]);
   const [viewport, setViewport] = useState({ left: 0, width: 720 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [status, setStatus] = useState<{
@@ -152,10 +161,13 @@ export function HistoryTimeline() {
     note: string;
   }>({ mongo: null, xai: null, note: "Seeded events are ready." });
 
-  const zoomSpec = ZOOM_LEVELS[zoom] ?? ZOOM_LEVELS[DEFAULT_ZOOM];
+  customRef.current = customCategories;
+
+  const zoomSpec = ZOOM_LEVELS[zoom] ?? ZOOM_LEVELS[defaultHistoryPrefs().zoom];
   const granularity = zoomSpec.granularity;
   const pixelsPerYear = zoomSpec.pixelsPerYear;
   const width = timelineWidth(pixelsPerYear);
+  const minEventWidth = pointMinWidth(granularity);
 
   const visible = useMemo(() => {
     const pad = OVERSCAN_PX / pixelsPerYear;
@@ -174,9 +186,23 @@ export function HistoryTimeline() {
         visible.end,
         zoomSpec.tick,
         zoomSpec.labelEvery,
+        granularity,
       ),
-    [visible.end, visible.start, zoomSpec.labelEvery, zoomSpec.tick],
+    [granularity, visible.end, visible.start, zoomSpec.labelEvery, zoomSpec.tick],
   );
+  const gridTicks = useMemo(
+    () => ticks.filter((tick) => tick.grid),
+    [ticks],
+  );
+
+  const persistPrefs = useCallback(() => {
+    saveHistoryPrefs({
+      zoom,
+      centerYear: centerYearRef.current,
+      lanes,
+      customCategories: customRef.current,
+    });
+  }, [lanes, zoom]);
 
   const readViewport = useCallback(() => {
     const node = scrollerRef.current;
@@ -185,7 +211,8 @@ export function HistoryTimeline() {
     const viewWidth = node.clientWidth || 720;
     centerYearRef.current = xToYear(left + viewWidth / 2, pixelsPerYear);
     setViewport({ left, width: viewWidth });
-  }, [pixelsPerYear]);
+    persistPrefs();
+  }, [persistPrefs, pixelsPerYear]);
 
   const scrollToYear = useCallback(
     (year: number, behavior: ScrollBehavior = "smooth") => {
@@ -212,7 +239,7 @@ export function HistoryTimeline() {
 
   const fetchRange = useCallback(
     async (
-      categories: HistoryCategoryId[],
+      categories: TimelineCategoryId[],
       start: number,
       end: number,
       gran: HistoryGranularity,
@@ -232,14 +259,15 @@ export function HistoryTimeline() {
             windowKey(category, gran, window.start),
           );
           keys.forEach((key) => inflightRef.current.add(key));
-          setLoadingKeys((prev) => [...new Set([...prev, ...keys])]);
 
           try {
+            const meta = getCategory(category, customRef.current);
             const response = await fetch("/api/history-timeline/events", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 category,
+                categoryLabel: meta.label,
                 start: needed[0].start,
                 end: needed[needed.length - 1].end,
                 granularity: gran,
@@ -295,7 +323,6 @@ export function HistoryTimeline() {
             }));
           } finally {
             keys.forEach((key) => inflightRef.current.delete(key));
-            setLoadingKeys((prev) => prev.filter((key) => !keys.includes(key)));
           }
         }),
       );
@@ -303,7 +330,22 @@ export function HistoryTimeline() {
     [],
   );
 
+  useLayoutEffect(() => {
+    const prefs = loadHistoryPrefs();
+    setZoom(prefs.zoom);
+    setLanes(prefs.lanes);
+    setCustomCategories(prefs.customCategories);
+    centerYearRef.current = prefs.centerYear;
+    setPrefsReady(true);
+  }, []);
+
   useEffect(() => {
+    if (!prefsReady) return;
+    persistPrefs();
+  }, [lanes, persistPrefs, prefsReady, zoom]);
+
+  useEffect(() => {
+    if (!prefsReady) return;
     const node = scrollerRef.current;
     if (!node) return;
     const onScroll = debounce(() => readViewport(), DEBOUNCE_MS);
@@ -316,28 +358,30 @@ export function HistoryTimeline() {
       node.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
     };
-  }, [readViewport]);
+  }, [prefsReady, readViewport]);
 
   useEffect(() => {
+    if (!prefsReady) return;
     const node = scrollerRef.current;
     if (!node) return;
     const year = didCenter.current
       ? centerYearRef.current
-      : DEFAULT_CENTER_YEAR;
+      : centerYearRef.current;
     didCenter.current = true;
     const left = yearToX(year, pixelsPerYear) - node.clientWidth / 2;
     node.scrollLeft = Math.max(0, left);
     centerYearRef.current = year;
     readViewport();
-  }, [pixelsPerYear, readViewport]);
+  }, [pixelsPerYear, prefsReady, readViewport]);
 
   useEffect(() => {
+    if (!prefsReady) return;
     const categories = lanes.map((lane) => lane.category);
     const timer = window.setTimeout(() => {
       void fetchRange(categories, visible.start, visible.end, granularity, true);
     }, DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
-  }, [fetchRange, granularity, lanes, visible.end, visible.start]);
+  }, [fetchRange, granularity, lanes, prefsReady, visible.end, visible.start]);
 
   useEffect(() => {
     void fetch("/api/history-timeline/events?status=1")
@@ -355,7 +399,12 @@ export function HistoryTimeline() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target && (target.tagName === "INPUT" || target.tagName === "SELECT" || target.tagName === "TEXTAREA")) {
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "SELECT" ||
+          target.tagName === "TEXTAREA")
+      ) {
         return;
       }
       if (event.key === "ArrowRight") {
@@ -378,7 +427,8 @@ export function HistoryTimeline() {
     return () => window.removeEventListener("keydown", onKey);
   }, [applyZoom, zoom]);
 
-  const swapLane = (laneId: string, category: HistoryCategoryId) => {
+  const swapLane = (laneId: string, category: TimelineCategoryId) => {
+    if (!isTimelineCategory(category)) return;
     setLanes((prev) =>
       prev.map((lane) => (lane.id === laneId ? { ...lane, category } : lane)),
     );
@@ -390,6 +440,44 @@ export function HistoryTimeline() {
     });
   };
 
+  const addCustomCategory = () => {
+    const label = draftName.trim().slice(0, 32);
+    if (label.length < 2 || customCategories.length >= MAX_CUSTOM) return;
+    const id = nextCustomCategoryId(label, customCategories);
+    const next: CustomHistoryCategory = {
+      id,
+      label,
+      hue: draftHue,
+      hint: "Custom lane",
+    };
+    setCustomCategories((prev) => [...prev, next]);
+    setLanes((prev) => {
+      const copy = [...prev];
+      const last = copy[copy.length - 1];
+      if (last) copy[copy.length - 1] = { ...last, category: id };
+      return copy;
+    });
+    setDraftName("");
+    setSelectedId(null);
+    trackEvent(analyticsEvents.categorySwap, {
+      tool: TOOL_SLUG,
+      category: id,
+      granularity,
+    });
+  };
+
+  const removeCustomCategory = (id: string) => {
+    setCustomCategories((prev) => prev.filter((item) => item.id !== id));
+    setLanes((prev) =>
+      prev.map((lane) =>
+        lane.category === id
+          ? { ...lane, category: defaultHistoryPrefs().lanes[0]?.category ?? "empires" }
+          : lane,
+      ),
+    );
+    setSelectedId(null);
+  };
+
   const jumpEra = (preset: (typeof ERA_PRESETS)[number]) => {
     centerYearRef.current = (preset.start + preset.end) / 2;
     applyZoom(preset.zoom);
@@ -398,7 +486,19 @@ export function HistoryTimeline() {
 
   const allEvents = useMemo(() => Object.values(eventsById), [eventsById]);
   const selected = selectedId ? eventsById[selectedId] : undefined;
-  const loadingSet = useMemo(() => new Set(loadingKeys), [loadingKeys]);
+  const categoryOptions = useMemo(
+    () => [
+      ...historyCategories.map((item) => ({
+        id: item.id,
+        label: item.label,
+      })),
+      ...customCategories.map((item) => ({
+        id: item.id,
+        label: item.label,
+      })),
+    ],
+    [customCategories],
+  );
 
   useEffect(() => {
     if (selected) {
@@ -434,7 +534,7 @@ export function HistoryTimeline() {
             {GRANULARITY[granularity].label}
             <span className="mx-2 font-normal text-ink-muted">·</span>
             <span className="font-normal text-ink-muted">
-              {formatYearRange(Math.round(visible.start), Math.round(visible.end))}
+              {formatYearRange(visible.start, visible.end, granularity)}
             </span>
           </p>
         </div>
@@ -450,13 +550,94 @@ export function HistoryTimeline() {
             </button>
           ))}
         </div>
+        <form
+          className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
+          onSubmit={(event) => {
+            event.preventDefault();
+            addCustomCategory();
+          }}
+        >
+          <label className="min-w-[12rem] flex-1 text-xs font-medium text-ink-muted">
+            New category
+            <input
+              className="snap-input mt-1 min-h-10 w-full px-2.5 text-sm font-normal text-ink"
+              value={draftName}
+              onChange={(event) => setDraftName(event.target.value)}
+              placeholder="Philosophy, fashion, ships…"
+              maxLength={32}
+              autoComplete="off"
+            />
+          </label>
+          <fieldset className="border-0 p-0">
+            <legend className="text-xs font-medium text-ink-muted">Color</legend>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {CUSTOM_HUE_PRESETS.map((preset) => {
+                const swatch = hueSwatch(preset.hue);
+                const selectedHue = draftHue === preset.hue;
+                return (
+                  <button
+                    key={preset.hue}
+                    type="button"
+                    title={preset.label}
+                    aria-pressed={selectedHue}
+                    aria-label={preset.label}
+                    onClick={() => setDraftHue(preset.hue)}
+                    className="h-8 w-8 rounded-full border"
+                    style={{
+                      background: swatch.background,
+                      borderColor: selectedHue ? "var(--ink)" : swatch.border,
+                      boxShadow: selectedHue
+                        ? "0 0 0 2px var(--bg), 0 0 0 3px var(--ink)"
+                        : undefined,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </fieldset>
+          <button
+            type="submit"
+            className="snap-btn min-h-10 px-3 text-sm"
+            disabled={draftName.trim().length < 2 || customCategories.length >= MAX_CUSTOM}
+          >
+            Add lane
+          </button>
+        </form>
+        {customCategories.length > 0 ? (
+          <ul className="flex flex-wrap gap-1.5" aria-label="Custom categories">
+            {customCategories.map((item) => {
+              const swatch = hueSwatch(item.hue);
+              return (
+                <li key={item.id}>
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs text-ink"
+                    style={{
+                      background: swatch.background,
+                      borderColor: swatch.border,
+                    }}
+                  >
+                    {item.label}
+                    <button
+                      type="button"
+                      className="font-medium text-ink-muted hover:text-ink"
+                      onClick={() => removeCustomCategory(item.id)}
+                      aria-label={`Remove ${item.label}`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
       </div>
 
       <div className="flex">
         <div className="w-[7.75rem] shrink-0 border-r border-line sm:w-[9.25rem]">
           <div style={{ height: AXIS_HEIGHT }} className="bg-surface-muted/70" />
           {lanes.map((lane) => {
-            const meta = getCategory(lane.category);
+            const meta = getCategory(lane.category, customCategories);
             return (
               <div
                 key={lane.id}
@@ -472,10 +653,10 @@ export function HistoryTimeline() {
                   value={lane.category}
                   onChange={(event) => {
                     const value = event.target.value;
-                    if (isHistoryCategory(value)) swapLane(lane.id, value);
+                    if (isTimelineCategory(value)) swapLane(lane.id, value);
                   }}
                 >
-                  {historyCategories.map((item) => (
+                  {categoryOptions.map((item) => (
                     <option key={item.id} value={item.id}>
                       {item.label}
                     </option>
@@ -496,6 +677,23 @@ export function HistoryTimeline() {
         >
           <div className="relative" style={{ width }}>
             <div
+              className="pointer-events-none absolute inset-0 z-0"
+              aria-hidden
+            >
+              {gridTicks.map((tick) => (
+                <div
+                  key={`grid-${tick.year}`}
+                  className="absolute top-0 bottom-0 w-px bg-ink/10"
+                  style={{ left: yearToX(tick.year, pixelsPerYear) }}
+                />
+              ))}
+              <div
+                className="absolute top-0 bottom-0 w-px bg-secondary/45"
+                style={{ left: yearToX(NOW_YEAR, pixelsPerYear) }}
+              />
+            </div>
+
+            <div
               className="sticky top-0 z-10 border-b border-line bg-surface-muted/90 backdrop-blur-md"
               style={{ height: AXIS_HEIGHT }}
             >
@@ -510,7 +708,7 @@ export function HistoryTimeline() {
                   />
                   {tick.label ? (
                     <p className="absolute top-3 -translate-x-1/2 whitespace-nowrap text-[11px] tabular-nums text-ink-muted">
-                      {formatYear(tick.year)}
+                      {tick.text}
                     </p>
                   ) : null}
                 </div>
@@ -530,13 +728,14 @@ export function HistoryTimeline() {
               <LaneRow
                 key={lane.id}
                 category={lane.category}
+                customCategories={customCategories}
                 events={allEvents}
                 granularity={granularity}
                 pixelsPerYear={pixelsPerYear}
+                minWidth={minEventWidth}
                 visibleStart={visible.start}
                 visibleEnd={visible.end}
                 scrollLeft={viewport.left}
-                loadingKeys={loadingSet}
                 selectedId={selectedId}
                 onSelect={setSelectedId}
               />
@@ -567,15 +766,16 @@ export function HistoryTimeline() {
       {selected ? (
         <aside
           ref={detailRef}
-          className="border-t border-line bg-secondary-soft/50 px-4 py-4 sm:px-5"
+          className="border-t border-line bg-surface-muted/60 px-4 py-4 sm:px-5"
         >
           <div className="flex items-start justify-between gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">
-              {getCategory(selected.category).label}
+              {getCategory(selected.category, customCategories).label}
               <span className="mx-2 text-line">·</span>
               {formatYearRange(
                 eventSpan(selected).start,
                 eventSpan(selected).end,
+                granularity,
               )}
               {selected.projected ? (
                 <>
@@ -607,28 +807,30 @@ export function HistoryTimeline() {
 
 function LaneRow({
   category,
+  customCategories,
   events,
   granularity,
   pixelsPerYear,
+  minWidth,
   visibleStart,
   visibleEnd,
   scrollLeft,
-  loadingKeys,
   selectedId,
   onSelect,
 }: {
-  category: HistoryCategoryId;
+  category: TimelineCategoryId;
+  customCategories: CustomHistoryCategory[];
   events: HistoryEvent[];
   granularity: HistoryGranularity;
   pixelsPerYear: number;
+  minWidth: number;
   visibleStart: number;
   visibleEnd: number;
   scrollLeft: number;
-  loadingKeys: Set<string>;
   selectedId: string | null;
   onSelect: (id: string) => void;
 }) {
-  const meta = getCategory(category);
+  const meta = getCategory(category, customCategories);
   const overscanYears = OVERSCAN_PX / pixelsPerYear;
   const visibleEvents = events.filter(
     (event) =>
@@ -640,11 +842,7 @@ function LaneRow({
         visibleEnd + overscanYears,
       ),
   );
-  const packed = packEvents(visibleEvents, pixelsPerYear, 3);
-  const windows = windowsOverlapping(visibleStart, visibleEnd, granularity);
-  const pending = windows.filter((window) =>
-    loadingKeys.has(windowKey(category, granularity, window.start)),
-  );
+  const packed = packEvents(visibleEvents, pixelsPerYear, minWidth, 3);
 
   return (
     <div
@@ -653,30 +851,16 @@ function LaneRow({
       role="list"
       aria-label={`${meta.label} events`}
     >
-      <div
-        className="pointer-events-none absolute top-0 bottom-0 w-px bg-secondary/50"
-        style={{ left: yearToX(NOW_YEAR, pixelsPerYear) }}
-        aria-hidden
-      />
-      {pending.map((window) => (
-        <div
-          key={`load-${window.start}`}
-          className="absolute top-3 bottom-3 animate-pulse rounded-xl bg-secondary-soft/70"
-          style={{
-            left: yearToX(window.start, pixelsPerYear),
-            width: Math.max(
-              48,
-              (window.end - window.start) * pixelsPerYear - 8,
-            ),
-          }}
-          aria-hidden
-        />
-      ))}
       {packed.map(({ event, x, width, wide, row }) => {
         const selected = event.id === selectedId;
-        const swatch = eventSwatch(event.category, event.id, selected);
+        const swatch = eventSwatch(
+          event.category,
+          event.id,
+          selected,
+          meta.hue,
+        );
         const span = eventSpan(event);
-        const range = formatYearRange(span.start, span.end);
+        const range = formatYearRange(span.start, span.end, granularity);
         const labelPad = wide
           ? Math.max(10, Math.min(width - 96, scrollLeft - x + 10))
           : 10;
@@ -693,7 +877,7 @@ function LaneRow({
               style={{
                 left: x,
                 width,
-                minWidth: POINT_EVENT_MIN_WIDTH,
+                minWidth,
                 top: LANE_PAD + row * (ROW_HEIGHT + ROW_GAP),
                 height: ROW_HEIGHT,
                 paddingLeft: wide ? labelPad : undefined,
@@ -716,7 +900,7 @@ function LaneRow({
                 <>
                   <span className="flex items-center gap-1.5">
                     <span className="text-[11px] tabular-nums opacity-70">
-                      {formatYear(event.year)}
+                      {formatYearRange(event.year, event.year, granularity)}
                     </span>
                     {event.projected ? (
                       <span className="text-[10px] font-semibold uppercase tracking-wide text-secondary">
