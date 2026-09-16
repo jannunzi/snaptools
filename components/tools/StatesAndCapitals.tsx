@@ -527,7 +527,6 @@ function PlayPanel({
   onFinish: () => void;
 }) {
   const showHint = showAbbr && current.direction === "capital";
-  const expected = officialAnswer(current);
 
   return (
     <div>
@@ -638,7 +637,7 @@ function PlayPanel({
           {feedback === "correct"
             ? `Yes — ${current.state.name}: ${current.state.capital}.`
             : feedback === "wrong"
-              ? `Not quite. ${current.state.name}: ${expected}.`
+              ? `Not quite. ${current.state.name}: ${current.state.capital}.`
               : answerStyle === "choice"
                 ? "Tap an answer."
                 : "Type your answer and press Enter."}
