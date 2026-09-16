@@ -942,18 +942,44 @@ export function HistoryTimeline() {
               return (
                 <div
                   key={lane.id}
+                  data-lane-id={lane.id}
                   className="flex items-start gap-1.5 border-t border-line px-2 py-2.5 sm:px-2.5"
                   style={{ height: bandHeight, background: band.background }}
-                  onDragOver={(event) => event.preventDefault()}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                  }}
                   onDrop={() => onDropLane(lane.id)}
                 >
-                  <button
-                    type="button"
+                  <div
+                    role="button"
+                    tabIndex={0}
                     className="mt-0.5 grid min-h-8 min-w-7 cursor-grab place-items-center rounded-md text-ink-muted hover:bg-surface/80 hover:text-ink active:cursor-grabbing"
                     aria-label={`Reorder ${title}. Use up or down arrow keys.`}
                     draggable
-                    onDragStart={() => {
+                    onDragStart={(event) => {
                       dragLaneId.current = lane.id;
+                      event.dataTransfer.setData("text/plain", lane.id);
+                      event.dataTransfer.effectAllowed = "move";
+                    }}
+                    onPointerDown={(event) => {
+                      if (event.button !== 0) return;
+                      dragLaneId.current = lane.id;
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                    }}
+                    onPointerUp={(event) => {
+                      const source = dragLaneId.current;
+                      if (!source) return;
+                      const hit = document
+                        .elementsFromPoint(event.clientX, event.clientY)
+                        .find(
+                          (node) =>
+                            node instanceof HTMLElement && node.dataset.laneId,
+                        );
+                      if (hit instanceof HTMLElement && hit.dataset.laneId) {
+                        onDropLane(hit.dataset.laneId);
+                      }
+                      dragLaneId.current = null;
                     }}
                     onKeyDown={(event) => {
                       if (event.key === "ArrowUp") {
@@ -966,7 +992,7 @@ export function HistoryTimeline() {
                     }}
                   >
                     <GripIcon />
-                  </button>
+                  </div>
                   <p className="min-w-0 flex-1 pt-1 text-sm font-semibold leading-snug text-ink">
                     {title}
                   </p>
@@ -1018,6 +1044,8 @@ export function HistoryTimeline() {
                   xai={status.xai}
                   onSelect={setSelectedId}
                   onRetry={() => fillNow([lane.category])}
+                  laneId={lane.id}
+                  onDropLane={onDropLane}
                 />
               ))}
               <div
@@ -1141,6 +1169,8 @@ function LaneRow({
   xai,
   onSelect,
   onRetry,
+  laneId,
+  onDropLane,
 }: {
   category: TimelineCategoryId;
   hue?: number;
@@ -1159,6 +1189,8 @@ function LaneRow({
   xai: boolean | null;
   onSelect: (id: string) => void;
   onRetry: () => void;
+  laneId: string;
+  onDropLane: (targetId: string) => void;
 }) {
   const meta = getCategory(category, customCategories);
   const overscanYears = OVERSCAN_PX / pixelsPerYear;
@@ -1183,6 +1215,12 @@ function LaneRow({
       role="list"
       aria-label={`${meta.label} events`}
       aria-busy={fill?.status === "loading"}
+      data-lane-id={laneId}
+      onDragOver={(event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+      }}
+      onDrop={() => onDropLane(laneId)}
     >
       {empty ? (
         <div
