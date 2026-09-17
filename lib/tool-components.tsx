@@ -4,6 +4,7 @@ import { HistoryTimeline } from "@/components/tools/HistoryTimeline";
 import { ComingSoonPanel } from "@/components/tools/ComingSoonPanel";
 import { CountingMoney } from "@/components/tools/CountingMoney";
 import { DivisionFacts } from "@/components/tools/DivisionFacts";
+import { FractionsPractice } from "@/components/tools/FractionsPractice";
 import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
@@ -36,6 +37,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <HistoryTimeline />;
     case "states-and-capitals":
       return <StatesAndCapitals />;
+    case "fractions-practice":
+      return <FractionsPractice />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }

@@ -13,6 +13,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [Addition & Subtraction Facts Practice](/tools/addition-subtraction-facts) — addition, subtraction, or mixed facts through 20. Easy / Medium / Challenge presets, then Practice, a 60-second quiz, or Streak. Instant feedback, missed/slow-fact review, printable addition chart.
 - [History Timeline](/tools/history-timeline) — horizontal world history (past left, future right) with parallel lanes. Swap a lane’s category or add your own, zoom millennia to days, and fill missing spans with Grok. Zoom and scroll restore on reload. Seeded events show on first paint; MongoDB caches category + time window + granularity.
 - [US States & Capitals](/tools/states-and-capitals) — name the capital or the state. Multiple choice or type-the-answer, Census regions, Quick 10 / Full 50 / Streak, optional postal hint, missed-pair review.
+- [Fractions Practice](/tools/fractions-practice) — identify a shaded pie or bar, simplify, name equivalents, compare, add/subtract like denominators, and convert improper ↔ mixed. Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
 
 ## Stack
 
@@ -85,6 +86,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 | `/tools/addition-subtraction-facts` | Live addition and subtraction facts practice |
 | `/tools/history-timeline` | Live multi-lane history timeline |
 | `/tools/states-and-capitals` | Live 50-state capitals quiz |
+| `/tools/fractions-practice` | Live fraction fluency practice |
 | `/api/history-timeline/events` | Cached + generated timeline events |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |

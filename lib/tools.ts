@@ -410,6 +410,42 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "fractions-practice",
+    title: "Fractions Practice",
+    tagline: "Identify, simplify, compare, and operate on fractions.",
+    description:
+      "Read a shaded pie or bar, reduce to lowest terms, compare two fractions, then add and subtract like denominators or convert improper and mixed numbers. Practice, race a 60-second quiz, or see how long you can streak. Instant feedback and missed-item review.",
+    day: 12,
+    publishedOn: "2026-09-17",
+    audience: "Kids, parents, and teachers building fraction fluency (grades ~3–6)",
+    status: "live",
+    howTo:
+      "Start with Easy: name the shaded part of a pie or bar — halves, thirds, fourths, fifths, eighths, and tenths. Type 3/4 or tap the numerator and denominator. When that feels easy, try Medium: simplify, name an equivalent, or compare two fractions. Challenge adds and subtracts with the same denominator and converts improper ↔ mixed numbers. Use Timed for a one-minute sprint; use Streak to find the problems that still stall you.",
+    books: [
+      {
+        asin: "1635783186",
+        title: "Humble Math — 100 Days of Decimals, Percents & Fractions",
+        author: "Humble Math",
+        blurb:
+          "Daily drills for converting, reducing, and operating on fractions/decimals/percents.",
+      },
+      {
+        asin: "148380478X",
+        title: "Spectrum Fractions, Grade 5",
+        author: "Spectrum",
+        blurb:
+          "Focused grade-5 fraction concepts, operations, pretests/posttests, answer key.",
+      },
+      {
+        asin: "1483804801",
+        title: "Spectrum Fractions Workbook, Grade 6",
+        author: "Spectrum",
+        blurb:
+          "Add/subtract/multiply/divide fractions with step-by-step examples and assessments.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
