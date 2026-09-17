@@ -135,6 +135,12 @@ function formatFraction(fraction: Fraction) {
   return `${fraction.n}/${fraction.d}`;
 }
 
+function formatWholeOrFraction(fraction: Fraction) {
+  const reduced = reduce(fraction);
+  if (reduced.d === 1) return String(reduced.n);
+  return formatFraction(reduced);
+}
+
 function formatMixed(mixed: MixedNumber) {
   if (mixed.n === 0) return String(mixed.whole);
   return `${mixed.whole} ${mixed.n}/${mixed.d}`;
@@ -413,11 +419,11 @@ function parseAnswer(raw: string): ParsedAnswer | null {
 function expectedLabel(problem: Problem) {
   switch (problem.kind) {
     case "identify": {
-      const reduced = reduce(problem.answer);
-      if (reduced.n === problem.answer.n && reduced.d === problem.answer.d) {
-        return formatFraction(problem.answer);
+      const pretty = formatWholeOrFraction(problem.answer);
+      if (pretty === formatFraction(problem.answer)) {
+        return pretty;
       }
-      return `${formatFraction(problem.answer)} = ${formatFraction(reduced)}`;
+      return `${formatFraction(problem.answer)} = ${pretty}`;
     }
     case "simplify":
       return `${formatFraction(problem.fraction)} = ${formatFraction(problem.answer)}`;
@@ -427,12 +433,9 @@ function expectedLabel(problem: Problem) {
       return `${formatFraction(problem.left)} ${problem.answer} ${formatFraction(problem.right)}`;
     case "addsub": {
       const sign = problem.op === "add" ? "+" : "−";
-      const reduced = reduce(problem.answer);
+      const pretty = formatWholeOrFraction(problem.answer);
       const sum = formatFraction(problem.answer);
-      const extra =
-        reduced.n === problem.answer.n && reduced.d === problem.answer.d
-          ? ""
-          : ` = ${formatFraction(reduced)}`;
+      const extra = pretty === sum ? "" : ` = ${pretty}`;
       return `${formatFraction(problem.left)} ${sign} ${formatFraction(problem.right)} = ${sum}${extra}`;
     }
     case "convert":
@@ -1359,7 +1362,14 @@ function FractionModel({
   if (model === "bar") {
     return <FractionBar parts={parts} shaded={shaded} label={label} compact={compact} />;
   }
-  return <FractionPie parts={parts} shaded={shaded} label={label} compact={compact} />;
+  return (
+    <FractionPie
+      parts={parts}
+      shaded={shaded}
+      label={label}
+      compact={compact}
+    />
+  );
 }
 
 function FractionBar({
@@ -1404,30 +1414,53 @@ function FractionPie({
   shaded,
   label,
   compact,
+  showDivisions = true,
 }: {
   parts: number;
   shaded: number;
   label: string;
   compact: boolean;
+  showDivisions?: boolean;
 }) {
-  const wedges = pieWedges(parts, shaded);
+  const sweep = parts > 0 ? 360 / parts : 360;
+  const shadedEnd = parts > 0 ? (shaded / parts) * 360 : 0;
+  const whole = shaded >= parts && parts > 0;
+
   return (
     <svg
       viewBox="0 0 200 200"
       role="img"
       aria-label={label}
-      className={`mx-auto h-auto ${compact ? "w-28" : "w-44 sm:w-52"}`}
+      className={`mx-auto h-auto ${compact ? "w-32 sm:w-36" : "w-44 sm:w-52"}`}
     >
-      <circle cx="100" cy="100" r="94" className="fill-surface-muted" />
-      {wedges.map((wedge) => (
+      <circle
+        cx="100"
+        cy="100"
+        r="94"
+        className={whole ? "fill-secondary" : "fill-surface"}
+      />
+      {!whole && shaded > 0 ? (
         <path
-          key={wedge.key}
-          d={wedge.d}
-          className={wedge.shaded ? "fill-secondary" : "fill-surface"}
-          stroke="currentColor"
-          strokeWidth="1.5"
+          d={wedgePath(100, 100, 94, 0, shadedEnd)}
+          className="fill-secondary"
         />
-      ))}
+      ) : null}
+      {showDivisions && parts > 1
+        ? Array.from({ length: parts }, (_, index) => {
+            const point = polar(100, 100, index * sweep, 94);
+            return (
+              <line
+                key={index}
+                x1="100"
+                y1="100"
+                x2={point.x}
+                y2={point.y}
+                className="stroke-line"
+                strokeWidth="1.5"
+              />
+            );
+          })
+        : null}
       <circle
         cx="100"
         cy="100"
@@ -1459,34 +1492,11 @@ function ImproperPies({ fraction }: { fraction: Fraction }) {
           shaded={pie.shaded}
           label={modelDescription(pie.parts, pie.shaded, "pie")}
           compact={pies.length > 1}
+          showDivisions={pie.shaded < pie.parts}
         />
       ))}
     </div>
   );
-}
-
-function pieWedges(parts: number, shaded: number) {
-  if (parts <= 0) return [];
-  if (parts === 1) {
-    return [
-      {
-        key: "full",
-        d: "M 100 6 A 94 94 0 1 1 99.999 6 Z",
-        shaded: shaded > 0,
-      },
-    ];
-  }
-
-  const sweep = 360 / parts;
-  return Array.from({ length: parts }, (_, index) => {
-    const start = index * sweep;
-    const end = (index + 1) * sweep;
-    return {
-      key: `${index}`,
-      d: wedgePath(100, 100, 94, start, end),
-      shaded: index < shaded,
-    };
-  });
 }
 
 function wedgePath(
