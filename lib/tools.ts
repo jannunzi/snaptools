@@ -476,6 +476,43 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "sight-words",
+    category: "languages",
+    title: "Sight Words Practice",
+    tagline: "Flash and type high-frequency Dolch words.",
+    description:
+      "Practice Dolch pre-primer through grade 3 sight words. Flash recognition (pick from four), type-the-word, Practice / Timed / Streak modes, and set size 10 / 20 / 40. Instant feedback and missed-word review.",
+    day: 13,
+    publishedOn: "2026-09-18",
+    audience: "Kids, parents, and teachers building early reading fluency",
+    status: "live",
+    howTo:
+      "Start with Pre-Primer and Flash to warm up. When that feels easy, switch to Type, then Primer / Grade 1+. Use Timed for a one-minute sprint; use Streak to find words that still stall you.",
+    books: [
+      {
+        asin: "1483811883",
+        title: "Spectrum Sight Words, Kindergarten",
+        author: "Spectrum",
+        blurb:
+          "Kindergarten phonics, sentence strips, and flash cards for the first sight words — a paper follow-up after a short on-screen set.",
+      },
+      {
+        asin: "1483811891",
+        title: "Spectrum Sight Words, Grade 1",
+        author: "Spectrum",
+        blurb:
+          "Scrambled sentences and flash cards for grade 1 sight words — extra pages once Pre-Primer and Primer feel easy.",
+      },
+      {
+        asin: "1589473388",
+        title: "School Zone Sight Word Fun Workbook",
+        author: "School Zone",
+        blurb:
+          "1st grade word recognition and spelling pages — short, colorful practice next to the flash and type modes.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
