@@ -7,8 +7,26 @@ export type AmazonBook = {
 
 export type ToolStatus = "live" | "coming-soon";
 
+export const TOOL_CATEGORIES = [
+  { id: "math", label: "Math" },
+  { id: "history-civics", label: "History & Civics" },
+  { id: "languages", label: "Languages" },
+  { id: "arts", label: "Arts" },
+] as const;
+
+export type ToolCategoryId = (typeof TOOL_CATEGORIES)[number]["id"];
+
+export const TOOL_CATEGORY_ORDER: readonly ToolCategoryId[] =
+  TOOL_CATEGORIES.map((category) => category.id);
+
+const TOOL_CATEGORY_LABELS: Record<ToolCategoryId, string> = Object.fromEntries(
+  TOOL_CATEGORIES.map((category) => [category.id, category.label]),
+) as Record<ToolCategoryId, string>;
+
 export type Tool = {
   slug: string;
+  /** Hub grouping. Assign one of the locked ids in TOOL_CATEGORIES. */
+  category: ToolCategoryId;
   title: string;
   tagline: string;
   description: string;
@@ -23,6 +41,7 @@ export type Tool = {
 export const tools: Tool[] = [
   {
     slug: "multiplication-tables",
+    category: "math",
     title: "Multiplication Tables Practice",
     tagline: "Fact fluency for the 1–12 tables.",
     description:
@@ -59,6 +78,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "music-note-recognition",
+    category: "arts",
     title: "Music Note Recognition",
     tagline: "Name the note on the treble staff.",
     description:
@@ -88,6 +108,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "spelling-practice",
+    category: "languages",
     title: "Spelling Practice",
     tagline: "Hear a word, type the spelling — English, Spanish, or French.",
     description:
@@ -124,6 +145,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "printable-coloring",
+    category: "arts",
     title: "Printable Coloring Pages",
     tagline: "Coloring-book line art to color on screen or on paper.",
     description:
@@ -160,6 +182,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "civics-quiz",
+    category: "history-civics",
     title: "USCIS Civics Quiz",
     tagline: "Practice the official 2025 naturalization civics bank.",
     description:
@@ -196,6 +219,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "division-facts",
+    category: "math",
     title: "Division Facts Practice",
     tagline: "Fact fluency for divisors 1–12.",
     description:
@@ -232,6 +256,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "telling-time",
+    category: "math",
     title: "Telling Time Practice",
     tagline: "Read the analog clock — hours to the minute.",
     description:
@@ -268,6 +293,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "counting-money",
+    category: "math",
     title: "Counting Money Practice",
     tagline: "Count US coins and bills — or make change.",
     description:
@@ -304,6 +330,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "addition-subtraction-facts",
+    category: "math",
     title: "Addition & Subtraction Facts Practice",
     tagline: "Fact fluency for sums and differences through 20.",
     description:
@@ -340,6 +367,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "history-timeline",
+    category: "history-civics",
     title: "History Timeline",
     tagline: "Parallel lanes of world history — past left, future right.",
     description:
@@ -376,6 +404,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "states-and-capitals",
+    category: "history-civics",
     title: "US States & Capitals",
     tagline: "Name the capital — or the state.",
     description:
@@ -412,6 +441,7 @@ export const tools: Tool[] = [
   },
   {
     slug: "fractions-practice",
+    category: "math",
     title: "Fractions Practice",
     tagline: "Identify, simplify, compare, and operate on fractions.",
     description:
@@ -454,6 +484,42 @@ export function getTool(slug: string) {
 
 export function getLiveTools() {
   return tools.filter((tool) => tool.status === "live");
+}
+
+export function getCategoryLabel(category: ToolCategoryId) {
+  return TOOL_CATEGORY_LABELS[category];
+}
+
+export function compareToolsByPublishOrder(a: Tool, b: Tool) {
+  const byDate = a.publishedOn.localeCompare(b.publishedOn);
+  if (byDate !== 0) return byDate;
+  return a.day - b.day;
+}
+
+export function getToolsByCategory(
+  category: ToolCategoryId,
+  list: readonly Tool[] = tools,
+) {
+  return list
+    .filter((tool) => tool.category === category)
+    .slice()
+    .sort(compareToolsByPublishOrder);
+}
+
+export type ToolCategoryGroup = {
+  id: ToolCategoryId;
+  label: string;
+  tools: Tool[];
+};
+
+export function groupToolsByCategory(
+  list: readonly Tool[] = tools,
+): ToolCategoryGroup[] {
+  return TOOL_CATEGORY_ORDER.map((id) => ({
+    id,
+    label: getCategoryLabel(id),
+    tools: getToolsByCategory(id, list),
+  })).filter((group) => group.tools.length > 0);
 }
 
 export function getFeaturedTool() {

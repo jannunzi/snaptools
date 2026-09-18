@@ -54,7 +54,7 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 ## How to add a tool
 
 1. **Register it** in `lib/tools.ts`  
-   Add a new entry with `status: "live"`, `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs.
+   Add a new entry with `status: "live"`, `category` (`math` | `history-civics` | `languages` | `arts`), `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs. The homepage groups live tools by that category.
 
 2. **Build the tool** as a client component  
    Add `components/tools/YourTool.tsx`. Keep it account-free: no auth. Server routes are OK when a secret must stay off the client (see `/api/tts`, `/api/coloring/generate`, and `/api/history-timeline/events`).
@@ -74,7 +74,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 
 | Route | What |
 | --- | --- |
-| `/` | Hero, featured card, all-tools directory |
+| `/` | Hero, featured card, tools grouped by category |
 | `/tools/multiplication-tables` | Live multiplication practice |
 | `/tools/music-note-recognition` | Live treble-staff quiz |
 | `/tools/spelling-practice` | Live EN/ES/FR spelling by ear |
