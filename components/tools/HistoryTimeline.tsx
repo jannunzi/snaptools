@@ -440,12 +440,19 @@ export function HistoryTimeline() {
             return { pending: true, rateLimited: false };
           }
           if (fill && missing && empty && !xai) {
+            if (category.startsWith("custom-")) {
+              setFillByCategory((prev) => ({
+                ...prev,
+                [category]: {
+                  status: "error",
+                  note: "This lane needs a server key to fill.",
+                },
+              }));
+              return { pending: false, rateLimited: false };
+            }
             setFillByCategory((prev) => ({
               ...prev,
-              [category]: {
-                status: "error",
-                note: "This lane needs a server key to fill.",
-              },
+              [category]: { status: "ready" },
             }));
             return { pending: false, rateLimited: false };
           }
