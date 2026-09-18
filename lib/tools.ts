@@ -112,13 +112,13 @@ export const tools: Tool[] = [
     title: "Spelling Practice",
     tagline: "Hear a word, type the spelling — English, Spanish, or French.",
     description:
-      "Grok reads a word aloud. Type what you heard. English, Spanish, or French, Easy or Challenge banks, and a 10 / 20 / 40 / all set. US or UK English accent, optional Spanish accents, score and streak. Browser speech is the fallback.",
+      "Clear voice reads a word aloud. Type what you heard. English, Spanish, or French, Easy or Challenge banks, and a 10 / 20 / 40 / all set. US or UK English accent, optional Spanish accents, score and streak. Browser speech is the fallback.",
     day: 3,
     publishedOn: "2026-09-08",
     audience: "Kids and language learners practicing spelling by ear",
     status: "live",
     howTo:
-      "Pick a language, difficulty, and set size (default 10). For English, choose US or UK. Grok speaks the word — type it and press Enter; the box refocuses for the next one. Spanish accent marks are optional unless you turn on Require accent marks. After a set, deal the next batch from the bank.",
+      "Pick a language, difficulty, and set size (default 10). For English, choose US or UK. Clear voice reads the word — type it and press Enter; the box refocuses for the next one. Spanish accent marks are optional unless you turn on Require accent marks. After a set, deal the next batch from the bank.",
     books: [
       {
         asin: "148381176X",
