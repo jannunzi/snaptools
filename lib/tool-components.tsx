@@ -8,6 +8,7 @@ import { FractionsPractice } from "@/components/tools/FractionsPractice";
 import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
+import { SightWords } from "@/components/tools/SightWords";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
 import { StatesAndCapitals } from "@/components/tools/StatesAndCapitals";
 import { TellingTime } from "@/components/tools/TellingTime";
@@ -39,6 +40,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <StatesAndCapitals />;
     case "fractions-practice":
       return <FractionsPractice />;
+    case "sight-words":
+      return <SightWords />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }
