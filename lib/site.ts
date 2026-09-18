@@ -1,4 +1,4 @@
-export const siteName = "SnapTools";
+export const siteName = "FactsTools";
 
 export const siteTagline = "Tiny free tools you finish in seconds.";
 

@@ -1,4 +1,4 @@
-# SnapTools
+# FactsTools
 
 Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts. Most tools run entirely in the browser; History Timeline optionally caches generated events in MongoDB so Grok is not asked twice for the same span.
 
@@ -112,7 +112,7 @@ Without a key, spelling falls back to the browser voice, coloring still uses the
 
 ### History Timeline cache
 
-Events are stored in `snaptools.history_event_windows` (or `MONGODB_DB` if you set a different SnapTools database), keyed by **category + granularity + aligned window start**. Zooming in (including months, weeks, and days) requests finer windows; those fills add detail without repeating a coarse query. Custom lane names travel with the request so Grok can fill user-defined categories. Zoom, scroll position, and personal categories are stored in the browser (`localStorage`). The course `web-dev` database is never used.
+Events are stored in `snaptools.history_event_windows` (or `MONGODB_DB` if you set a different FactsTools database), keyed by **category + granularity + aligned window start**. Zooming in (including months, weeks, and days) requests finer windows; those fills add detail without repeating a coarse query. Custom lane names travel with the request so Grok can fill user-defined categories. Zoom, scroll position, and personal categories are stored in the browser (`localStorage`). The course `web-dev` database is never used.
 
 ```bash
 # after adding MONGODB_URI to .env.local
