@@ -139,7 +139,7 @@ export function SpellingPractice() {
         if (!available) {
           setVoiceSource("browser");
           setVoiceNote((current) =>
-            current ?? "Grok voice is not configured. Using the browser voice.",
+            current ?? "Clear voice is not configured. Using the browser voice.",
           );
         }
       })
@@ -209,7 +209,7 @@ export function SpellingPractice() {
           () => setSpeaking(true),
           () => setSpeaking(false),
         );
-        setVoiceNote("Grok voice unavailable — used the browser voice.");
+        setVoiceNote("Clear voice isn’t available — used the browser voice.");
       }
     },
     [accent, lang, speakWithGrok, stopAudio, word],
@@ -332,7 +332,7 @@ export function SpellingPractice() {
         <div>
           <h2 className="font-display text-2xl text-ink">Choose a language</h2>
           <p className="mt-1 text-sm text-ink-muted">
-            Grok reads the word aloud. Headphones help. The word stays hidden
+            Clear voice reads the word aloud. Headphones help. The word stays hidden
             until you check your spelling. Pick a set size — the bank is much
             larger than one round.
           </p>
@@ -469,7 +469,7 @@ export function SpellingPractice() {
                     setVoiceNote(null);
                   }}
                 />
-                Grok voice
+                Clear voice
               </label>
               <label
                 className={`flex min-h-12 items-center gap-2 rounded-xl border px-3 text-sm ${

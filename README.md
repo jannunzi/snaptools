@@ -4,7 +4,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 
 - [Multiplication Tables Practice](/tools/multiplication-tables) — pick tables 1–12, then Practice, a 60-second quiz, or Streak mode. Instant feedback, missed/slow-fact review, printable chart.
 - [Music Note Recognition](/tools/music-note-recognition) — name the note on a treble staff. Lines-only or lines + spaces, optional ledger lines, Practice or Streak.
-- [Spelling Practice](/tools/spelling-practice) — Grok TTS speaks a word (US/UK English accent, browser fallback); type the spelling in English, Spanish, or French. Set size 10/20/40/all from a larger bank. Spanish accents optional.
+- [Spelling Practice](/tools/spelling-practice) — Clear voice speaks a word (US/UK English accent, browser fallback); type the spelling in English, Spanish, or French. Set size 10/20/40/all from a larger bank. Spanish accents optional.
 - [Printable Coloring Pages](/tools/printable-coloring) — 12 starter-pack pages plus optional this-visit-only Imagine pages. Color on screen, then print or download a PNG.
 - [USCIS Civics Quiz](/tools/civics-quiz) — official 2025 128-question bank. Quick 10, interview 20 (pass 12+), or browse.
 - [Division Facts Practice](/tools/division-facts) — pick divisors 1–12, then Practice, a 60-second quiz, or Streak mode. Exact facts only, missed/slow-fact review, printable chart.
