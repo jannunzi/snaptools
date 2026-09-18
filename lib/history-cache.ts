@@ -192,3 +192,31 @@ export async function purgeMisfitCachedEvents(
 
   return modified;
 }
+
+/**
+ * Drop thin AI-filled BCE windows so a richer seed + prompt can refill them.
+ * Only touches the SnapTools `history_event_windows` collection (never web-dev).
+ */
+let thinAncientPurge: Promise<number> | null = null;
+
+export async function purgeThinAncientCachedWindows() {
+  if (thinAncientPurge) return thinAncientPurge;
+  thinAncientPurge = (async () => {
+    const db = await getMongoDb();
+    if (!db) return 0;
+    const collection = await windowsCollection(db);
+    try {
+      const result = await collection.deleteMany({
+        windowStart: { $lt: 1 },
+        $expr: {
+          $lt: [{ $size: { $ifNull: ["$events", []] } }, 4],
+        },
+      });
+      return result.deletedCount ?? 0;
+    } catch {
+      thinAncientPurge = null;
+      return 0;
+    }
+  })();
+  return thinAncientPurge;
+}

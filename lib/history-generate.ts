@@ -25,9 +25,38 @@ const SYSTEM_PROMPT = [
   "No mythology presented as fact. No copyrighted long quotations. One or two sentences per summary.",
   "Titles stay short. Events must belong to the requested category and fall inside the year window.",
   "Empires means polities, dynasties, and states — never battles, sieges, campaigns, or wars. Battle of Tours, the Umayyad siege of Constantinople, and similar fights belong only in Wars. If the category is Empires, do not list military actions even when they involve an empire.",
-  "For Empires include long-lived states when they fall in the window — examples: Roman Republic (c. 509–27 BCE), Roman Empire (27 BCE–476 CE, West), Eastern Roman / Byzantine Empire (330–1453), Sassanid (to 651), Umayyad, Abbasid, Carolingian, Holy Roman Empire (from 800/962), Tang, Song, First Bulgarian Empire, Ghana Empire, Khmer Empire. Do not treat 27 BCE as the start of Rome as a state.",
+  "For Empires include long-lived states when they fall in the window — Bronze–Iron Age examples if they overlap: Old/Middle/New Kingdom Egypt, Hittite Empire, Middle and Neo-Assyrian empires, Old and Neo-Babylonian, Shang and Zhou China, Carthage, Mitanni, Indus/Harappan, later Roman Republic (c. 509–27 BCE), Roman Empire (27 BCE–476 CE, West), Eastern Roman / Byzantine Empire (330–1453), Sassanid, Umayyad, Abbasid, Carolingian, Holy Roman Empire, Tang, Song, First Bulgarian Empire, Ghana Empire, Khmer Empire. Do not treat 27 BCE as the start of Rome as a state.",
+  "Negative years are BCE. A window such as -2000 to -1000 is the second millennium BCE — historically rich. Do not return an empty or one-item list when well-known category events fall in the window. Only include an example if its conventional span actually overlaps THIS window; do not force dates that sit outside it.",
   "If the category label is a specific subject (for example WWII, fashion, or ships), fill that subject in the window — do not substitute a generic world-history list.",
 ].join(" ");
+
+function ancientCategoryExamples(categoryId: TimelineCategoryId, label: string) {
+  if (categoryId === "empires") {
+    return "Well-known polities to consider when they overlap this window (do not invent dates outside it): Old/Middle/New Kingdom Egypt; Hittite Empire; Middle and Neo-Assyrian; Old and Neo-Babylonian; Shang and Zhou; Carthage; Mitanni; Indus/Harappan; Nanda/Maurya.";
+  }
+  if (categoryId === "inventions") {
+    return "Well-known inventions to consider when they fall in this window: controlled fire (long established by the Neolithic), agriculture, ard plow, the wheel, sail, cuneiform writing, bronze working, iron working, chariot, glass, alphabetic script, aqueduct/qanat precursors. Point events use endYear null.";
+  }
+  if (categoryId === "wars") {
+    return "Well-known conflicts to consider when they fall in this window: Battle of Kadesh; Bronze Age collapse / Sea Peoples; sack of Babylon (1595 BCE); later Greco-Persian or Punic wars only if the window reaches them.";
+  }
+  if (categoryId === "science") {
+    return "Well-known scientific items to consider when they fall in this window: Egyptian civil calendar; Babylonian mathematics (e.g. Plimpton 322); medical papyri; later Euclid only if the window reaches the Hellenistic age.";
+  }
+  if (categoryId === "art") {
+    return "Well-known works to consider when they fall in this window: Great Pyramid of Giza; Standard of Ur; palatial Minoan/Mycenaean art; Nefertiti bust; later Parthenon only if the window reaches Classical Greece.";
+  }
+  if (categoryId === "explorations") {
+    return "Well-known journeys to consider when they fall in this window: Harkhuf to Yam; Hatshepsut to Punt; Phoenician Red Sea and African voyages; later Silk Road missions only if the window reaches them.";
+  }
+  if (categoryId === "sports") {
+    return "Well-known athletic items to consider when they fall in this window: Egyptian tomb wrestling; Minoan bull-leaping; the recorded Olympic Games (776 BCE) if the window reaches them.";
+  }
+  if (categoryId === "musicians") {
+    return "Well-known musical items to consider when they fall in this window: lyres of Ur; Hurrian Hymn H.6. Skip this category rather than inventing named composers who are not attested.";
+  }
+  return `Fill ${label} with well-known items that actually fall in this window. If the period is historically documented for that subject, do not return near-empty JSON.`;
+}
 
 function clampSignificance(value: unknown): 1 | 2 | 3 | 4 | 5 {
   const n = Math.round(Number(value));
@@ -146,16 +175,24 @@ export async function generateHistoryWindow(options: {
   ]);
   const known = options.knownTitles.slice(0, 16).join("; ") || "none";
 
+  const bce =
+    options.window.end <= 1
+      ? `This window is BCE (negative years). ${ancientCategoryExamples(options.category, category.label)} Aim for ${spec.targetCount} events; returning 0–2 items is wrong when the period is rich for this category.`
+      : "";
+
   const user = [
     `Category: ${category.label} — ${category.hint}`,
-    `Window: ${formatYearRange(options.window.start, options.window.end, options.granularity)} (start inclusive, end exclusive).`,
+    `Window: ${formatYearRange(options.window.start, options.window.end, options.granularity)} (start inclusive, end exclusive). Negative years are BCE.`,
     `Granularity: ${options.granularity}. Aim for ${spec.targetCount} distinct events at this resolution.`,
     precisionHint(options.granularity),
+    bce,
     `Present year: ${NOW_YEAR}. Years after that are forecasts.`,
     `Do not repeat these already-shown titles: ${known}.`,
     `For long-lived subjects (empires, wars, composers' lives, expeditions) endYear is required.`,
-    "Return JSON: {\"events\":[{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
-  ].join("\n");
+    "Return JSON: {\"events\":[{\"year\":-1550,\"endYear\":-1069,\"title\":\"New Kingdom Egypt\",\"summary\":\"...\",\"significance\":5,\"projected\":false},{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const payload = await xaiChatJson({
     apiKey: options.apiKey,

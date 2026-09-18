@@ -1,4 +1,4 @@
-export const TIMELINE_START = -3000;
+export const TIMELINE_START = -10000;
 export const TIMELINE_END = 2100;
 export const NOW_YEAR = 2026;
 

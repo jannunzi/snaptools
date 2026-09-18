@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { ancientWindowTooThin } from "@/lib/history-fill";
 import { withoutMisfitEvents } from "@/lib/history-fit";
 import {
   loadCachedWindows,
   purgeMisfitCachedEvents,
   purgeRetiredHistoryEvents,
+  purgeThinAncientCachedWindows,
   saveGeneratedWindow,
 } from "@/lib/history-cache";
 import { generateHistoryWindow, historyGenerateModel } from "@/lib/history-generate";
@@ -123,6 +125,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
         );
         await purgeMisfitCachedEvents("empires");
       }
+      await purgeThinAncientCachedWindows();
       cached = await loadCachedWindows(category, granularity, windows);
     } catch {
       mongo = false;
@@ -138,25 +141,34 @@ async function handleEvents(input: ParsedRequest, request: Request) {
     const key = windowKey(category, granularity, window.start);
     const seed = seedEventsFor(category, window.start, window.end);
     const hit = cached.get(key);
-    if (hit) {
-      collected.push(
-        withoutMisfitEvents(withoutRetiredHistoryEvents(hit.events), category),
-      );
-      collected.push(seed);
+    const cachedEvents = hit
+      ? withoutMisfitEvents(withoutRetiredHistoryEvents(hit.events), category)
+      : [];
+    collected.push(cachedEvents);
+    collected.push(seed);
+    const available = mergeEvents(cachedEvents, seed).length;
+    const richThin = ancientWindowTooThin(
+      available,
+      granularity,
+      category,
+      window,
+    );
+
+    if (hit && !richThin) {
       statuses.push({ ...window, key, source: "cache" });
       continue;
     }
-    collected.push(seed);
     if (!fill) {
       statuses.push({
         ...window,
         key,
-        source: seed.length > 0 ? "seed" : "missing",
+        source: available > 0 ? "seed" : "missing",
       });
       continue;
     }
     // minSeed 0 means "always ask at this zoom" (year / month / week / day).
-    if (spec.minSeed > 0 && seed.length >= spec.minSeed) {
+    // Rich ancient windows still generate when seed+cache is far below target.
+    if (spec.minSeed > 0 && seed.length >= spec.minSeed && !richThin) {
       statuses.push({ ...window, key, source: "seed" });
       continue;
     }
@@ -216,10 +228,9 @@ async function handleEvents(input: ParsedRequest, request: Request) {
 
     const results = await Promise.allSettled(
       generateNow.map(async (window) => {
-        const known = seedEventsFor(category, window.start, window.end).map(
-          (event) => event.title,
-        );
-        const events = await generateHistoryWindow({
+        const seed = seedEventsFor(category, window.start, window.end);
+        const known = seed.map((event) => event.title);
+        const first = await generateHistoryWindow({
           apiKey,
           category,
           categoryLabel,
@@ -227,7 +238,31 @@ async function handleEvents(input: ParsedRequest, request: Request) {
           window,
           knownTitles: known,
         });
-        if (events.length > 0 && mongo) {
+        let events = first;
+        const thinAfterFirst = ancientWindowTooThin(
+          mergeEvents(first, seed).length,
+          granularity,
+          category,
+          window,
+        );
+        if (thinAfterFirst) {
+          const retry = await generateHistoryWindow({
+            apiKey,
+            category,
+            categoryLabel,
+            granularity,
+            window,
+            knownTitles: [...known, ...first.map((event) => event.title)],
+          });
+          events = mergeEvents(first, retry);
+        }
+        const stillThin = ancientWindowTooThin(
+          mergeEvents(events, seed).length,
+          granularity,
+          category,
+          window,
+        );
+        if (events.length > 0 && mongo && !stillThin) {
           try {
             await saveGeneratedWindow({
               category,
@@ -240,7 +275,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
             // Serving generated events still succeeds if the cache write fails.
           }
         }
-        return { window, events };
+        return { window, events, thin: stillThin };
       }),
     );
 
@@ -253,7 +288,10 @@ async function handleEvents(input: ParsedRequest, request: Request) {
         statuses.push({
           ...window,
           key: windowKey(category, granularity, window.start),
-          source: result.value.events.length > 0 ? "generated" : "missing",
+          source:
+            result.value.events.length > 0 && !result.value.thin
+              ? "generated"
+              : "missing",
         });
         continue;
       }
