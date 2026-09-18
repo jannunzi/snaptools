@@ -34,7 +34,8 @@ import { getXaiApiKey } from "@/lib/xai";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const FILL_LIMIT = 8;
+const FILL_LIMIT_PER_CATEGORY = 8;
+const FILL_LIMIT_GLOBAL = 24;
 const FILL_WINDOW_MS = 60_000;
 const MAX_GENERATE_PER_REQUEST = 3;
 
@@ -180,38 +181,33 @@ async function handleEvents(input: ParsedRequest, request: Request) {
   }
 
   if (generateNow.length > 0 && apiKey) {
-    if (!rateLimit(`history:${clientKey(request)}`, FILL_LIMIT, FILL_WINDOW_MS)) {
-      return NextResponse.json(
-        {
-          error: "Too many timeline fills. Try again in a moment.",
-          events: withoutMisfitEvents(
-            withoutRetiredHistoryEvents(mergeEvents(...collected)),
-            category,
-          ),
-          windows: [
-            ...statuses,
-            ...generateNow.map((window) => ({
-              ...window,
-              key: windowKey(category, granularity, window.start),
-              source: "missing" as const,
-            })),
-            ...leftover.map((window) => ({
-              ...window,
-              key: windowKey(category, granularity, window.start),
-              source: "missing" as const,
-            })),
-          ],
-          meta: {
-            mongo,
-            xai: true,
-            generated: 0,
-            cached: cached.size,
-            pending: leftover.length,
-            database: getMongoDbName(),
-          },
+    const ip = clientKey(request);
+    const allowed =
+      rateLimit(`history:${ip}:${category}`, FILL_LIMIT_PER_CATEGORY, FILL_WINDOW_MS) &&
+      rateLimit(`history:${ip}`, FILL_LIMIT_GLOBAL, FILL_WINDOW_MS);
+    // Stay pending — do not 429 a sibling lane just because Empires already filled.
+    if (!allowed) {
+      const waiting = [...generateNow, ...leftover].map((window) => ({
+        ...window,
+        key: windowKey(category, granularity, window.start),
+        source: "missing" as const,
+      }));
+      return NextResponse.json({
+        events: withoutMisfitEvents(
+          withoutRetiredHistoryEvents(mergeEvents(...collected)),
+          category,
+        ),
+        windows: [...statuses, ...waiting],
+        meta: {
+          mongo,
+          xai: true,
+          generated: 0,
+          cached: cached.size,
+          pending: waiting.length,
+          rateLimited: true,
+          database: getMongoDbName(),
         },
-        { status: 429 },
-      );
+      });
     }
 
     const results = await Promise.allSettled(
@@ -257,22 +253,20 @@ async function handleEvents(input: ParsedRequest, request: Request) {
         });
         continue;
       }
-      const seed = seedEventsFor(category, window.start, window.end);
       statuses.push({
         ...window,
         key: windowKey(category, granularity, window.start),
-        source: seed.length > 0 ? "seed" : "missing",
+        source: "missing",
       });
     }
   }
 
-  if (apiKey || generateNow.length === 0) {
+  if (apiKey) {
     for (const window of leftover) {
-      const seed = seedEventsFor(category, window.start, window.end);
       statuses.push({
         ...window,
         key: windowKey(category, granularity, window.start),
-        source: seed.length > 0 ? "seed" : "missing",
+        source: "missing",
       });
     }
   }
@@ -289,6 +283,7 @@ async function handleEvents(input: ParsedRequest, request: Request) {
       generated: generatedCount,
       cached: cached.size,
       pending: apiKey ? leftover.length : 0,
+      rateLimited: false,
       database: getMongoDbName(),
     },
   });

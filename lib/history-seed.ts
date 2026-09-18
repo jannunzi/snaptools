@@ -224,6 +224,27 @@ export const historySeedEvents: HistoryEvent[] = [
   ),
   ev(
     "inventions",
+    -2000,
+    "Spoked-wheel chariot",
+    "Light horse chariots become the prestige weapon of Bronze Age armies.",
+    4,
+  ),
+  ev(
+    "inventions",
+    -1200,
+    "Iron working",
+    "Bloomery iron spreads after the Bronze Age collapse, making metal tools far more common.",
+    5,
+  ),
+  ev(
+    "inventions",
+    -1050,
+    "Phoenician alphabet",
+    "A small consonant alphabet becomes the ancestor of later Mediterranean scripts.",
+    5,
+  ),
+  ev(
+    "inventions",
     105,
     "Paper in Han China",
     "Court official Cai Lun standardizes paper from plant fibers — cheap, light writing.",
@@ -385,6 +406,21 @@ export const historySeedEvents: HistoryEvent[] = [
     4,
   ),
 
+  ev(
+    "wars",
+    -1274,
+    "Battle of Kadesh",
+    "Ramesses II and Muwatalli II fight the best-documented chariot battle of the Bronze Age.",
+    5,
+  ),
+  ev(
+    "wars",
+    -1200,
+    "Bronze Age collapse",
+    "Palaces from Greece to the Levant fall; Sea Peoples and inland wars remake the eastern Mediterranean.",
+    5,
+    { endYear: -1150 },
+  ),
   ev(
     "wars",
     -499,

@@ -79,6 +79,7 @@ type EventsResponse = {
     generated?: number;
     cached?: number;
     pending?: number;
+    rateLimited?: boolean;
     database?: string;
   };
   error?: string;
@@ -176,6 +177,15 @@ function LaneSpinner() {
 }
 
 const SPARSE_COMPLETE_MAX = 2;
+const FILL_BATCH = 2;
+const FILL_RETRY_MS = 450;
+const RATE_LIMIT_RETRIES = 5;
+
+function delay(ms: number) {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
 
 export function HistoryTimeline() {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -186,6 +196,7 @@ export function HistoryTimeline() {
   const customRef = useRef<CustomHistoryCategory[]>([]);
   const cameraRef = useRef({ left: 0, width: 720 });
   const dragLaneId = useRef<string | null>(null);
+  const fillGenRef = useRef(0);
 
   const [prefsReady, setPrefsReady] = useState(false);
   const [zoom, setZoom] = useState(defaultHistoryPrefs().zoom);
@@ -291,143 +302,218 @@ export function HistoryTimeline() {
       gran: HistoryGranularity,
       fill: boolean,
     ) => {
+      const gen = ++fillGenRef.current;
       const unique = [...new Set(categories)];
-      await Promise.all(
-        unique.map(async (category) => {
-          const windows = windowsOverlapping(start, end, gran);
-          const needed = windows.filter((window) => {
-            const key = windowKey(category, gran, window.start);
-            return !loadedRef.current.has(key) && !inflightRef.current.has(key);
-          });
-          if (needed.length === 0) {
-            const waiting = windows.some((window) =>
-              inflightRef.current.has(windowKey(category, gran, window.start)),
-            );
-            if (!waiting) {
-              setFillByCategory((prev) => ({
-                ...prev,
-                [category]: { status: "ready" },
-              }));
-            }
-            return;
-          }
+      const windowsFor = () => windowsOverlapping(start, end, gran);
+      const needsCategory = (category: TimelineCategoryId) =>
+        windowsFor().some((window) => {
+          const key = windowKey(category, gran, window.start);
+          return !loadedRef.current.has(key) && !inflightRef.current.has(key);
+        });
 
-          const keys = needed.map((window) =>
-            windowKey(category, gran, window.start),
-          );
-          keys.forEach((key) => inflightRef.current.add(key));
+      for (const category of unique) {
+        if (needsCategory(category)) {
           setFillByCategory((prev) => ({
             ...prev,
             [category]: { status: "loading" },
           }));
+          continue;
+        }
+        const waiting = windowsFor().some((window) =>
+          inflightRef.current.has(windowKey(category, gran, window.start)),
+        );
+        if (!waiting) {
+          setFillByCategory((prev) => {
+            if (prev[category]?.status === "error") return prev;
+            return { ...prev, [category]: { status: "ready" } };
+          });
+        }
+      }
 
-          try {
-            const meta = getCategory(category, customRef.current);
-            const response = await fetch("/api/history-timeline/events", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                category,
-                categoryLabel: meta.label,
-                start: needed[0].start,
-                end: needed[needed.length - 1].end,
-                granularity: gran,
-                fill,
-              }),
+      const fetchOne = async (
+        category: TimelineCategoryId,
+      ): Promise<{ pending: boolean; rateLimited: boolean }> => {
+        const windows = windowsFor();
+        const needed = windows.filter((window) => {
+          const key = windowKey(category, gran, window.start);
+          return !loadedRef.current.has(key) && !inflightRef.current.has(key);
+        });
+        if (needed.length === 0) {
+          return { pending: false, rateLimited: false };
+        }
+
+        const keys = needed.map((window) =>
+          windowKey(category, gran, window.start),
+        );
+        keys.forEach((key) => inflightRef.current.add(key));
+        setFillByCategory((prev) => ({
+          ...prev,
+          [category]: { status: "loading" },
+        }));
+
+        try {
+          const meta = getCategory(category, customRef.current);
+          const response = await fetch("/api/history-timeline/events", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              category,
+              categoryLabel: meta.label,
+              start: needed[0]?.start,
+              end: needed[needed.length - 1]?.end,
+              granularity: gran,
+              fill,
+            }),
+          });
+          const payload = (await response.json()) as EventsResponse;
+          const rateLimited =
+            response.status === 429 || payload.meta?.rateLimited === true;
+          if (payload.meta) {
+            setStatus({
+              mongo: payload.meta.mongo ?? null,
+              xai: payload.meta.xai ?? null,
+              note: rateLimited
+                ? "Filling other lanes first — this range will continue shortly."
+                : payload.meta.generated && payload.meta.generated > 0
+                  ? `Filled ${payload.meta.generated} missing window${payload.meta.generated === 1 ? "" : "s"} with Grok.`
+                  : payload.error
+                    ? payload.error
+                    : "Showing cached and seeded events.",
             });
-            const payload = (await response.json()) as EventsResponse;
-            if (payload.meta) {
-              setStatus({
-                mongo: payload.meta.mongo ?? null,
-                xai: payload.meta.xai ?? null,
-                note:
-                  payload.meta.generated && payload.meta.generated > 0
-                    ? `Filled ${payload.meta.generated} missing window${payload.meta.generated === 1 ? "" : "s"} with Grok.`
-                    : payload.error
-                      ? payload.error
-                      : "Showing cached and seeded events.",
-              });
-            }
-            if (payload.events) {
-              setEventsById((prev) => {
-                const next = { ...prev };
-                for (const event of payload.events ?? []) {
-                  if (isRetiredHistoryEvent(event)) continue;
-                  if (!eventFitsCategory(event, event.category)) continue;
-                  next[event.id] = event;
-                }
-                return next;
-              });
-            }
+          }
+          if (payload.events) {
+            setEventsById((prev) => {
+              const next = { ...prev };
+              for (const event of payload.events ?? []) {
+                if (isRetiredHistoryEvent(event)) continue;
+                if (!eventFitsCategory(event, event.category)) continue;
+                next[event.id] = event;
+              }
+              return next;
+            });
+          }
+          if (!rateLimited) {
             for (const window of payload.windows ?? []) {
               if (window.source !== "missing") {
                 loadedRef.current.add(window.key);
               }
             }
-            if (fill) {
-              trackEvent(analyticsEvents.panFetch, {
-                tool: TOOL_SLUG,
-                category,
-                granularity: gran,
-                count: payload.events?.length ?? 0,
-              });
-            }
+          }
+          if (fill) {
+            trackEvent(analyticsEvents.panFetch, {
+              tool: TOOL_SLUG,
+              category,
+              granularity: gran,
+              count: payload.events?.length ?? 0,
+            });
+          }
 
-            const pending = payload.meta?.pending ?? 0;
-            const missing =
-              payload.windows?.some((window) => window.source === "missing") ??
-              false;
-            const empty = !payload.events?.length;
-            const xai = payload.meta?.xai === true;
-            if (payload.error) {
-              setFillByCategory((prev) => ({
-                ...prev,
-                [category]: {
-                  status: "error",
-                  note: payload.error,
-                },
-              }));
-            } else if (fill && missing && empty && (!xai || pending === 0)) {
-              setFillByCategory((prev) => ({
-                ...prev,
-                [category]: {
-                  status: "error",
-                  note: xai
-                    ? "Could not fill this lane. Retry?"
-                    : "This lane needs a server key to fill.",
-                },
-              }));
-            } else if (fill && missing && pending > 0 && xai) {
-              setFillByCategory((prev) => ({
-                ...prev,
-                [category]: { status: "loading" },
-              }));
-              window.setTimeout(() => {
-                void fetchRange([category], start, end, gran, true);
-              }, 500);
-            } else {
-              setFillByCategory((prev) => ({
-                ...prev,
-                [category]: { status: "ready" },
-              }));
-            }
-          } catch {
+          const pendingCount = payload.meta?.pending ?? 0;
+          const missing =
+            payload.windows?.some((window) => window.source === "missing") ??
+            false;
+          const empty = !payload.events?.length;
+          const xai = payload.meta?.xai === true;
+
+          if (rateLimited) {
+            setFillByCategory((prev) => ({
+              ...prev,
+              [category]: { status: "loading" },
+            }));
+            return { pending: true, rateLimited: true };
+          }
+          if (payload.error) {
             setFillByCategory((prev) => ({
               ...prev,
               [category]: {
                 status: "error",
-                note: "Could not reach the timeline cache. Retry?",
+                note: payload.error,
               },
             }));
-            setStatus((prev) => ({
-              ...prev,
-              note: "Could not reach the timeline cache. Seeded events still show.",
-            }));
-          } finally {
-            keys.forEach((key) => inflightRef.current.delete(key));
+            return { pending: false, rateLimited: false };
           }
-        }),
-      );
+          if (fill && missing && pendingCount > 0 && xai) {
+            setFillByCategory((prev) => ({
+              ...prev,
+              [category]: { status: "loading" },
+            }));
+            return { pending: true, rateLimited: false };
+          }
+          if (fill && missing && empty && !xai) {
+            setFillByCategory((prev) => ({
+              ...prev,
+              [category]: {
+                status: "error",
+                note: "This lane needs a server key to fill.",
+              },
+            }));
+            return { pending: false, rateLimited: false };
+          }
+          if (fill && missing && empty && pendingCount === 0) {
+            setFillByCategory((prev) => ({
+              ...prev,
+              [category]: {
+                status: "error",
+                note: "Could not fill this lane. Retry?",
+              },
+            }));
+            return { pending: false, rateLimited: false };
+          }
+          setFillByCategory((prev) => ({
+            ...prev,
+            [category]: { status: "ready" },
+          }));
+          return { pending: false, rateLimited: false };
+        } catch {
+          setFillByCategory((prev) => ({
+            ...prev,
+            [category]: {
+              status: "error",
+              note: "Could not reach the timeline cache. Retry?",
+            },
+          }));
+          setStatus((prev) => ({
+            ...prev,
+            note: "Could not reach the timeline cache. Seeded events still show.",
+          }));
+          return { pending: false, rateLimited: false };
+        } finally {
+          keys.forEach((key) => inflightRef.current.delete(key));
+        }
+      };
+
+      const queue = unique.filter((category) => needsCategory(category));
+      const rateStrikes = new Map<string, number>();
+
+      while (queue.length > 0 && fillGenRef.current === gen) {
+        const batch = queue.splice(0, FILL_BATCH);
+        const results = await Promise.all(
+          batch.map((category) => fetchOne(category)),
+        );
+        if (fillGenRef.current !== gen) return;
+        for (const [index, category] of batch.entries()) {
+          const result = results[index];
+          if (!result?.pending) continue;
+          if (result.rateLimited) {
+            const strikes = (rateStrikes.get(category) ?? 0) + 1;
+            rateStrikes.set(category, strikes);
+            if (strikes >= RATE_LIMIT_RETRIES) {
+              setFillByCategory((prev) => ({
+                ...prev,
+                [category]: {
+                  status: "error",
+                  note: "Too many timeline fills. Retry?",
+                },
+              }));
+              continue;
+            }
+          }
+          if (needsCategory(category)) queue.push(category);
+        }
+        if (queue.length > 0 && fillGenRef.current === gen) {
+          await delay(FILL_RETRY_MS);
+        }
+      }
     },
     [],
   );
