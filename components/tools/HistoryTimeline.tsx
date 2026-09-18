@@ -943,6 +943,10 @@ export function HistoryTimeline() {
               const title = laneTitle(lane, customCategories);
               const hue = laneHue(lane, customCategories);
               const band = laneBand(lane.category, hue);
+              const fillStatus =
+                fillByCategory[lane.category]?.status ?? "loading";
+              const filling =
+                fillStatus === "loading" || fillStatus === "idle";
               return (
                 <div
                   key={lane.id}
@@ -999,6 +1003,12 @@ export function HistoryTimeline() {
                   </div>
                   <p className="min-w-0 flex-1 pt-1 text-sm font-semibold leading-snug text-ink">
                     {title}
+                    {filling ? (
+                      <span className="mt-1 flex items-center gap-1.5 text-[11px] font-normal text-ink-muted">
+                        <LaneSpinner />
+                        Filling this era…
+                      </span>
+                    ) : null}
                   </p>
                   <button
                     type="button"
@@ -1265,7 +1275,7 @@ function LaneRow({
           aria-live="polite"
         >
           {showLoading ? (
-            <span className="inline-flex items-center gap-2 rounded-full bg-surface/85 px-2.5 py-1 text-[12px] text-ink-muted shadow-[0_0_0_1px_var(--line)] backdrop-blur-sm">
+            <span className="inline-flex items-center gap-2 rounded-full bg-surface px-2.5 py-1 text-sm text-ink-muted shadow-[0_0_0_1px_var(--line)]">
               <LaneSpinner />
               Filling this era…
             </span>

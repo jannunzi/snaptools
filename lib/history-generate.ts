@@ -150,12 +150,17 @@ export async function generateHistoryWindow(options: {
     `Category: ${category.label} — ${category.hint}`,
     `Window: ${formatYearRange(options.window.start, options.window.end, options.granularity)} (start inclusive, end exclusive).`,
     `Granularity: ${options.granularity}. Aim for ${spec.targetCount} distinct events at this resolution.`,
+    options.window.end <= 1
+      ? `This window is BCE (negative years). If the period is historically rich for this category, prefer closer to ${spec.targetCount} well-known in-window events rather than a near-empty list.`
+      : "",
     precisionHint(options.granularity),
     `Present year: ${NOW_YEAR}. Years after that are forecasts.`,
     `Do not repeat these already-shown titles: ${known}.`,
     `For long-lived subjects (empires, wars, composers' lives, expeditions) endYear is required.`,
     "Return JSON: {\"events\":[{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const payload = await xaiChatJson({
     apiKey: options.apiKey,
