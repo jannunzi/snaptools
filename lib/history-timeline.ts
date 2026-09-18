@@ -174,7 +174,7 @@ export const ZOOM_LEVELS: ZoomLevel[] = [
     granularity: "millennium",
     pixelsPerYear: 0.3,
     tick: 500,
-    labelEvery: 500,
+    labelEvery: 1000,
   },
   {
     level: 1,
@@ -222,6 +222,8 @@ export const ZOOM_LEVELS: ZoomLevel[] = [
 
 export const DEFAULT_ZOOM = 1;
 export const DEFAULT_CENTER_YEAR = 1700;
+/** Shared packing budget: 4 lanes × 3 rows, or 1 lane × 12 rows. */
+export const SUB_ROW_BUDGET = 12;
 export const DEFAULT_LANES: HistoryCategoryId[] = [
   "empires",
   "inventions",
@@ -232,7 +234,7 @@ export const DEFAULT_LANES: HistoryCategoryId[] = [
 export const ERA_PRESETS = [
   { id: "ancient", label: "Ancient", start: -3000, end: -500, zoom: 1 },
   { id: "classical", label: "Classical", start: -800, end: 500, zoom: 1 },
-  { id: "medieval", label: "Medieval", start: 500, end: 1500, zoom: 1 },
+  { id: "medieval", label: "Medieval", start: 500, end: 1200, zoom: 1 },
   { id: "early-modern", label: "Early modern", start: 1450, end: 1800, zoom: 2 },
   { id: "modern", label: "Modern", start: 1800, end: NOW_YEAR, zoom: 2 },
   { id: "future", label: "Future", start: NOW_YEAR, end: 2100, zoom: 2 },
@@ -527,6 +529,24 @@ export function timelineWidth(pixelsPerYear: number) {
   return (TIMELINE_END - TIMELINE_START) * pixelsPerYear;
 }
 
+export function subRowsForLanes(
+  laneCount: number,
+  budget = SUB_ROW_BUDGET,
+) {
+  const n = Math.max(1, laneCount);
+  const min = n >= 7 ? 1 : 2;
+  return Math.max(min, Math.floor(budget / n));
+}
+
+export function laneBandHeight(
+  maxRows: number,
+  rowHeight = 48,
+  rowGap = 6,
+  pad = 10,
+) {
+  return pad * 2 + maxRows * rowHeight + Math.max(0, maxRows - 1) * rowGap;
+}
+
 export type TimelineTick = {
   year: number;
   label: boolean;
@@ -546,16 +566,16 @@ export function ticksForRange(
   }
 
   const step = tick > 0 ? tick : 1;
+  const labelStep = labelEvery > 0 ? labelEvery : step;
+  // Align to year 0 so panning does not phase-shift 100/200 into 150/250.
   const first = Math.ceil(start / step - 1e-9) * step;
   const marks: TimelineTick[] = [];
   const maxMarks = 240;
   for (let i = 0; i < maxMarks; i += 1) {
     const year = first + i * step;
     if (year > end + 1e-9) break;
-    const offset = year - first;
     const label =
-      Math.abs(Math.round(offset / labelEvery) * labelEvery - offset) <
-      step / 3;
+      Math.abs(Math.round(year / labelStep) * labelStep - year) < step / 3;
     marks.push({
       year,
       label,

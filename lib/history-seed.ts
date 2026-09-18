@@ -49,6 +49,14 @@ export const historySeedEvents: HistoryEvent[] = [
   ),
   ev(
     "empires",
+    -509,
+    "Roman Republic",
+    "Rome replaces its kings with annually elected magistrates; the republic lasts until Octavian’s settlement.",
+    5,
+    { endYear: -27 },
+  ),
+  ev(
+    "empires",
     -221,
     "Qin unifies China",
     "Qin Shi Huang ends the Warring States and standardizes writing, roads, and measures.",
@@ -58,17 +66,98 @@ export const historySeedEvents: HistoryEvent[] = [
   ev(
     "empires",
     -27,
-    "Roman Empire begins",
-    "Octavian becomes Augustus; Rome shifts from republic to imperial rule.",
+    "Roman Empire",
+    "Augustus ends the republic; the western imperial state lasts until 476 CE.",
     5,
     { endYear: 476 },
   ),
   ev(
     "empires",
+    224,
+    "Sassanid Empire",
+    "Ardashir I overthrows the Parthians; Sasanian Iran lasts until the Arab conquests.",
+    5,
+    { endYear: 651 },
+  ),
+  ev(
+    "empires",
     330,
-    "Constantinople founded",
-    "Constantine makes the city on the Bosporus the new Roman capital.",
+    "Eastern Roman / Byzantine Empire",
+    "Constantinople becomes the Roman capital; the eastern state continues until 1453.",
+    5,
+    { endYear: 1453 },
+  ),
+  ev(
+    "empires",
+    300,
+    "Ghana Empire",
+    "A West African trading empire on the Sahel gold and salt routes, before Mali.",
     4,
+    { endYear: 1200 },
+  ),
+  ev(
+    "empires",
+    618,
+    "Tang dynasty",
+    "Li Yuan founds a cosmopolitan Chinese empire that sets a high-water mark for medieval East Asia.",
+    5,
+    { endYear: 907 },
+  ),
+  ev(
+    "empires",
+    661,
+    "Umayyad Caliphate",
+    "The Umayyads rule from Damascus and stretch from Iberia to Central Asia.",
+    5,
+    { endYear: 750 },
+  ),
+  ev(
+    "empires",
+    681,
+    "First Bulgarian Empire",
+    "Asparuh’s Bulgars found a state that rivals Byzantium in the Balkans.",
+    4,
+    { endYear: 1018 },
+  ),
+  ev(
+    "empires",
+    750,
+    "Abbasid Caliphate",
+    "The Abbasids move the caliphal center to Iraq; Baghdad becomes a world city until the Mongol sack.",
+    5,
+    { endYear: 1258 },
+  ),
+  ev(
+    "empires",
+    800,
+    "Carolingian Empire",
+    "Charlemagne is crowned emperor; a Frankish imperial order lasts through the ninth century.",
+    4,
+    { endYear: 888 },
+  ),
+  ev(
+    "empires",
+    802,
+    "Khmer Empire",
+    "Jayavarman II founds a mainland Southeast Asian empire centered on Angkor.",
+    4,
+    { endYear: 1431 },
+  ),
+  ev(
+    "empires",
+    960,
+    "Song dynasty",
+    "Zhao Kuangyin reunifies most of China; the Song era is dense with cities, print, and commerce.",
+    5,
+    { endYear: 1279 },
+  ),
+  ev(
+    "empires",
+    962,
+    "Holy Roman Empire",
+    "Otto I is crowned emperor; a Central European imperial title lasts until 1806.",
+    5,
+    { endYear: 1806 },
   ),
   ev(
     "empires",
@@ -131,6 +220,27 @@ export const historySeedEvents: HistoryEvent[] = [
     -3500,
     "The wheel",
     "Wheeled vehicles appear in Mesopotamia and the steppe, transforming haulage.",
+    5,
+  ),
+  ev(
+    "inventions",
+    -2000,
+    "Spoked-wheel chariot",
+    "Light horse chariots become the prestige weapon of Bronze Age armies.",
+    4,
+  ),
+  ev(
+    "inventions",
+    -1200,
+    "Iron working",
+    "Bloomery iron spreads after the Bronze Age collapse, making metal tools far more common.",
+    5,
+  ),
+  ev(
+    "inventions",
+    -1050,
+    "Phoenician alphabet",
+    "A small consonant alphabet becomes the ancestor of later Mediterranean scripts.",
     5,
   ),
   ev(
@@ -298,6 +408,21 @@ export const historySeedEvents: HistoryEvent[] = [
 
   ev(
     "wars",
+    -1274,
+    "Battle of Kadesh",
+    "Ramesses II and Muwatalli II fight the best-documented chariot battle of the Bronze Age.",
+    5,
+  ),
+  ev(
+    "wars",
+    -1200,
+    "Bronze Age collapse",
+    "Palaces from Greece to the Levant fall; Sea Peoples and inland wars remake the eastern Mediterranean.",
+    5,
+    { endYear: -1150 },
+  ),
+  ev(
+    "wars",
     -499,
     "Greco-Persian Wars",
     "Greek city-states resist Achaemenid invasions at Marathon, Salamis, and Plataea.",
@@ -311,6 +436,21 @@ export const historySeedEvents: HistoryEvent[] = [
     "Rome and Carthage fight three wars for the western Mediterranean.",
     5,
     { endYear: -146 },
+  ),
+  ev(
+    "wars",
+    717,
+    "Umayyad siege of Constantinople",
+    "Maslama’s Umayyad army and fleet fail to take the Byzantine capital; Greek fire and the Theodosian Walls hold.",
+    4,
+    { endYear: 718 },
+  ),
+  ev(
+    "wars",
+    732,
+    "Battle of Tours",
+    "Charles Martel’s Franks halt an Umayyad raid near Poitiers — a war, not an empire.",
+    4,
   ),
   ev(
     "wars",
@@ -742,6 +882,31 @@ export const historySeedEvents: HistoryEvent[] = [
     { projected: true },
   ),
 ];
+
+/** Older seed ids/titles that must not linger in Mongo window caches. */
+export const RETIRED_HISTORY_EVENT_IDS = new Set([
+  "empires--27-roman-empire-begins",
+  "empires-330-constantinople-founded",
+]);
+
+export const RETIRED_HISTORY_EVENT_TITLES = new Set([
+  "Roman Empire begins",
+]);
+
+export function isRetiredHistoryEvent(event: {
+  id: string;
+  title?: string;
+}) {
+  if (RETIRED_HISTORY_EVENT_IDS.has(event.id)) return true;
+  if (event.title && RETIRED_HISTORY_EVENT_TITLES.has(event.title)) return true;
+  return false;
+}
+
+export function withoutRetiredHistoryEvents<T extends { id: string; title?: string }>(
+  events: T[],
+) {
+  return events.filter((event) => !isRetiredHistoryEvent(event));
+}
 
 export function seedEventsFor(
   category: string,

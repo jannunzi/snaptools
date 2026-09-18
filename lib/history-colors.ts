@@ -7,20 +7,25 @@ type HueBase = {
 
 /** Muted, desaturated bases — Apple-clean, not candy. */
 const CATEGORY_HUE: Record<HistoryCategoryId, HueBase> = {
-  empires: { h: 32, s: 16 },
-  inventions: { h: 210, s: 10 },
-  musicians: { h: 322, s: 12 },
-  wars: { h: 10, s: 14 },
-  explorations: { h: 92, s: 11 },
-  science: { h: 206, s: 12 },
-  art: { h: 36, s: 14 },
-  sports: { h: 112, s: 10 },
+  empires: { h: 46, s: 22 },
+  inventions: { h: 212, s: 16 },
+  musicians: { h: 328, s: 12 },
+  wars: { h: 6, s: 20 },
+  explorations: { h: 88, s: 12 },
+  science: { h: 204, s: 14 },
+  art: { h: 28, s: 16 },
+  sports: { h: 118, s: 12 },
 };
 
 export type EventSwatch = {
   background: string;
   border: string;
   color: string;
+};
+
+export type LaneSwatch = {
+  background: string;
+  border: string;
 };
 
 function hashId(id: string) {
@@ -38,17 +43,40 @@ function hsl(h: number, s: number, l: number) {
 
 function baseFor(category: string, hueOverride?: number): HueBase {
   if (hueOverride !== undefined && Number.isFinite(hueOverride)) {
-    return { h: ((hueOverride % 360) + 360) % 360, s: 12 };
+    return { h: ((hueOverride % 360) + 360) % 360, s: 16 };
   }
   if (category in CATEGORY_HUE) {
     return CATEGORY_HUE[category as HistoryCategoryId];
   }
   const n = hashId(category);
-  return { h: n % 360, s: 11 };
+  return { h: n % 360, s: 13 };
+}
+
+export function resolveLaneHue(
+  category: string,
+  hueOverride?: number,
+): number {
+  return baseFor(category, hueOverride).h;
 }
 
 /**
- * Stable per-event tint from the category hue + event id hash.
+ * Whole-lane band: a subdued wash, lighter than event bars.
+ * Thin vertical grids sit on top; no glow panel.
+ */
+export function laneBand(
+  category: string,
+  hueOverride?: number,
+): LaneSwatch {
+  const base = baseFor(category, hueOverride);
+  return {
+    background: `light-dark(${hsl(base.h, Math.max(8, base.s - 6), 95.6)}, ${hsl(base.h, Math.max(8, base.s - 4), 16.5)})`,
+    border: `light-dark(${hsl(base.h, base.s - 4, 88)}, ${hsl(base.h, base.s, 24)})`,
+  };
+}
+
+/**
+ * Stable per-event tint from the lane hue + event id hash.
+ * A bit darker than the row in light mode so bars read as content.
  * Uses light-dark() so dark mode keeps AA contrast without a JS theme hook.
  */
 export function eventSwatch(
@@ -62,10 +90,10 @@ export function eventSwatch(
   const hue = base.h + ((n % 5) - 2);
   const sat = base.s + ((n >> 3) % 3);
   const lightStep = n % 7;
-  const lightL = selected ? 74 - lightStep : 86 - lightStep * 1.4;
-  const darkL = selected ? 34 + lightStep * 0.6 : 26 + lightStep * 0.9;
-  const lightBorder = selected ? 58 : 70 - lightStep;
-  const darkBorder = selected ? 48 : 38 + lightStep * 0.5;
+  const lightL = selected ? 72 - lightStep * 0.8 : 82 - lightStep * 1.1;
+  const darkL = selected ? 36 + lightStep * 0.5 : 28 + lightStep * 0.8;
+  const lightBorder = selected ? 56 : 68 - lightStep;
+  const darkBorder = selected ? 50 : 40 + lightStep * 0.5;
 
   return {
     background: `light-dark(${hsl(hue, sat, lightL)}, ${hsl(hue, sat + 2, darkL)})`,
@@ -77,7 +105,7 @@ export function eventSwatch(
 export function hueSwatch(hue: number) {
   const h = ((hue % 360) + 360) % 360;
   return {
-    background: `light-dark(${hsl(h, 12, 82)}, ${hsl(h, 14, 28)})`,
-    border: `light-dark(${hsl(h, 14, 68)}, ${hsl(h, 14, 42)})`,
+    background: `light-dark(${hsl(h, 16, 82)}, ${hsl(h, 16, 28)})`,
+    border: `light-dark(${hsl(h, 18, 66)}, ${hsl(h, 16, 42)})`,
   };
 }
