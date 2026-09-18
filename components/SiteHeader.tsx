@@ -10,7 +10,7 @@ export function SiteHeader() {
             aria-hidden
             className="grid h-8 w-8 place-items-center rounded-[9px] bg-accent text-[13px] font-semibold text-accent-ink"
           >
-            S
+            F
           </span>
           <span className="text-[17px] font-semibold tracking-tight text-ink group-hover:opacity-70">
             {siteName}

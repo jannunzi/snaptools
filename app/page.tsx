@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { ToolCard } from "@/components/ToolCard";
 import { siteDescription, siteTagline } from "@/lib/site";
-import { getFeaturedTool, tools } from "@/lib/tools";
+import {
+  getFeaturedTool,
+  getLiveTools,
+  groupToolsByCategory,
+} from "@/lib/tools";
 
 export default function Home() {
   const featured = getFeaturedTool();
-  const rest = tools.filter((tool) => tool.slug !== featured.slug);
+  const categories = groupToolsByCategory(getLiveTools());
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
@@ -39,19 +43,25 @@ export default function Home() {
         <ToolCard tool={featured} featured />
       </section>
 
-      <section className="mt-16" aria-labelledby="tools-heading">
-        <h2
-          id="tools-heading"
-          className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-muted"
+      {categories.map((group) => (
+        <section
+          key={group.id}
+          className="mt-16"
+          aria-labelledby={`category-${group.id}-heading`}
         >
-          All tools
-        </h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {rest.map((tool) => (
-            <ToolCard key={tool.slug} tool={tool} />
-          ))}
-        </div>
-      </section>
+          <h2
+            id={`category-${group.id}-heading`}
+            className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-muted"
+          >
+            {group.label}
+          </h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {group.tools.map((tool) => (
+              <ToolCard key={tool.slug} tool={tool} />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

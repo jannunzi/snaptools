@@ -1,4 +1,4 @@
-# SnapTools
+# FactsTools
 
 Free one-off online tools — practice sheets, templates, quick reference. Trivial and specific beats clever and broad. No accounts. Most tools run entirely in the browser; History Timeline optionally caches generated events in MongoDB so Grok is not asked twice for the same span.
 
@@ -54,7 +54,7 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 ## How to add a tool
 
 1. **Register it** in `lib/tools.ts`  
-   Add a new entry with `status: "live"`, `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs.
+   Add a new entry with `status: "live"`, `category` (`math` | `history-civics` | `languages` | `arts`), `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs. The homepage groups live tools by that category.
 
 2. **Build the tool** as a client component  
    Add `components/tools/YourTool.tsx`. Keep it account-free: no auth. Server routes are OK when a secret must stay off the client (see `/api/tts`, `/api/coloring/generate`, and `/api/history-timeline/events`).
@@ -74,7 +74,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 
 | Route | What |
 | --- | --- |
-| `/` | Hero, featured card, all-tools directory |
+| `/` | Hero, featured card, tools grouped by category |
 | `/tools/multiplication-tables` | Live multiplication practice |
 | `/tools/music-note-recognition` | Live treble-staff quiz |
 | `/tools/spelling-practice` | Live EN/ES/FR spelling by ear |
@@ -112,7 +112,7 @@ Without a key, spelling falls back to the browser voice, coloring still uses the
 
 ### History Timeline cache
 
-Events are stored in `snaptools.history_event_windows` (or `MONGODB_DB` if you set a different SnapTools database), keyed by **category + granularity + aligned window start**. Zooming in (including months, weeks, and days) requests finer windows; those fills add detail without repeating a coarse query. Custom lane names travel with the request so Grok can fill user-defined categories. Zoom, scroll position, and personal categories are stored in the browser (`localStorage`). The course `web-dev` database is never used.
+Events are stored in `snaptools.history_event_windows` (or `MONGODB_DB` if you set a different FactsTools database), keyed by **category + granularity + aligned window start**. Zooming in (including months, weeks, and days) requests finer windows; those fills add detail without repeating a coarse query. Custom lane names travel with the request so Grok can fill user-defined categories. Zoom, scroll position, and personal categories are stored in the browser (`localStorage`). The course `web-dev` database is never used.
 
 ```bash
 # after adding MONGODB_URI to .env.local

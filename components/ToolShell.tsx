@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { AmazonBookBanner } from "@/components/AmazonBookBanner";
-import { isNewTool, type Tool } from "@/lib/tools";
+import { getCategoryLabel, isNewTool, type Tool } from "@/lib/tools";
 
 type ToolShellProps = {
   tool: Tool;
@@ -18,6 +18,9 @@ export function ToolShell({ tool, children }: ToolShellProps) {
       }`}
     >
       <div className="no-print flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-muted">
+          {getCategoryLabel(tool.category)}
+        </span>
         {showNew ? <span className="snap-badge snap-badge-new">New</span> : null}
         <span
           className={`snap-badge ${isLive ? "snap-badge-live" : "snap-badge-muted"}`}
