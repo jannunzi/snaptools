@@ -7,6 +7,7 @@ import { DivisionFacts } from "@/components/tools/DivisionFacts";
 import { FractionsPractice } from "@/components/tools/FractionsPractice";
 import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
+import { PlaceValuePractice } from "@/components/tools/PlaceValuePractice";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
 import { SightWords } from "@/components/tools/SightWords";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
@@ -42,6 +43,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <FractionsPractice />;
     case "sight-words":
       return <SightWords />;
+    case "place-value":
+      return <PlaceValuePractice />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }

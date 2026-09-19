@@ -513,6 +513,43 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "place-value",
+    category: "math",
+    title: "Place Value Practice",
+    tagline: "Name the place — or the value of a digit.",
+    description:
+      "Name the place of an underlined digit, or its value. Practice, race a 60-second quiz, or see how long you can streak. Instant feedback, missed-item review, and a printable place-value chart — ones through hundred thousands, plus tenths and hundredths.",
+    day: 14,
+    publishedOn: "2026-09-19",
+    audience: "Kids, parents, and teachers building place-value fluency (grades ~2–5)",
+    status: "live",
+    howTo:
+      "Start with Easy: whole numbers to hundreds. Type the place of the underlined digit (tens, 10s, or ten) or its value (40 or four tens). When that feels easy, try Medium: numbers through hundred thousands, expanded form, and compare two numbers. Challenge adds decimals to thousandths and rounding to a named place. Use Timed for a one-minute sprint; use Streak to find the problems that still stall you.",
+    books: [
+      {
+        asin: "1635783313",
+        title: "Humble Math — 100 Days of Place Value, Rounding & Estimation",
+        author: "Humble Math",
+        blurb:
+          "Daily place-value, rounding, and estimation practice with an answer key.",
+      },
+      {
+        asin: "1483824268",
+        title: "Spectrum Place Value and Rounding, Grade 4",
+        author: "Spectrum",
+        blurb:
+          "Focused Grade 4 pages for multi-digit place value and rounding.",
+      },
+      {
+        asin: "0887431372",
+        title: "School Zone Math Basics 1",
+        author: "School Zone",
+        blurb:
+          "Numbers, skip counting, and early place value for ages 6–7.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
