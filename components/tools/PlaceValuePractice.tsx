@@ -1525,20 +1525,22 @@ function HighlightedNumber({
 
   return (
     <p
-      className="font-display text-5xl tabular-nums tracking-wide text-ink sm:text-6xl"
+      className="font-display text-5xl tabular-nums text-ink sm:text-6xl"
+      style={{ letterSpacing: "0.02em" }}
       aria-label={label}
     >
       {display.split("").map((char, index) => {
         const highlighted = index === mark && /\d/.test(char);
+        const punct = char === "," || char === ".";
         return (
           <span
             key={`${char}-${index}`}
             className={
               highlighted
-                ? "border-b-[3px] border-secondary px-0.5"
-                : char === "," || char === "."
-                  ? "text-ink-muted"
-                  : undefined
+                ? "inline-block border-b-[3px] border-secondary px-[0.08em] text-secondary"
+                : punct
+                  ? "inline-block px-[0.06em] text-ink-muted"
+                  : "inline-block px-[0.08em]"
             }
           >
             {char}
