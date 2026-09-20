@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { AmazonBookBanner } from "@/components/AmazonBookBanner";
+import { ToolCurriculumChips } from "@/components/ToolCurriculumChips";
 import { getCategoryLabel, isNewTool, type Tool } from "@/lib/tools";
 
 type ToolShellProps = {
@@ -39,6 +40,7 @@ export function ToolShell({ tool, children }: ToolShellProps) {
         <span className="mx-2 text-line">·</span>
         {tool.audience}
       </p>
+      <ToolCurriculumChips slug={tool.slug} />
       <div className="no-print mt-6 rounded-2xl border border-line bg-surface px-5 py-4 text-sm leading-relaxed text-ink-muted">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink">
           How to practice

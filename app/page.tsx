@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomepageGradeBrowse } from "@/components/GradeBrowse";
 import { ToolCard } from "@/components/ToolCard";
 import { siteDescription, siteTagline } from "@/lib/site";
 import {
@@ -20,10 +21,17 @@ export default function Home() {
         <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted sm:text-xl">
           {siteDescription}
         </p>
-        <Link href={`/tools/${featured.slug}`} className="snap-btn mt-8">
-          Open featured tool
-        </Link>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <Link href={`/tools/${featured.slug}`} className="snap-btn">
+            Open featured tool
+          </Link>
+          <Link href="/grades" className="snap-btn-secondary">
+            Browse by grade
+          </Link>
+        </div>
       </section>
+
+      <HomepageGradeBrowse />
 
       <section className="mt-16" aria-labelledby="featured-heading">
         <div className="mb-4 flex items-baseline justify-between gap-3">

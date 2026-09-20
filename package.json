@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "tsx --test lib/curriculum.test.ts",
+    "curriculum:gaps": "tsx scripts/curriculum-gaps.ts",
     "generate:coloring": "node scripts/generate-coloring.mjs",
     "history:indexes": "node scripts/ensure-history-indexes.mjs"
   },
@@ -25,6 +27,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
