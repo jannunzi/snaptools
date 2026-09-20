@@ -1,4 +1,5 @@
 import { eventFitsCategory } from "@/lib/history-fit";
+import { parseWikipediaField } from "@/lib/history-wikipedia";
 import {
   eventId,
   formatYearRange,
@@ -17,6 +18,7 @@ const SYSTEM_PROMPT = [
   "You are a careful historian writing captions for a horizontal world-history timeline.",
   "Return only JSON of the form {\"events\":[...]} with no markdown.",
   "Each event must include: year (number; negative = BCE), endYear (number or null), title, summary, significance (1-5), projected (boolean).",
+  "Optional wikipedia: the canonical English Wikipedia article title or slug when you are confident the page exists (for example \"Roman Empire\" or \"Apollo_11\"). Omit rather than guess.",
   "Optional month (1-12) and day (1-31) refine the start date when the civil date is known.",
   "For empires, dynasties, wars, lives, voyages, and other spans, set endYear to the conventional end. If it still exists today, set endYear to the present year.",
   "Point events (an invention, a single work, a single day) use endYear null.",
@@ -108,6 +110,9 @@ function parseGeneratedEvents(
       source: "ai",
       granularity,
     };
+    const wikipedia =
+      parseWikipediaField(row.wikipedia) ?? parseWikipediaField(row.wikiTitle);
+    if (wikipedia) event.wikipedia = wikipedia;
     if (!eventFitsCategory(event, category)) continue;
     events.push(event);
   }
@@ -157,7 +162,8 @@ export async function generateHistoryWindow(options: {
     `Present year: ${NOW_YEAR}. Years after that are forecasts.`,
     `Do not repeat these already-shown titles: ${known}.`,
     `For long-lived subjects (empires, wars, composers' lives, expeditions) endYear is required.`,
-    "Return JSON: {\"events\":[{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
+    "Optional wikipedia is the English article title when obvious; omit if unsure.",
+    "Return JSON: {\"events\":[{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false,\"wikipedia\":\"Apollo 11\"}]}",
   ]
     .filter(Boolean)
     .join("\n");

@@ -25,6 +25,10 @@ import { eventFitsCategory } from "@/lib/history-fit";
 import { packEventsStable } from "@/lib/history-pack";
 import { historySeedEvents, isRetiredHistoryEvent } from "@/lib/history-seed";
 import {
+  wikipediaEventHref,
+  withKnownWikipedia,
+} from "@/lib/history-wikipedia";
+import {
   ERA_PRESETS,
   eventOverlaps,
   eventSpan,
@@ -387,7 +391,7 @@ export function HistoryTimeline() {
               for (const event of payload.events ?? []) {
                 if (isRetiredHistoryEvent(event)) continue;
                 if (!eventFitsCategory(event, event.category)) continue;
-                next[event.id] = event;
+                next[event.id] = withKnownWikipedia(event, next[event.id]);
               }
               return next;
             });
@@ -1246,6 +1250,17 @@ export function HistoryTimeline() {
             {getCategory(selected.category, customCategories).hint}
           </p>
           <h3 className="mt-2 font-display text-xl text-ink">{selected.title}</h3>
+          <p className="mt-2">
+            <a
+              href={wikipediaEventHref(selected)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${selected.title} on Wikipedia`}
+              className="snap-link text-sm"
+            >
+              Open on Wikipedia
+            </a>
+          </p>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-ink-muted">
             {selected.summary}
           </p>

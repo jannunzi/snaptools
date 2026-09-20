@@ -16,6 +16,8 @@ function ev(
   extras: {
     endYear?: number;
     projected?: boolean;
+    wikipedia?: string;
+    wikiTitle?: string;
   } = {},
 ): HistoryEvent {
   return {
@@ -30,7 +32,7 @@ function ev(
   };
 }
 
-export const historySeedEvents: HistoryEvent[] = [
+const SEED_EVENTS: HistoryEvent[] = [
   ev(
     "empires",
     -2334,
@@ -220,6 +222,13 @@ export const historySeedEvents: HistoryEvent[] = [
     -3500,
     "The wheel",
     "Wheeled vehicles appear in Mesopotamia and the steppe, transforming haulage.",
+    5,
+  ),
+  ev(
+    "inventions",
+    -3000,
+    "Control of fire",
+    "By the Bronze Age, keeping and kindling fire is already a human universal — cooking, ceramics, and metalwork depend on it.",
     5,
   ),
   ev(
@@ -882,6 +891,128 @@ export const historySeedEvents: HistoryEvent[] = [
     { projected: true },
   ),
 ];
+
+/** Canonical English Wikipedia titles for well-known seeds. */
+const SEED_WIKIPEDIA: Record<string, string> = {
+  "Akkadian Empire": "Akkadian Empire",
+  "Achaemenid Persian Empire": "Achaemenid Empire",
+  "Roman Republic": "Roman Republic",
+  "Qin unifies China": "Qin dynasty",
+  "Roman Empire": "Roman Empire",
+  "Sassanid Empire": "Sasanian Empire",
+  "Eastern Roman / Byzantine Empire": "Byzantine Empire",
+  "Ghana Empire": "Ghana Empire",
+  "Tang dynasty": "Tang dynasty",
+  "Umayyad Caliphate": "Umayyad Caliphate",
+  "First Bulgarian Empire": "First Bulgarian Empire",
+  "Abbasid Caliphate": "Abbasid Caliphate",
+  "Carolingian Empire": "Carolingian Empire",
+  "Khmer Empire": "Khmer Empire",
+  "Song dynasty": "Song dynasty",
+  "Holy Roman Empire": "Holy Roman Empire",
+  "Mongol Empire": "Mongol Empire",
+  "Ottoman Empire": "Ottoman Empire",
+  "Aztec Triple Alliance": "Aztec Empire",
+  "Mughal Empire": "Mughal Empire",
+  "Kingdom of Great Britain": "Kingdom of Great Britain",
+  "Soviet Union": "Soviet Union",
+  "Writing in Mesopotamia": "Cuneiform",
+  "The wheel": "Wheel",
+  "Control of fire": "Control of fire by early humans",
+  "Spoked-wheel chariot": "Chariot",
+  "Iron working": "Iron Age",
+  "Phoenician alphabet": "Phoenician alphabet",
+  "Paper in Han China": "Cai Lun",
+  "Gutenberg printing press": "Printing press",
+  "Refracting telescope": "Refracting telescope",
+  "Newcomen steam engine": "Newcomen atmospheric engine",
+  "Smallpox vaccine": "Smallpox vaccine",
+  Telephone: "Telephone",
+  "Powered airplane": "Wright Flyer",
+  Penicillin: "Penicillin",
+  Transistor: "Transistor",
+  "World Wide Web": "World Wide Web",
+  iPhone: "iPhone",
+  "Hildegard of Bingen": "Hildegard of Bingen",
+  "Johann Sebastian Bach": "Johann Sebastian Bach",
+  "Wolfgang Amadeus Mozart": "Wolfgang Amadeus Mozart",
+  "Ludwig van Beethoven": "Ludwig van Beethoven",
+  "Frédéric Chopin": "Frédéric Chopin",
+  "Duke Ellington": "Duke Ellington",
+  "Billie Holiday records Summertime": "Billie Holiday",
+  "The Beatles’ first single": "The Beatles",
+  "Bob Dylan goes electric": "Bob Dylan",
+  "Rapper’s Delight": "Rapper's Delight",
+  Thriller: "Thriller (album)",
+  "Battle of Kadesh": "Battle of Kadesh",
+  "Bronze Age collapse": "Late Bronze Age collapse",
+  "Greco-Persian Wars": "Greco-Persian Wars",
+  "Punic Wars": "Punic Wars",
+  "Umayyad siege of Constantinople": "Siege of Constantinople (717–718)",
+  "Battle of Tours": "Battle of Tours",
+  "First Crusade": "First Crusade",
+  "Hundred Years’ War": "Hundred Years' War",
+  "Thirty Years’ War": "Thirty Years' War",
+  "American Revolutionary War": "American Revolutionary War",
+  "Napoleonic Wars": "Napoleonic Wars",
+  "American Civil War": "American Civil War",
+  "World War I": "World War I",
+  "World War II": "World War II",
+  "D-Day": "Normandy landings",
+  "Cold War": "Cold War",
+  "Zhang Qian’s missions": "Zhang Qian",
+  "Zheng He’s first voyage": "Zheng He",
+  "Columbus reaches the Caribbean": "Christopher Columbus",
+  "Vasco da Gama reaches India": "Vasco da Gama",
+  "Magellan–Elcano circumnavigation": "Magellan expedition",
+  "Cook’s Endeavour voyage": "First voyage of James Cook",
+  "Lewis and Clark expedition": "Lewis and Clark Expedition",
+  "Amundsen at the South Pole": "Amundsen's South Pole expedition",
+  "Apollo 11 Moon landing": "Apollo 11",
+  "Voyager launches": "Voyager program",
+  "Curiosity lands on Mars": "Curiosity (rover)",
+  "Euclid’s Elements": "Euclid's Elements",
+  "Copernican Revolution": "Copernican Revolution",
+  "Newton’s Principia": "Philosophiæ Naturalis Principia Mathematica",
+  "On the Origin of Species": "On the Origin of Species",
+  "Periodic table": "Periodic table",
+  "Einstein’s annus mirabilis": "Annus mirabilis papers",
+  "Fleming and penicillin": "Alexander Fleming",
+  "Structure of DNA": "Nucleic acid double helix",
+  "Apollo science return": "Moon rock",
+  "Higgs boson": "Higgs boson",
+  "CRISPR gene editing": "CRISPR gene editing",
+  "Parthenon begun": "Parthenon",
+  "Terracotta Army": "Terracotta Army",
+  "Hagia Sophia dedicated": "Hagia Sophia",
+  "Leonardo paints the Mona Lisa": "Mona Lisa",
+  "Michelangelo’s David": "David (Michelangelo)",
+  "Rembrandt’s Night Watch": "The Night Watch",
+  "First Impressionist exhibition": "Impressionism",
+  "Picasso’s Les Demoiselles d’Avignon": "Les Demoiselles d'Avignon",
+  Fountain: "Fountain (Duchamp)",
+  "Warhol’s soup cans": "Campbell's Soup Cans",
+  "First recorded Olympic Games": "Ancient Olympic Games",
+  "Football Association founded": "The Football Association",
+  "First modern Olympics": "1896 Summer Olympics",
+  "First World Series": "1903 World Series",
+  "First FIFA World Cup": "1930 FIFA World Cup",
+  "Jackie Robinson debuts": "Jackie Robinson",
+  "Super Bowl I": "Super Bowl I",
+  "Title IX": "Title IX",
+  "Miracle on Ice": "Miracle on Ice",
+  "First FIFA Women's World Cup": "1991 FIFA Women's World Cup",
+  "Usain Bolt in Beijing": "Usain Bolt",
+  "Simone Biles in Rio": "Simone Biles",
+  "Artemis lunar return (projected)": "Artemis program",
+  "Commercial fusion pilots (projected)": "Fusion power",
+  "Crewed Mars landing (projected)": "Human mission to Mars",
+};
+
+export const historySeedEvents: HistoryEvent[] = SEED_EVENTS.map((event) => {
+  const wikipedia = SEED_WIKIPEDIA[event.title];
+  return wikipedia ? { ...event, wikipedia } : event;
+});
 
 /** Older seed ids/titles that must not linger in Mongo window caches. */
 export const RETIRED_HISTORY_EVENT_IDS = new Set([

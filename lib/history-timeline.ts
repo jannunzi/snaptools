@@ -83,6 +83,10 @@ export type HistoryEvent = {
   projected?: boolean;
   source: HistoryEventSource;
   granularity?: HistoryGranularity;
+  /** Canonical English Wikipedia title or slug, when known. */
+  wikipedia?: string;
+  /** Alias accepted from older seeds / generated JSON. */
+  wikiTitle?: string;
 };
 
 export type HistoryWindow = {
@@ -505,16 +509,31 @@ export function shouldShowEvent(
 }
 
 export function mergeEvents(...groups: HistoryEvent[][]) {
-  const seen = new Set<string>();
-  const merged: HistoryEvent[] = [];
+  const seen = new Map<string, HistoryEvent>();
   for (const group of groups) {
     for (const event of group) {
-      if (seen.has(event.id)) continue;
-      seen.add(event.id);
-      merged.push(event);
+      const existing = seen.get(event.id);
+      if (!existing) {
+        seen.set(event.id, event);
+        continue;
+      }
+      // Cache rows can beat a later seed copy; keep a known article title.
+      if (
+        !existing.wikipedia &&
+        !existing.wikiTitle &&
+        (event.wikipedia || event.wikiTitle)
+      ) {
+        seen.set(event.id, {
+          ...existing,
+          wikipedia: event.wikipedia,
+          wikiTitle: event.wikiTitle,
+        });
+      }
     }
   }
-  return merged.sort((a, b) => a.year - b.year || a.title.localeCompare(b.title));
+  return [...seen.values()].sort(
+    (a, b) => a.year - b.year || a.title.localeCompare(b.title),
+  );
 }
 
 export function yearToX(year: number, pixelsPerYear: number) {
