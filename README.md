@@ -16,6 +16,9 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [Fractions Practice](/tools/fractions-practice) — identify a shaded pie or bar, simplify, name equivalents, compare, add/subtract like denominators, and convert improper ↔ mixed. Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
 - [Place Value Practice](/tools/place-value) — name the place of an underlined digit or its value. Ones through hundred thousands, expanded form, compare, decimals to thousandths, and rounding. Practice, 60-second quiz, or Streak. Instant feedback, missed-item review, printable chart.
 - [Skip Counting Practice](/tools/skip-counting) — fill the missing number in a short sequence by 2s, 5s, 10s, and beyond. Easy / Medium / Challenge, then Practice, a 60-second quiz, or Streak. Instant feedback, missed-item review, printable 2s/5s/10s chart.
+- [First Communion Prayers](/tools/first-communion-prayers) — Our Father, Hail Mary, Glory Be, and a child-friendly Act of Contrition. Put lines in order or fill a missing word. Practice, short quiz, or Streak.
+- [Parts of the Mass](/tools/parts-of-the-mass) — name the four parts of Mass and match Gospel, Homily, Consecration, Sign of Peace, Communion, and Dismissal.
+- [Eucharist Basics](/tools/eucharist-basics) — First Communion quiz: Body and Blood of Christ, bread and wine, reverence, Baptism and a ready heart, the Communion fast in simple words.
 
 ## Stack
 
@@ -56,7 +59,7 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 ## How to add a tool
 
 1. **Register it** in `lib/tools.ts`  
-   Add a new entry with `status: "live"`, `category` (`math` | `history-civics` | `languages` | `arts`), `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs. The homepage groups live tools by that category.
+   Add a new entry with `status: "live"`, `category` (`math` | `history-civics` | `languages` | `arts` | `faith`), `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs. The homepage groups live tools by that category.
 
 2. **Build the tool** as a client component  
    Add `components/tools/YourTool.tsx`. Keep it account-free: no auth. Server routes are OK when a secret must stay off the client (see `/api/tts`, `/api/coloring/generate`, and `/api/history-timeline/events`).
@@ -91,6 +94,9 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 | `/tools/fractions-practice` | Live fraction fluency practice |
 | `/tools/place-value` | Live place-value, expanded form, and rounding practice |
 | `/tools/skip-counting` | Live skip-counting sequences by 2s, 5s, 10s, and beyond |
+| `/tools/first-communion-prayers` | Live First Communion prayer practice |
+| `/tools/parts-of-the-mass` | Live Parts of the Mass quiz |
+| `/tools/eucharist-basics` | Live Eucharist basics quiz |
 | `/api/history-timeline/events` | Cached + generated timeline events |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |

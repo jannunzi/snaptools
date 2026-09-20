@@ -12,6 +12,7 @@ export const TOOL_CATEGORIES = [
   { id: "history-civics", label: "History & Civics" },
   { id: "languages", label: "Languages" },
   { id: "arts", label: "Arts" },
+  { id: "faith", label: "Faith" },
 ] as const;
 
 export type ToolCategoryId = (typeof TOOL_CATEGORIES)[number]["id"];
@@ -584,6 +585,117 @@ export const tools: Tool[] = [
         author: "Kristen Math",
         blurb:
           "Patterns and sequences by 2s, 5s, 10s, and 100s, with word problems and an answer key.",
+      },
+    ],
+  },
+  {
+    slug: "first-communion-prayers",
+    category: "faith",
+    title: "First Communion Prayers",
+    tagline: "Our Father, Hail Mary, Glory Be, Act of Contrition.",
+    description:
+      "Practice the core prayers for First Communion. Put the lines in order or fill in a missing word. Practice, a short quiz, or streak — instant feedback, reverent and simple.",
+    day: 16,
+    publishedOn: "2026-09-20",
+    audience: "Children preparing for First Communion (~Grade 2), with a parent or catechist",
+    status: "live",
+    howTo:
+      "Read a prayer, then put its lines in order or tap the missing word. Start with one prayer; mix all four when that feels easy. Use the short quiz for a scored set of 8; use Streak until the first miss.",
+    books: [
+      {
+        asin: "0899422403",
+        title: "St. Joseph First Communion Catechism (No. 0)",
+        author: "Bennet Kelley",
+        blurb:
+          "Baltimore Catechism No. 0 for grades 1–2 — prayers, pictures, and short lessons for First Communion prep.",
+      },
+      {
+        asin: "0895551446",
+        title: "Baltimore Catechism One",
+        author: "Third Council of Baltimore",
+        blurb:
+          "Question-and-answer lessons for First Communicants through about fifth grade — a paper companion to the prayers.",
+      },
+      {
+        asin: "1593251491",
+        title: "Jesus Speaks to Me on My First Holy Communion",
+        author: "Angela M. Burrin",
+        blurb:
+          "A gentle First Communion gift book with Scripture scenes and the traditional prayers children memorize.",
+      },
+    ],
+  },
+  {
+    slug: "parts-of-the-mass",
+    category: "faith",
+    title: "Parts of the Mass",
+    tagline: "Name the four parts — and the moments inside them.",
+    description:
+      "A First Communion quiz on Introductory Rites, Liturgy of the Word, Liturgy of the Eucharist, and Concluding Rites. Multiple choice or match Gospel, Homily, Consecration, Sign of Peace, Communion, and Dismissal.",
+    day: 17,
+    publishedOn: "2026-09-20",
+    audience: "Children preparing for First Communion (~Grade 2), with a parent or catechist",
+    status: "live",
+    howTo:
+      "Start with multiple choice to learn the four parts in order. Switch to Match to place each moment in the right part of Mass. Practice keeps going; the short quiz is 8 questions; Streak ends on the first miss.",
+    books: [
+      {
+        asin: "1592760759",
+        title: "The Mass Book for Children",
+        author: "Rosemarie Gortler and Donna Piscitelli",
+        blurb:
+          "A short, illustrated walk through the parts of Mass for children about preschool to age 9.",
+      },
+      {
+        asin: "0899422403",
+        title: "St. Joseph First Communion Catechism (No. 0)",
+        author: "Bennet Kelley",
+        blurb:
+          "First Communion lessons on the Mass and the Eucharist, with pictures for grades 1–2.",
+      },
+      {
+        asin: "0895551446",
+        title: "Baltimore Catechism One",
+        author: "Third Council of Baltimore",
+        blurb:
+          "Clear Q&A on the Mass and the Holy Eucharist for First Communicants.",
+      },
+    ],
+  },
+  {
+    slug: "eucharist-basics",
+    category: "faith",
+    title: "Eucharist Basics",
+    tagline: "Jesus is truly present — Body and Blood.",
+    description:
+      "A First Communion quiz: the Eucharist is the Body and Blood of Christ; bread and wine; reverence; Baptism and a ready heart; the Communion fast in simple words; who may receive. Standard catechism teaching for children.",
+    day: 18,
+    publishedOn: "2026-09-20",
+    audience: "Children preparing for First Communion (~Grade 2), with a parent or catechist",
+    status: "live",
+    howTo:
+      "Read each question and tap the best answer. Practice keeps going; the short quiz is 8 questions; Streak ends on the first miss. Review the missed items before the next round.",
+    books: [
+      {
+        asin: "0899422403",
+        title: "St. Joseph First Communion Catechism (No. 0)",
+        author: "Bennet Kelley",
+        blurb:
+          "The classic First Communion catechism — Who is Jesus in the Eucharist, and how we receive him.",
+      },
+      {
+        asin: "1593251491",
+        title: "Jesus Speaks to Me on My First Holy Communion",
+        author: "Angela M. Burrin",
+        blurb:
+          "Jesus invites the child to friendship in the Eucharist, with memory pages and traditional prayers.",
+      },
+      {
+        asin: "0895551446",
+        title: "Baltimore Catechism One",
+        author: "Third Council of Baltimore",
+        blurb:
+          "Short Q&A on the Holy Eucharist for First Communicants through about fifth grade.",
       },
     ],
   },
