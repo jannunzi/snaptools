@@ -41,6 +41,12 @@ test("multiplication is covered and decimals is a gap", () => {
     multiplication.tools.some((tool) => tool.slug === "multiplication-tables"),
   );
 
+  const skipCounting = getSkillCoverage(getSkill("skip-counting")!);
+  assert.equal(skipCounting.isGap, false);
+  assert.ok(
+    skipCounting.tools.some((tool) => tool.slug === "skip-counting"),
+  );
+
   const decimals = getSkillCoverage(getSkill("decimals")!);
   assert.equal(decimals.isGap, true);
   assert.equal(decimals.liveCount, 0);
@@ -82,7 +88,7 @@ test("prerequisites resolve and addition-subtraction maps to two skills", () => 
 test("gap report and snapshot export skills with zero tools", () => {
   const report = formatCurriculumGapReport();
   assert.match(report, /decimals/);
-  assert.match(report, /skip-counting/);
+  assert.doesNotMatch(report, /skip-counting\t/);
   assert.doesNotMatch(report, /multiplication\t/);
 
   const snapshot = exportCurriculumSnapshot();

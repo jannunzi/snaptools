@@ -405,6 +405,11 @@ export const TOOL_CURRICULUM: readonly ToolCurriculumTag[] = [
     grades: ["2", "3", "4", "5"],
   },
   {
+    slug: "skip-counting",
+    skillIds: ["skip-counting"],
+    grades: ["k", "1", "2"],
+  },
+  {
     slug: "telling-time",
     skillIds: ["telling-time"],
     grades: ["1", "2", "3"],
