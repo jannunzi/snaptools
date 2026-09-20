@@ -10,6 +10,7 @@ import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PlaceValuePractice } from "@/components/tools/PlaceValuePractice";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
 import { SightWords } from "@/components/tools/SightWords";
+import { SkipCounting } from "@/components/tools/SkipCounting";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
 import { StatesAndCapitals } from "@/components/tools/StatesAndCapitals";
 import { TellingTime } from "@/components/tools/TellingTime";
@@ -45,6 +46,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <SightWords />;
     case "place-value":
       return <PlaceValuePractice />;
+    case "skip-counting":
+      return <SkipCounting />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }

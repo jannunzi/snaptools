@@ -550,6 +550,43 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "skip-counting",
+    category: "math",
+    title: "Skip Counting Practice",
+    tagline: "Count by 2s, 5s, 10s — and beyond.",
+    description:
+      "Fill the missing number in a short skip-counting sequence. Practice, race a 60-second quiz, or see how long you can streak. Instant feedback, missed-item review, and a printable chart for 2s, 5s, and 10s.",
+    day: 15,
+    publishedOn: "2026-09-20",
+    audience: "Kids, parents, and teachers building early number fluency",
+    status: "live",
+    howTo:
+      "Start with Easy (2, 5, 10). Type the missing number in the sequence and press Enter. When that feels easy, add 3s and 4s, then Challenge (6–9, 25, 100). Use Timed for a one-minute sprint; use Streak to find the skips that still stall you.",
+    books: [
+      {
+        asin: "0887431372",
+        title: "School Zone Math Basics 1 Workbook",
+        author: "School Zone",
+        blurb:
+          "1st grade numbers 1–100, skip counting, and more — short colorful pages after a fluency set.",
+      },
+      {
+        asin: "1483871444",
+        title: "Spectrum 1st Grade Math Workbook",
+        author: "Spectrum",
+        blurb:
+          "Addition, subtraction, place value, shapes, and early number skills for ages 6–7.",
+      },
+      {
+        asin: "B0GTHSLD3B",
+        title: "Skip Counting Workbook Grade 2",
+        author: "Kristen Math",
+        blurb:
+          "Patterns and sequences by 2s, 5s, 10s, and 100s, with word problems and an answer key.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
