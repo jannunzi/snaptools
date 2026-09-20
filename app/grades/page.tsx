@@ -24,12 +24,12 @@ export default function GradesPage() {
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-muted sm:text-lg">
         Pick a grade to see the skills for that band, the tools that exist, and
-        the gaps still open.
+        what is coming soon.
       </p>
       <p className="mt-4 text-sm text-ink-muted">
         {summary.liveCount} skills with a tool
         <span className="mx-1.5 text-line">·</span>
-        {summary.gapCount} {summary.gapCount === 1 ? "gap" : "gaps"}
+        {summary.gapCount} coming soon
       </p>
       <p className="mt-3">
         <Link href="/learn" className="snap-link text-sm">

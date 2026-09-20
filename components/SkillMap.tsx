@@ -8,7 +8,7 @@ import {
 
 function SkillStatus({ item }: { item: SkillCoverage }) {
   if (item.isGap) {
-    return <span className="snap-badge snap-badge-muted">Gap</span>;
+    return <span className="snap-badge snap-badge-muted">Coming soon</span>;
   }
   return (
     <span className="snap-badge snap-badge-live">
@@ -46,9 +46,7 @@ export function SkillRow({
           </p>
         ) : null}
         {item.isGap ? (
-          <p className="mt-3 text-sm text-ink-muted">
-            No tool yet — a gap to fill next.
-          </p>
+          <p className="mt-3 text-sm text-ink-muted">Coming soon.</p>
         ) : (
           <p className="mt-3 text-sm text-ink-muted">
             {item.tools.map((tool) => tool.title).join(" · ")}
@@ -78,7 +76,7 @@ export function SkillMapList({
             <p className="text-sm text-ink-muted">
               {group.liveCount} live
               <span className="mx-1.5 text-line">·</span>
-              {group.gapCount} {group.gapCount === 1 ? "gap" : "gaps"}
+              {group.gapCount} coming soon
             </p>
           </div>
           <ol className="mt-4 grid gap-3">

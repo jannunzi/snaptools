@@ -58,7 +58,7 @@ export function GradeCoverageGrid({
           <p className="mt-2 text-sm text-ink-muted">
             {item.liveCount} with a tool
             <span className="mx-1.5 text-line">·</span>
-            {item.gapCount} {item.gapCount === 1 ? "gap" : "gaps"}
+            {item.gapCount} coming soon
           </p>
           <p className="mt-1 text-sm text-ink-muted">
             {item.skills.length}{" "}

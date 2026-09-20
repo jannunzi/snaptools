@@ -10,7 +10,7 @@ import {
 export const metadata: Metadata = {
   title: "Skill map",
   description:
-    "What FactsTools covers by subject and skill — and the gaps still open.",
+    "What FactsTools covers by subject and skill — and what is coming soon.",
 };
 
 export default function LearnPage() {
@@ -27,12 +27,12 @@ export default function LearnPage() {
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-muted sm:text-lg">
         Each tool still works on its own. This map shows the skills they cover
-        and the gaps with no tool yet.
+        and what is coming soon.
       </p>
       <p className="mt-4 text-sm text-ink-muted">
         {summary.liveCount} of {summary.skillCount} skills have a tool
         <span className="mx-1.5 text-line">·</span>
-        {summary.gapCount} {summary.gapCount === 1 ? "gap" : "gaps"}
+        {summary.gapCount} coming soon
       </p>
       <p className="mt-3">
         <Link href="/grades" className="snap-link text-sm">

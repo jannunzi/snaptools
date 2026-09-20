@@ -28,7 +28,7 @@ export async function generateMetadata({
 
   return {
     title: grade.title,
-    description: `Skills and tools for ${grade.title}, including gaps with no practice tool yet.`,
+    description: `Skills and tools for ${grade.title}, including what is coming soon.`,
   };
 }
 
@@ -57,12 +57,12 @@ export default async function GradePage({ params }: GradePageProps) {
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-muted sm:text-lg">
         Subjects and skills for this grade. Open a skill to practice, or see
-        what is still a gap.
+        what is coming soon.
       </p>
       <p className="mt-4 text-sm text-ink-muted">
         {liveCount} with a tool
         <span className="mx-1.5 text-line">·</span>
-        {gapCount} {gapCount === 1 ? "gap" : "gaps"}
+        {gapCount} coming soon
       </p>
       <SkillMapList groups={groups} />
     </div>

@@ -63,7 +63,7 @@ export default async function SkillPage({ params }: SkillPageProps) {
           {getCategoryLabel(skill.category)}
         </span>
         {coverage.isGap ? (
-          <span className="snap-badge snap-badge-muted">Gap</span>
+          <span className="snap-badge snap-badge-muted">Coming soon</span>
         ) : (
           <span className="snap-badge snap-badge-live">
             {coverage.liveCount}{" "}
@@ -134,10 +134,10 @@ export default async function SkillPage({ params }: SkillPageProps) {
         </h2>
         {coverage.isGap ? (
           <div className="snap-panel mt-4">
-            <p className="font-display text-xl text-ink">No tool yet</p>
+            <p className="font-display text-xl text-ink">Coming soon</p>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-muted">
-              This skill is a gap. Each tool still stands alone — the map just
-              shows what is missing so the next practice tool is easy to pick.
+              A practice tool for this skill is not live yet. Each tool still
+              works on its own.
             </p>
           </div>
         ) : (
