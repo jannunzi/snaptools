@@ -1,5 +1,7 @@
 import { AdditionSubtractionFacts } from "@/components/tools/AdditionSubtractionFacts";
 import { CivicsQuiz } from "@/components/tools/CivicsQuiz";
+import { EucharistBasics } from "@/components/tools/EucharistBasics";
+import { FirstCommunionPrayers } from "@/components/tools/FirstCommunionPrayers";
 import { HistoryTimeline } from "@/components/tools/HistoryTimeline";
 import { ComingSoonPanel } from "@/components/tools/ComingSoonPanel";
 import { CountingMoney } from "@/components/tools/CountingMoney";
@@ -7,6 +9,7 @@ import { DivisionFacts } from "@/components/tools/DivisionFacts";
 import { FractionsPractice } from "@/components/tools/FractionsPractice";
 import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
+import { PartsOfTheMass } from "@/components/tools/PartsOfTheMass";
 import { PlaceValuePractice } from "@/components/tools/PlaceValuePractice";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
 import { SightWords } from "@/components/tools/SightWords";
@@ -48,6 +51,12 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <PlaceValuePractice />;
     case "skip-counting":
       return <SkipCounting />;
+    case "first-communion-prayers":
+      return <FirstCommunionPrayers />;
+    case "parts-of-the-mass":
+      return <PartsOfTheMass />;
+    case "eucharist-basics":
+      return <EucharistBasics />;
     default:
       return <ComingSoonPanel tool={tool} />;
   }
