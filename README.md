@@ -15,6 +15,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [US States & Capitals](/tools/states-and-capitals) — name the capital or the state. Multiple choice or type-the-answer, Census regions, Quick 10 / Full 50 / Streak, optional postal hint, missed-pair review.
 - [Fractions Practice](/tools/fractions-practice) — identify a shaded pie or bar, simplify, name equivalents, compare, add/subtract like denominators, and convert improper ↔ mixed. Practice, 60-second quiz, or Streak. Instant feedback and missed-item review.
 - [Place Value Practice](/tools/place-value) — name the place of an underlined digit or its value. Ones through hundred thousands, expanded form, compare, decimals to thousandths, and rounding. Practice, 60-second quiz, or Streak. Instant feedback, missed-item review, printable chart.
+- [Skip Counting Practice](/tools/skip-counting) — fill the missing number in a short sequence by 2s, 5s, 10s, and beyond. Easy / Medium / Challenge, then Practice, a 60-second quiz, or Streak. Instant feedback, missed-item review, printable 2s/5s/10s chart.
 
 ## Stack
 
@@ -96,6 +97,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 | `/tools/states-and-capitals` | Live 50-state capitals quiz |
 | `/tools/fractions-practice` | Live fraction fluency practice |
 | `/tools/place-value` | Live place-value, expanded form, and rounding practice |
+| `/tools/skip-counting` | Live skip-counting sequences by 2s, 5s, 10s, and beyond |
 | `/api/history-timeline/events` | Cached + generated timeline events |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
