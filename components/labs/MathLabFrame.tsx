@@ -28,7 +28,7 @@ export function useMathLabProjector() {
 
 /**
  * Shared projector chrome for Math Labs: full screen and a toolbar row.
- * Hub page is intentionally not built yet — see lib/math-labs.ts.
+ * The lab index is /math-labs.
  */
 export function MathLabFrame({
   label,

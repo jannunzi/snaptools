@@ -18,6 +18,13 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="Primary" className="flex items-center gap-5 text-sm">
           <Link
+            href="/math-labs"
+            className="font-medium text-ink-muted transition-colors hover:text-ink"
+          >
+            <span className="sm:hidden">Labs</span>
+            <span className="hidden sm:inline">Math Labs</span>
+          </Link>
+          <Link
             href="/"
             className="font-medium text-ink-muted transition-colors hover:text-ink"
           >
