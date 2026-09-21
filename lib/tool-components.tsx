@@ -13,6 +13,7 @@ import { MultiplicationTables } from "@/components/tools/MultiplicationTables";
 import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PartsOfTheMass } from "@/components/tools/PartsOfTheMass";
 import { PlaceValuePractice } from "@/components/tools/PlaceValuePractice";
+import { Pythagoras } from "@/components/tools/Pythagoras";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
 import { RomanNumerals } from "@/components/tools/RomanNumerals";
 import { SightWords } from "@/components/tools/SightWords";
@@ -52,6 +53,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <FractionWall />;
     case "area-perimeter":
       return <AreaPerimeter />;
+    case "pythagoras":
+      return <Pythagoras />;
     case "sight-words":
       return <SightWords />;
     case "place-value":

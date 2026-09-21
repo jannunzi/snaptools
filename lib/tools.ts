@@ -835,6 +835,51 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "pythagoras",
+    category: "math",
+    format: "lab",
+    title: "Pythagoras Lab",
+    tagline: "Drag a right triangle. Watch a² + b² = c².",
+    description:
+      "An interactive Pythagorean theorem. Drag a right triangle and watch the Pythagoras area squares on each side — a², b², and c² — update together. The a²+b²=c² visual stays true as you drag. The right angle stays fixed. Free, no login, ready for a classroom projector.",
+    keywords: [
+      "interactive pythagorean theorem",
+      "pythagoras area squares",
+      "a²+b²=c² visual",
+      "pythagorean theorem",
+      "right triangle squares",
+    ],
+    day: 22,
+    publishedOn: "2026-09-21",
+    audience: "Grades 7–9 on a projector or iPad",
+    status: "live",
+    howTo:
+      "Project this page and tap Full screen. Explore opens on a 3–4–5 triangle. Drag a corner: the squares are the areas, and 9 + 16 = 25 stays true. Tap Show why — the big square splits into two rectangles, one matching each leg. Open Triples and tap 5–12–13, then 8–15–17. Missing side hides one length. Add the areas, or drag the free leg until the hypotenuse matches, then tap Check. One idea fits in five minutes.",
+    books: [
+      {
+        asin: "1570911509",
+        title: "What's Your Angle, Pythagoras?",
+        author: "Julie Ellis",
+        blurb:
+          "A picture-book adventure that introduces the right angle and how the squares on its sides fit together.",
+      },
+      {
+        asin: "1570917760",
+        title: "Pythagoras and the Ratios",
+        author: "Julie Ellis",
+        blurb:
+          "The sequel: Pythagoras tunes pipes and lyres and finds a mathematical ratio that makes the notes agree.",
+      },
+      {
+        asin: "0691148236",
+        title: "The Pythagorean Theorem: A 4,000-Year History",
+        author: "Eli Maor",
+        blurb:
+          "A short history of the theorem, from Babylonian tablets to the proofs still taught beside a right triangle.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
@@ -856,7 +901,7 @@ export function compareToolsByPublishOrder(a: Tool, b: Tool) {
 }
 
 /**
- * Math Labs only. A second lab is registered. TODO(math-labs-hub): render
+ * Math Labs only. Three labs are registered. TODO(math-labs-hub): render
  * this when a hub page is added. See lib/math-labs.ts.
  */
 export function getMathLabTools(list: readonly Tool[] = tools) {
