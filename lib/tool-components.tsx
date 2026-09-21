@@ -1,4 +1,5 @@
 import { AdditionSubtractionFacts } from "@/components/tools/AdditionSubtractionFacts";
+import { AreaPerimeter } from "@/components/tools/AreaPerimeter";
 import { CivicsQuiz } from "@/components/tools/CivicsQuiz";
 import { EucharistBasics } from "@/components/tools/EucharistBasics";
 import { FirstCommunionPrayers } from "@/components/tools/FirstCommunionPrayers";
@@ -49,6 +50,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <FractionsPractice />;
     case "fraction-wall":
       return <FractionWall />;
+    case "area-perimeter":
+      return <AreaPerimeter />;
     case "sight-words":
       return <SightWords />;
     case "place-value":

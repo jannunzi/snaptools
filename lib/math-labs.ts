@@ -2,11 +2,11 @@
  * Math Labs are projector manipulatives. They stay in the Math category
  * (`format: "lab"` on the tool) beside the fluency drills.
  *
- * Shipped: Fraction Wall.
- * Planned: Pythagoras, unit circle, sine-from-circle, area and perimeter, slope.
+ * Shipped: Fraction Wall, Area vs Perimeter Tiles.
+ * Planned: Pythagoras, unit circle, sine-from-circle, slope.
  *
- * TODO(math-labs-hub): Do not add a hub page until a second lab ships.
- * Then list `getMathLabTools()` from lib/tools.ts and link it from Math.
+ * TODO(math-labs-hub): A second lab is registered. Do not add the hub page
+ * in the lab PR — list `getMathLabTools()` from lib/tools.ts when the hub is built.
  */
 
 export const MATH_LAB_CATEGORY = "math" as const;
@@ -16,7 +16,7 @@ export const PLANNED_MATH_LABS = [
   { id: "pythagoras", title: "Pythagoras" },
   { id: "unit-circle", title: "Unit Circle" },
   { id: "sine-from-circle", title: "Sine from the Circle" },
-  { id: "area-perimeter", title: "Area and Perimeter" },
+  { id: "area-perimeter", title: "Area vs Perimeter", slug: "area-perimeter" },
   { id: "slope", title: "Slope" },
 ] as const;
 
