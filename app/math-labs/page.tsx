@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { MathLabsSignup } from "@/components/labs/MathLabsSignup";
 import { ToolCard } from "@/components/ToolCard";
+import { getSiteUrl } from "@/lib/site";
 import { getMathLabTools } from "@/lib/tools";
 
 export const metadata: Metadata = {
@@ -12,7 +14,14 @@ export const metadata: Metadata = {
     "interactive fraction wall",
     "interactive unit circle",
     "interactive pythagorean theorem",
+    "classroom math labs",
   ],
+  openGraph: {
+    title: "Math Labs",
+    description:
+      "Free projector manipulatives: fraction bars, area and perimeter, Pythagoras, the unit circle, sine, and slope. No login.",
+    url: `${getSiteUrl()}/math-labs`,
+  },
 };
 
 export default function MathLabsPage() {
@@ -37,6 +46,7 @@ export default function MathLabsPage() {
           ))}
         </div>
       </section>
+      <MathLabsSignup />
     </div>
   );
 }
