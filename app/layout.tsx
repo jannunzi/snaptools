@@ -54,6 +54,9 @@ export const metadata: Metadata = {
     "interactive pythagorean theorem",
     "pythagoras area squares",
     "a²+b²=c² visual",
+    "interactive unit circle",
+    "unit circle radians degrees",
+    "sin cos on unit circle",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,
