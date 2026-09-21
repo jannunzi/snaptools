@@ -19,6 +19,7 @@ Free one-off online tools — practice sheets, templates, quick reference. Trivi
 - [First Communion Prayers](/tools/first-communion-prayers) — Our Father, Hail Mary, Glory Be, and a child-friendly Act of Contrition. Put lines in order or fill a missing word. Practice, short quiz, or Streak.
 - [Parts of the Mass](/tools/parts-of-the-mass) — name the four parts of Mass and match Gospel, Homily, Consecration, Sign of Peace, Communion, and Dismissal.
 - [Eucharist Basics](/tools/eucharist-basics) — First Communion quiz: Body and Blood of Christ, bread and wine, reverence, Baptism and a ready heart, the Communion fast in simple words.
+- [Roman Numerals Practice](/tools/roman-numerals) — read and write Roman numerals from I to MMMCMXCIX. Easy (1–20), Medium (1–100), or Challenge (1–3999); Arabic ↔ Roman; Practice, 60-second quiz, or Streak. Instant feedback, missed-item review, printable chart.
 
 ## Stack
 
@@ -97,6 +98,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 | `/tools/first-communion-prayers` | Live First Communion prayer practice |
 | `/tools/parts-of-the-mass` | Live Parts of the Mass quiz |
 | `/tools/eucharist-basics` | Live Eucharist basics quiz |
+| `/tools/roman-numerals` | Live Roman numeral conversion practice |
 | `/api/history-timeline/events` | Cached + generated timeline events |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |

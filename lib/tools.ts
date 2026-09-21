@@ -699,6 +699,43 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "roman-numerals",
+    category: "math",
+    title: "Roman Numerals Practice",
+    tagline: "Read and write Roman numerals — I to M.",
+    description:
+      "Convert Arabic numbers to Roman numerals and back. Practice, race a 60-second quiz, or see how long you can streak. Instant feedback, missed-item review, and a printable chart for I, V, X, L, C, D, and M.",
+    day: 19,
+    publishedOn: "2026-09-21",
+    audience: "Kids, parents, and teachers practicing Roman numerals (grades ~3–5)",
+    status: "live",
+    howTo:
+      "Start with Easy: numbers 1–20 (I–XX). Type the Roman numeral or the number you see. When that feels easy, try Medium (1–100, including IV, IX, XL, XC), then Challenge through 3999 (I–MMMCMXCIX). Use Timed for a one-minute sprint; use Streak to find the numerals that still stall you.",
+    books: [
+      {
+        asin: "B0FTFRB4H3",
+        title: "Roman Numerals Workbook Grades 3-4",
+        author: "Victoria School Math",
+        blurb:
+          "Step-by-step Grades 3–4 pages with more than 1,600 exercises and an answer key — a paper follow-up after a short on-screen set.",
+      },
+      {
+        asin: "B0GCVW5H28",
+        title: "Learning Roman Numerals for Kids",
+        author: "Mr. Hocine Boumessid",
+        blurb:
+          "One hundred worksheets for conversions 1–100, sequences, comparisons, and an answer key.",
+      },
+      {
+        asin: "B0CFCXD1XJ",
+        title: "Math Practice Roman Numerals Workbook Grade 3rd–6th",
+        author: "Nasipa Learning",
+        blurb:
+          "Grade 3–6 reading and writing practice — a thicker paper companion once Medium and Challenge feel familiar.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
