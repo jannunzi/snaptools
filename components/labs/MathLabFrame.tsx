@@ -9,6 +9,7 @@ import {
   createContext,
   type ReactNode,
 } from "react";
+import Link from "next/link";
 
 type ProjectorValue = {
   projector: boolean;
@@ -103,6 +104,13 @@ export function MathLabFrame({
           {toolbar}
         </div>
         {children}
+        {projector ? null : (
+          <p className="no-print mt-6 border-t border-line/70 pt-4 text-sm text-ink-muted">
+            <Link href="/math-labs#signup" className="snap-link">
+              Classroom math labs — new tools + tell us what to build.
+            </Link>
+          </p>
+        )}
       </section>
     </ProjectorContext.Provider>
   );

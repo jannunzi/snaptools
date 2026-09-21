@@ -49,13 +49,20 @@ export default function Home() {
           className="mt-16"
           aria-labelledby={`category-${group.id}-heading`}
         >
-          <h2
-            id={`category-${group.id}-heading`}
-            className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-muted"
-          >
-            {group.label}
-          </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <h2
+              id={`category-${group.id}-heading`}
+              className="text-sm font-semibold uppercase tracking-[0.16em] text-ink-muted"
+            >
+              {group.label}
+            </h2>
+            {group.id === "math" ? (
+              <Link href="/math-labs" className="snap-link shrink-0 text-sm">
+                Math Labs
+              </Link>
+            ) : null}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
             {group.tools.map((tool) => (
               <ToolCard key={tool.slug} tool={tool} />
             ))}

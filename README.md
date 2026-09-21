@@ -48,6 +48,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `XAI_API_KEY` | (none) | Server-only xAI key for Grok TTS, Imagine, and History Timeline fills. Never prefix with `NEXT_PUBLIC_`. |
 | `MONGODB_URI` | (none) | MongoDB Atlas URI for History Timeline event cache. `MONGO_URI` is accepted as a fallback. Without it, seed events still render and Grok fills are not persisted. |
 | `MONGODB_DB` | `snaptools` | Database name. Defaults to `snaptools`. Never writes to the course `web-dev` database, even if that name is in the URI path. |
+| `MATH_LABS_SIGNUP_WEBHOOK` | (none) | Optional HTTPS inbox for Math Labs teacher signups. POST JSON `{ email, interest, message, source, createdAt }`. Slack incoming webhooks (`hooks.slack.com`) receive `{ text }` instead. |
 
 Book links are always:
 
@@ -81,6 +82,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 | Route | What |
 | --- | --- |
 | `/` | Hero, featured card, tools grouped by category |
+| `/math-labs` | Math Labs hub and teacher signup |
 | `/tools/multiplication-tables` | Live multiplication practice |
 | `/tools/music-note-recognition` | Live treble-staff quiz |
 | `/tools/spelling-practice` | Live EN/ES/FR spelling by ear |
@@ -100,6 +102,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 | `/tools/eucharist-basics` | Live Eucharist basics quiz |
 | `/tools/roman-numerals` | Live Roman numeral conversion practice |
 | `/api/history-timeline/events` | Cached + generated timeline events |
+| `/api/math-labs/signup` | Teacher email + optional next-lab note |
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 
@@ -136,6 +139,18 @@ npm run build
 ```
 
 must pass before you merge.
+
+### Math Labs teacher signup
+
+`/math-labs` collects an email and an optional “What would you like next?” note. The one variable to set is **`MATH_LABS_SIGNUP_WEBHOOK`**.
+
+Where a signup lands:
+
+1. **Webhook** — if `MATH_LABS_SIGNUP_WEBHOOK` is an `https` URL, the route POSTs the signup there (Formspree, a Slack incoming webhook, or any collector).
+2. **MongoDB** — if `MONGODB_URI` is already set, the same note is inserted into `math_lab_signups` in the FactsTools database (`MONGODB_DB`, default `snaptools`).
+3. **Server log** — every accepted signup prints a line starting with `[math-labs-signup]`. Locally that is the terminal running `next dev` or `next start`. On Vercel: the deployment’s **Logs**, filtered to `math-labs-signup`.
+
+The form still shows a thank-you when the webhook is missing. The build does not read `MATH_LABS_SIGNUP_WEBHOOK`. An `http` URL is ignored and the signup stays in the log (and in MongoDB when that is configured).
 
 ## Product rules
 
