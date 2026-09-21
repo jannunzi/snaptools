@@ -49,6 +49,8 @@ export const metadata: Metadata = {
     "no account",
     "interactive fraction wall",
     "fraction bars",
+    "area vs perimeter interactive",
+    "same perimeter different area",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,

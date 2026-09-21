@@ -790,6 +790,51 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "area-perimeter",
+    category: "math",
+    format: "lab",
+    title: "Area vs Perimeter Tiles",
+    tagline: "Paint squares. Compare area and perimeter.",
+    description:
+      "An area vs perimeter interactive. Paint unit squares or drag a rectangle and watch area and perimeter update together. Try same perimeter, different area: a long bar and a square can share the distance around while the square holds more squares. Free, no login, ready for a classroom projector.",
+    keywords: [
+      "area vs perimeter interactive",
+      "same perimeter different area",
+      "same area different perimeter",
+      "area and perimeter",
+      "perimeter of a rectangle",
+    ],
+    day: 21,
+    publishedOn: "2026-09-21",
+    audience: "Grades 3–5 on a projector or iPad",
+    status: "live",
+    howTo:
+      "Project this page and tap Full screen. Explore opens on a rectangle — drag a handle, or tap Width and Height. Area is the filled squares. The bright edge is the perimeter, the walk around the outside. Open Same perimeter: the long bar and the square can share a perimeter while the square holds more squares. Tap More square, same perimeter and watch the area climb. Same area keeps the tile count — tap Longer bar, same area and the walk around grows. Target asks for an area, a perimeter, or both. Paint is there when you want a shape that is not a rectangle. One idea fits in five minutes.",
+    books: [
+      {
+        asin: "1635783305",
+        title: "Humble Math — Area, Perimeter, Volume, & Surface Area",
+        author: "Humble Math",
+        blurb:
+          "Area and perimeter problems first, then volume and surface area, with an answer key.",
+      },
+      {
+        asin: "1523293179",
+        title: "Area & Perimeter - Grade 3 Workbook",
+        author: "Maria Miller",
+        blurb:
+          "Grade 3 area and perimeter, including rectangles that share a perimeter and differ in area.",
+      },
+      {
+        asin: "1934968676",
+        title: "Grade 4 Geometry & Measurement",
+        author: "Kumon Publishing",
+        blurb:
+          "Grade 4 geometry: area and perimeter of rectangles, then volume, angles, and circles.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
@@ -811,8 +856,8 @@ export function compareToolsByPublishOrder(a: Tool, b: Tool) {
 }
 
 /**
- * Math Labs only. TODO(math-labs-hub): render this once a second lab ships.
- * See lib/math-labs.ts.
+ * Math Labs only. A second lab is registered. TODO(math-labs-hub): render
+ * this when a hub page is added. See lib/math-labs.ts.
  */
 export function getMathLabTools(list: readonly Tool[] = tools) {
   return getToolsByCategory(MATH_LAB_CATEGORY, list).filter(
