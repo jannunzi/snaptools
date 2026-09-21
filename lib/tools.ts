@@ -45,6 +45,8 @@ export type Tool = {
   audience: string;
   status: ToolStatus;
   howTo: string;
+  /** Optional link rendered at the end of the teacher tip. */
+  tipLink?: { href: string; label: string };
   books: AmazonBook[];
 };
 
@@ -925,6 +927,52 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "sine-from-circle",
+    category: "math",
+    format: "lab",
+    title: "Sine from Circle Lab",
+    tagline: "Unwrap the circle into a sine wave.",
+    description:
+      "Unwrap the unit circle into a sine wave. A point travels the circle while a sine wave from the unit circle draws the same height — y = sin θ — against the angle. Play, pause, or drag. Turn on cosine for an interactive sine cosine circle, the picture of unwrapping the unit circle. Free, no login, ready for a classroom projector.",
+    keywords: [
+      "sine wave from unit circle",
+      "interactive sine cosine circle",
+      "unwrapping the unit circle",
+      "sine and cosine waves",
+      "unit circle sine wave",
+    ],
+    day: 24,
+    publishedOn: "2026-09-21",
+    audience: "Algebra 2 and precalculus on a projector or iPad",
+    status: "live",
+    howTo:
+      "Project this page and tap Full screen. It opens at 0°. Tap Play and watch one turn: the point's height on the circle is the height of the sine wave. Pause near the top — about 90°, sine 1 — then drag a point on the wave back toward 180° and the circle follows. Tap Cosine and play again: the blue wave is the horizontal coordinate, cosine. Slow gives the room a longer look. For one angle and its right triangle, open the",
+    tipLink: { href: "/tools/unit-circle", label: "Unit Circle Lab" },
+    books: [
+      {
+        asin: "0817639144",
+        title: "Trigonometry",
+        author: "I.M. Gelfand and Mark Saul",
+        blurb:
+          "A short geometry-first introduction to sine and cosine that reaches the unit circle without a rush of formulas.",
+      },
+      {
+        asin: "0071795359",
+        title: "Schaum's Outline of Trigonometry",
+        author: "Robert E. Moyer and Frank Ayres",
+        blurb:
+          "Worked trigonometry problems with the steps written out, for practice after a lesson on the circle and the wave.",
+      },
+      {
+        asin: "1592441300",
+        title: "Precalculus Mathematics in a Nutshell",
+        author: "George F. Simmons",
+        blurb:
+          "Geometry, algebra, and trigonometry in one slim review, including sine and cosine as functions of a real number.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
@@ -946,7 +994,7 @@ export function compareToolsByPublishOrder(a: Tool, b: Tool) {
 }
 
 /**
- * Math Labs only. Four labs are registered. TODO(math-labs-hub): render
+ * Math Labs only. Five labs are registered. TODO(math-labs-hub): render
  * this when a hub page is added. See lib/math-labs.ts.
  */
 export function getMathLabTools(list: readonly Tool[] = tools) {

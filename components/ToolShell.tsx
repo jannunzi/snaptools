@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { AmazonBookBanner } from "@/components/AmazonBookBanner";
 import { getCategoryLabel, isNewTool, type Tool } from "@/lib/tools";
 
@@ -45,7 +46,18 @@ export function ToolShell({ tool, children }: ToolShellProps) {
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink">
           {tool.format === "lab" ? "Teacher tip" : "How to practice"}
         </p>
-        <p className="mt-1.5">{tool.howTo}</p>
+        <p className="mt-1.5">
+          {tool.howTo}
+          {tool.tipLink ? (
+            <>
+              {" "}
+              <Link href={tool.tipLink.href} className="snap-link">
+                {tool.tipLink.label}
+              </Link>
+              .
+            </>
+          ) : null}
+        </p>
       </div>
       <div className="mt-10">{children}</div>
       <AmazonBookBanner books={tool.books} tool={tool.slug} />

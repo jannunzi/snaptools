@@ -57,6 +57,9 @@ export const metadata: Metadata = {
     "interactive unit circle",
     "unit circle radians degrees",
     "sin cos on unit circle",
+    "sine wave from unit circle",
+    "interactive sine cosine circle",
+    "unwrapping the unit circle",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,
