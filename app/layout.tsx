@@ -47,6 +47,8 @@ export const metadata: Metadata = {
     "treble clef",
     "browser tools",
     "no account",
+    "interactive fraction wall",
+    "fraction bars",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,

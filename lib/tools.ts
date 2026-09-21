@@ -1,3 +1,5 @@
+import { MATH_LAB_CATEGORY } from "@/lib/math-labs";
+
 export type AmazonBook = {
   asin: string;
   title: string;
@@ -6,6 +8,9 @@ export type AmazonBook = {
 };
 
 export type ToolStatus = "live" | "coming-soon";
+
+/** Fluency drills omit this. Labs are projector manipulatives. */
+export type ToolFormat = "practice" | "lab";
 
 export const TOOL_CATEGORIES = [
   { id: "math", label: "Math" },
@@ -28,9 +33,13 @@ export type Tool = {
   slug: string;
   /** Hub grouping. Assign one of the locked ids in TOOL_CATEGORIES. */
   category: ToolCategoryId;
+  /** Omit for fluency drills. Labs can be listed together later. */
+  format?: ToolFormat;
   title: string;
   tagline: string;
   description: string;
+  /** Extra search phrases for the tool page. Omit to keep the site keywords. */
+  keywords?: string[];
   day: number;
   publishedOn: string;
   audience: string;
@@ -736,6 +745,51 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "fraction-wall",
+    category: "math",
+    format: "lab",
+    title: "Interactive Fraction Wall",
+    tagline: "Tap fraction bars that line up to one.",
+    description:
+      "An interactive fraction wall — fraction bars online for grades 3–6. Tap pieces from a whole through twelfths, compare two lengths, or match a target such as another way to show 3/4. Free, no login, ready for a classroom projector.",
+    keywords: [
+      "interactive fraction wall",
+      "fraction bars online",
+      "fraction wall",
+      "equivalent fractions",
+      "compare fractions",
+    ],
+    day: 20,
+    publishedOn: "2026-09-21",
+    audience: "Grades 3–6 on a projector or iPad",
+    status: "live",
+    howTo:
+      "Project this page and tap Full screen. Tap a brick to shade from the left edge through that brick — the first half is 1/2, the third fourth is 3/4. Leave Equivalents on and tap 1/2, then 2/4, then 3/6; matching lengths are marked together. Compare sets two fractions and shows which bar is longer. Challenge asks for the same length on another row, such as a different way to show 3/4. One idea fits in five minutes.",
+    books: [
+      {
+        asin: "1635783186",
+        title: "Humble Math — 100 Days of Decimals, Percents & Fractions",
+        author: "Humble Math",
+        blurb:
+          "Daily drills for converting, reducing, and operating on fractions/decimals/percents.",
+      },
+      {
+        asin: "148380478X",
+        title: "Spectrum Fractions, Grade 5",
+        author: "Spectrum",
+        blurb:
+          "Focused grade-5 fraction concepts, operations, pretests/posttests, answer key.",
+      },
+      {
+        asin: "1483804801",
+        title: "Spectrum Fractions Workbook, Grade 6",
+        author: "Spectrum",
+        blurb:
+          "Add/subtract/multiply/divide fractions with step-by-step examples and assessments.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
@@ -754,6 +808,16 @@ export function compareToolsByPublishOrder(a: Tool, b: Tool) {
   const byDate = a.publishedOn.localeCompare(b.publishedOn);
   if (byDate !== 0) return byDate;
   return a.day - b.day;
+}
+
+/**
+ * Math Labs only. TODO(math-labs-hub): render this once a second lab ships.
+ * See lib/math-labs.ts.
+ */
+export function getMathLabTools(list: readonly Tool[] = tools) {
+  return getToolsByCategory(MATH_LAB_CATEGORY, list).filter(
+    (tool) => tool.format === "lab",
+  );
 }
 
 export function getToolsByCategory(
