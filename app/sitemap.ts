@@ -12,6 +12,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 1,
     },
+    {
+      url: `${siteUrl}/math-labs`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     ...tools.map((tool) => ({
       url: `${siteUrl}/tools/${tool.slug}`,
       lastModified: new Date(tool.publishedOn),

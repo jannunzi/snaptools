@@ -60,6 +60,9 @@ export const metadata: Metadata = {
     "sine wave from unit circle",
     "interactive sine cosine circle",
     "unwrapping the unit circle",
+    "slope intercept explorer",
+    "interactive y=mx+b",
+    "graph slope rise run",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,

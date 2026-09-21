@@ -973,6 +973,52 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "slope-intercept",
+    category: "math",
+    format: "lab",
+    title: "Slope–Intercept Explorer",
+    tagline: "Drag the line. Read y = mx + b.",
+    description:
+      "A slope intercept explorer for an interactive y = mx + b graph. Drag the intercept and the slope, and the line updates with a graph slope rise run triangle. Snap to whole numbers and simple fractions, compare a second line, or match a dashed target. Free, no login, ready for a classroom projector.",
+    keywords: [
+      "slope intercept explorer",
+      "interactive y=mx+b",
+      "graph slope rise run",
+      "slope intercept form",
+      "rise over run",
+    ],
+    day: 25,
+    publishedOn: "2026-09-21",
+    audience: "Algebra 1 on a projector or iPad",
+    status: "live",
+    howTo:
+      "Project this page and tap Full screen. Explore opens on y = 2x + 1, with a rise 4, run 2 triangle — the same slope as 2. Drag the point on the y-axis down to 0 so the line crosses the origin, then drag the other point until the triangle reads rise 1, run 2. The equation becomes y = (1/2)x. Snap is on, so the line catches whole numbers, halves, thirds, and fourths. Compare adds a second line. Match asks the room to cover the dashed line; its equation stays hidden until the two agree. One idea fits in five minutes. See every lab on",
+    tipLink: { href: "/math-labs", label: "Math Labs" },
+    books: [
+      {
+        asin: "1941691056",
+        title: "Basic Linear Graphing Skills Practice Workbook",
+        author: "Chris McMullen",
+        blurb:
+          "Plotting points, slope, y-intercept, and the equation of a straight line, with answers in the back.",
+      },
+      {
+        asin: "1523504382",
+        title: "Everything You Need to Ace Pre-Algebra and Algebra 1 in One Big Fat Notebook",
+        author: "Workman Publishing",
+        blurb:
+          "A year of pre-algebra and algebra 1 in one notebook, including graphing a line.",
+      },
+      {
+        asin: "194169134X",
+        title: "Master Essential Algebra Skills Practice Workbook with Answers",
+        author: "Chris McMullen",
+        blurb:
+          "Worked examples and practice for the algebra that sits next to a graph of y = mx + b.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
@@ -993,10 +1039,7 @@ export function compareToolsByPublishOrder(a: Tool, b: Tool) {
   return a.day - b.day;
 }
 
-/**
- * Math Labs only. Five labs are registered. TODO(math-labs-hub): render
- * this when a hub page is added. See lib/math-labs.ts.
- */
+/** Math Labs only. The index page is /math-labs. */
 export function getMathLabTools(list: readonly Tool[] = tools) {
   return getToolsByCategory(MATH_LAB_CATEGORY, list).filter(
     (tool) => tool.format === "lab",

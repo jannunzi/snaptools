@@ -3,11 +3,8 @@
  * (`format: "lab"` on the tool) beside the fluency drills.
  *
  * Shipped: Fraction Wall, Area vs Perimeter Tiles, Pythagoras, Unit Circle,
- * Sine from Circle.
- * Planned: slope.
- *
- * TODO(math-labs-hub): Five labs are registered. The hub page stays out of
- * this PR — list `getMathLabTools()` from lib/tools.ts when the hub is built.
+ * Sine from Circle, Slope–Intercept Explorer.
+ * The index page is /math-labs (`getMathLabTools()` in lib/tools.ts).
  */
 
 export const MATH_LAB_CATEGORY = "math" as const;
@@ -18,7 +15,7 @@ export const PLANNED_MATH_LABS = [
   { id: "unit-circle", title: "Unit Circle", slug: "unit-circle" },
   { id: "sine-from-circle", title: "Sine from Circle", slug: "sine-from-circle" },
   { id: "area-perimeter", title: "Area vs Perimeter", slug: "area-perimeter" },
-  { id: "slope", title: "Slope" },
+  { id: "slope", title: "Slope–Intercept Explorer", slug: "slope-intercept" },
 ] as const;
 
 export type PlannedMathLabId = (typeof PLANNED_MATH_LABS)[number]["id"];

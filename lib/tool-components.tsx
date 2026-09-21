@@ -17,6 +17,7 @@ import { Pythagoras } from "@/components/tools/Pythagoras";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
 import { RomanNumerals } from "@/components/tools/RomanNumerals";
 import { SightWords } from "@/components/tools/SightWords";
+import { SlopeIntercept } from "@/components/tools/SlopeIntercept";
 import { SineFromCircle } from "@/components/tools/SineFromCircle";
 import { SkipCounting } from "@/components/tools/SkipCounting";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
@@ -61,6 +62,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <UnitCircle />;
     case "sine-from-circle":
       return <SineFromCircle />;
+    case "slope-intercept":
+      return <SlopeIntercept />;
     case "sight-words":
       return <SightWords />;
     case "place-value":
