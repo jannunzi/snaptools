@@ -12,9 +12,17 @@ export function SiteFooter() {
         </p>
         <div className="flex flex-col gap-2 sm:items-end">
           <p className="max-w-sm sm:text-right">{amazonDisclosure}</p>
-          <Link href="/" className="text-ink hover:opacity-70">
-            Back to tools
-          </Link>
+          <div className="flex flex-wrap gap-4 sm:justify-end">
+            <Link href="/" className="text-ink hover:opacity-70">
+              Tools
+            </Link>
+            <Link href="/grades" className="text-ink hover:opacity-70">
+              Grades
+            </Link>
+            <Link href="/learn" className="text-ink hover:opacity-70">
+              Skill map
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -62,6 +62,9 @@ The affiliate disclosure (“As an Amazon Associate we earn from qualifying purc
 1. **Register it** in `lib/tools.ts`  
    Add a new entry with `status: "live"`, `category` (`math` | `history-civics` | `languages` | `arts` | `faith`), `title`, `tagline`, `description`, `audience`, `howTo`, `day`, `publishedOn`, and 2–3 related Amazon books with real ASINs. The homepage groups live tools by that category.
 
+1b. **Tag it** in `lib/curriculum.ts`  
+   Map the slug to one or more skill ids and grade bands (`prek`, `k`, `1`–`12`, `college`). Add a new skill if this is the first tool for that skill. Skills with zero live tools stay visible as gaps.
+
 2. **Build the tool** as a client component  
    Add `components/tools/YourTool.tsx`. Keep it account-free: no auth. Server routes are OK when a secret must stay off the client (see `/api/tts`, `/api/coloring/generate`, and `/api/history-timeline/events`).
 
@@ -80,7 +83,11 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 
 | Route | What |
 | --- | --- |
-| `/` | Hero, featured card, tools grouped by category |
+| `/` | Hero, browse-by-grade, featured card, tools grouped by category |
+| `/grades` | Grade bands from Pre-K through College |
+| `/grades/[grade]` | Subjects and skills for that grade, including gaps |
+| `/learn` | Skill map by subject — what exists vs what is missing |
+| `/skills/[skill]` | Skill detail, linked tools, prerequisites, and empty gaps |
 | `/tools/multiplication-tables` | Live multiplication practice |
 | `/tools/music-note-recognition` | Live treble-staff quiz |
 | `/tools/spelling-practice` | Live EN/ES/FR spelling by ear |
@@ -103,7 +110,7 @@ That’s it. Do not add accounts or a CMS just to ship a tool. History Timeline 
 | `/sitemap.xml` | Generated from the registry |
 | `/robots.txt` | Allows crawlers; points at the sitemap |
 
-Shared UI: `SiteHeader`, `SiteFooter`, `ToolShell`, `AmazonBookBanner`, `ToolCard`.
+Shared UI: `SiteHeader`, `SiteFooter`, `ToolShell`, `AmazonBookBanner`, `ToolCard`. Curriculum helpers live in `lib/curriculum.ts` (`getGapSkills`, `exportCurriculumSnapshot`, `formatCurriculumGapReport`). List open gaps with `npm run curriculum:gaps`.
 
 ## Deploy on Vercel
 

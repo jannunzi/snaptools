@@ -47,6 +47,9 @@ export const metadata: Metadata = {
     "treble clef",
     "browser tools",
     "no account",
+    "grade bands",
+    "skill map",
+    "curriculum",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,

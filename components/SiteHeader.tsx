@@ -23,6 +23,12 @@ export function SiteHeader() {
           >
             Tools
           </Link>
+          <Link
+            href="/grades"
+            className="font-medium text-ink-muted transition-colors hover:text-ink"
+          >
+            Grades
+          </Link>
         </nav>
       </div>
     </header>
