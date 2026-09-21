@@ -12,6 +12,7 @@ import { MusicNoteRecognition } from "@/components/tools/MusicNoteRecognition";
 import { PartsOfTheMass } from "@/components/tools/PartsOfTheMass";
 import { PlaceValuePractice } from "@/components/tools/PlaceValuePractice";
 import { PrintableColoring } from "@/components/tools/PrintableColoring";
+import { RomanNumerals } from "@/components/tools/RomanNumerals";
 import { SightWords } from "@/components/tools/SightWords";
 import { SkipCounting } from "@/components/tools/SkipCounting";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
@@ -51,6 +52,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <PlaceValuePractice />;
     case "skip-counting":
       return <SkipCounting />;
+    case "roman-numerals":
+      return <RomanNumerals />;
     case "first-communion-prayers":
       return <FirstCommunionPrayers />;
     case "parts-of-the-mass":
