@@ -51,6 +51,9 @@ export const metadata: Metadata = {
     "fraction bars",
     "area vs perimeter interactive",
     "same perimeter different area",
+    "interactive pythagorean theorem",
+    "pythagoras area squares",
+    "a²+b²=c² visual",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,
