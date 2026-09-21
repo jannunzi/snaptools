@@ -14,7 +14,9 @@ export function ToolShell({ tool, children }: ToolShellProps) {
   return (
     <article
       className={`mx-auto w-full px-5 py-10 sm:px-8 sm:py-14 ${
-        tool.slug === "history-timeline" ? "max-w-6xl" : "max-w-5xl"
+        tool.slug === "history-timeline" || tool.format === "lab"
+          ? "max-w-6xl"
+          : "max-w-5xl"
       }`}
     >
       <div className="no-print flex flex-wrap items-center gap-2">
@@ -41,7 +43,7 @@ export function ToolShell({ tool, children }: ToolShellProps) {
       </p>
       <div className="no-print mt-6 rounded-2xl border border-line bg-surface px-5 py-4 text-sm leading-relaxed text-ink-muted">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink">
-          How to practice
+          {tool.format === "lab" ? "Teacher tip" : "How to practice"}
         </p>
         <p className="mt-1.5">{tool.howTo}</p>
       </div>

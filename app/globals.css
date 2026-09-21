@@ -212,6 +212,15 @@ body {
   color: var(--ink-muted);
 }
 
+.fraction-stripe {
+  background-color: var(--accent);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--accent) 0 6px,
+    color-mix(in srgb, var(--accent-ink) 34%, var(--accent)) 6px 10px
+  );
+}
+
 @media print {
   :root {
     --bg: #ffffff;
