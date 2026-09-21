@@ -21,6 +21,7 @@ import { SkipCounting } from "@/components/tools/SkipCounting";
 import { SpellingPractice } from "@/components/tools/SpellingPractice";
 import { StatesAndCapitals } from "@/components/tools/StatesAndCapitals";
 import { TellingTime } from "@/components/tools/TellingTime";
+import { UnitCircle } from "@/components/tools/UnitCircle";
 import type { Tool } from "@/lib/tools";
 
 export function ToolBody({ tool }: { tool: Tool }) {
@@ -55,6 +56,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <AreaPerimeter />;
     case "pythagoras":
       return <Pythagoras />;
+    case "unit-circle":
+      return <UnitCircle />;
     case "sight-words":
       return <SightWords />;
     case "place-value":

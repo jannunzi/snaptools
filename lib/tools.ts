@@ -880,6 +880,51 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "unit-circle",
+    category: "math",
+    format: "lab",
+    title: "Unit Circle Lab",
+    tagline: "Drag the point. Read sine and cosine.",
+    description:
+      "An interactive unit circle. Drag a point on the circumference and read the angle in unit circle radians and degrees, plus the fraction of a turn. Coordinates show sin and cos on the unit circle, with the reference right triangle drawn in. Snap to 0°, 30°, 45°, 60°, 90° and the matching radian measures. Free, no login, ready for a classroom projector.",
+    keywords: [
+      "interactive unit circle",
+      "unit circle radians degrees",
+      "sin cos on unit circle",
+      "unit circle",
+      "trig ratios",
+    ],
+    day: 23,
+    publishedOn: "2026-09-21",
+    audience: "Algebra 2 and precalculus on a projector or iPad",
+    status: "live",
+    howTo:
+      "Project this page and tap Full screen. It opens at 45°, π/4, one eighth of a turn, with cosine and sine both √2/2. Drag the black thumb — Snap is on, so it catches 30°, 60°, and 90°, the same places as π/6, π/3, and π/2. Stop at the top: 90°, π/2, one quarter turn, coordinates (0, 1). The flat side of the triangle is adjacent, cosine. The upright side is opposite, sine. Switch the big readout to Radians. Tap All six and slide toward 90°: tangent grows, then reads undefined on the axis. Tap Reset to return to 45°. One idea fits in five minutes.",
+    books: [
+      {
+        asin: "1394168551",
+        title: "Trigonometry For Dummies",
+        author: "Mary Jane Sterling",
+        blurb:
+          "A plain-English tour of sine, cosine, and tangent, including how a right triangle sits on the unit circle.",
+      },
+      {
+        asin: "1477497781",
+        title: "Trigonometry Essentials Practice Workbook with Answers",
+        author: "Chris McMullen",
+        blurb:
+          "Calculator-free practice for degrees and radians, and the sine and cosine of the common angles through 360°.",
+      },
+      {
+        asin: "1615641823",
+        title: "The Humongous Book of Trigonometry Problems",
+        author: "W. Michael Kelley",
+        blurb:
+          "Hundreds of worked trigonometry problems, with the missing steps written in the margin.",
+      },
+    ],
+  },
 ];
 
 export function getTool(slug: string) {
@@ -901,7 +946,7 @@ export function compareToolsByPublishOrder(a: Tool, b: Tool) {
 }
 
 /**
- * Math Labs only. Three labs are registered. TODO(math-labs-hub): render
+ * Math Labs only. Four labs are registered. TODO(math-labs-hub): render
  * this when a hub page is added. See lib/math-labs.ts.
  */
 export function getMathLabTools(list: readonly Tool[] = tools) {
