@@ -262,7 +262,7 @@ function TriangleFigure({
 }) {
   const groupRef = useRef<SVGGElement>(null);
   const titleId = useId();
-  const hit = model.span * 0.05;
+  const hit = model.span * 0.072;
   const knob = hit * 0.46;
 
   const move = (which: "a" | "b", clientX: number, clientY: number) => {
@@ -826,6 +826,8 @@ function PythagorasStage({
 
   return (
     <div className="no-print" data-mode={mode} data-status={status}>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,36rem)_minmax(0,1fr)]">
+      <div className="min-w-0 xl:order-1">
       <p className="max-w-3xl text-base leading-relaxed text-ink sm:text-lg">{prompt}</p>
       <div className="mt-5 flex flex-wrap items-end gap-x-10 gap-y-4">
         <Stat label="a" value={formatMeasure(a)} large={projector} name="a" tone="a" />
@@ -909,24 +911,6 @@ function PythagorasStage({
         </div>
       ) : null}
 
-      <div className={`mt-5 ${projector ? "mx-auto max-w-5xl" : "mx-auto max-w-3xl"}`}>
-        <div className="snap-panel">
-          <TriangleFigure
-            model={model}
-            why={why}
-            snap={snap}
-            lockA={lockA}
-            lockB={lockB}
-            hideHypotenuse={hideHypotenuse}
-            areaA={parts.a2}
-            areaB={parts.b2}
-            areaC={parts.c2}
-            onA={onA}
-            onB={onB}
-          />
-        </div>
-      </div>
-
       <div className="mt-4 flex flex-wrap gap-x-8 gap-y-3">
         {lockA ? null : (
           <Stepper
@@ -972,6 +956,23 @@ function PythagorasStage({
         The right angle stays fixed. Drag the other corners, or use plus and minus. Arrows move a focused corner.
         Whole numbers snaps the legs. Show why splits the big square into the two leg areas. Escape clears.
       </p>
+      </div>
+      <div className="snap-panel order-first xl:sticky xl:top-4 xl:order-2">
+        <TriangleFigure
+          model={model}
+          why={why}
+          snap={snap}
+          lockA={lockA}
+          lockB={lockB}
+          hideHypotenuse={hideHypotenuse}
+          areaA={parts.a2}
+          areaB={parts.b2}
+          areaC={parts.c2}
+          onA={onA}
+          onB={onB}
+        />
+      </div>
+      </div>
     </div>
   );
 }
