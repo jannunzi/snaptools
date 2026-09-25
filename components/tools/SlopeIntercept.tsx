@@ -21,20 +21,23 @@ import {
   PLANE,
   START_B,
   START_M,
+  followIntercept,
   gridTicks,
-  interceptFromPoint,
+  initialPoint,
   lineReadout,
   linesMatch,
+  nudgeSlopePoint,
   openingFor,
+  placeIntercept,
+  placeSlopePoint,
+  pointFromSlope,
   pointList,
-  preferredRun,
-  slopeFromPoint,
-  snapSlope,
+  snapHandles,
   stepIntercept,
-  stepSlope,
-  visibleRun,
+  stepSlopePoint,
   type LabMode,
   type LineReadout,
+  type PlanePoint,
 } from "@/lib/slope-intercept";
 
 const PAD = 1.9;
@@ -203,8 +206,7 @@ function PlaneFigure({
   onIntercept,
   onSlope,
   onStepIntercept,
-  onStepSlope,
-  onStepRun,
+  onNudgePoint,
 }: {
   lineA: LineReadout;
   lineB: LineReadout | null;
@@ -215,8 +217,7 @@ function PlaneFigure({
   onIntercept: (pointerY: number) => void;
   onSlope: (pointerX: number, pointerY: number) => void;
   onStepIntercept: (direction: -1 | 1) => void;
-  onStepSlope: (direction: -1 | 1) => void;
-  onStepRun: (direction: -1 | 1) => void;
+  onNudgePoint: (dx: number, dy: number) => void;
 }) {
   const groupRef = useRef<SVGGElement>(null);
   const interceptRef = useRef<SVGGElement>(null);
@@ -227,9 +228,7 @@ function PlaneFigure({
   const handled = edit === "b" && lineB ? lineB : lineA;
   const triangle = showTriangle ? handled.triangle : null;
   const intercept = { x: 0, y: handled.b };
-  const slopePoint = triangle
-    ? { x: triangle.x3, y: triangle.y3 }
-    : { x: handled.run, y: handled.b + handled.m * handled.run };
+  const slopePoint = handled.point;
 
   const readPoint = (clientX: number, clientY: number) => {
     const group = groupRef.current;
@@ -281,27 +280,28 @@ function PlaneFigure({
   };
 
   const onSlopeKey = (event: ReactKeyboardEvent<SVGGElement>) => {
-    if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-      event.preventDefault();
-      onStepSlope(event.key === "ArrowUp" ? 1 : -1);
-      return;
-    }
-    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
-      event.preventDefault();
-      onStepRun(event.key === "ArrowRight" ? 1 : -1);
-    }
+    const move: Record<string, [number, number]> = {
+      ArrowUp: [0, 1],
+      ArrowDown: [0, -1],
+      ArrowRight: [1, 0],
+      ArrowLeft: [-1, 0],
+    };
+    const step = move[event.key];
+    if (!step) return;
+    event.preventDefault();
+    onNudgePoint(step[0], step[1]);
   };
 
   const marker =
-    triangle && triangle.showRise && Math.abs(triangle.rise) > 0.7 && triangle.run > 0.7
+    triangle && triangle.showRise && Math.abs(triangle.rise) > 0.7 && Math.abs(triangle.run) > 0.7
       ? (() => {
           const size = 0.32;
-          const up = Math.sign(triangle.rise) * size;
-          const left = triangle.x2 - size;
+          const towardIntercept = Math.sign(triangle.x1 - triangle.x2) || 1;
+          const towardPoint = Math.sign(triangle.rise) || 1;
           return [
-            { x: left, y: triangle.y2 },
-            { x: left, y: triangle.y2 + up },
-            { x: triangle.x2, y: triangle.y2 + up },
+            { x: triangle.x2 + towardIntercept * size, y: triangle.y2 },
+            { x: triangle.x2 + towardIntercept * size, y: triangle.y2 + towardPoint * size },
+            { x: triangle.x2, y: triangle.y2 + towardPoint * size },
           ];
         })()
       : null;
@@ -314,10 +314,13 @@ function PlaneFigure({
     : null;
   const riseLabel =
     triangle && triangle.showRise
-      ? {
-          x: triangle.x2 > PLANE - 1.3 ? triangle.x2 - 0.72 : triangle.x2 + 0.72,
-          y: (triangle.y2 + triangle.y3) / 2,
-        }
+      ? (() => {
+          const outward = triangle.x2 >= 0 ? 0.72 : -0.72;
+          let x = triangle.x2 + outward;
+          if (x > PLANE - 0.4) x = triangle.x2 - 0.72;
+          if (x < -PLANE + 0.4) x = triangle.x2 + 0.72;
+          return { x, y: (triangle.y2 + triangle.y3) / 2 };
+        })()
       : null;
 
   return (
@@ -328,7 +331,7 @@ function PlaneFigure({
       aria-labelledby={titleId}
       data-dragging={dragging ?? ""}
     >
-      <title id={titleId}>Coordinate plane showing {handled.equation}</title>
+      <title id={titleId}>{`Coordinate plane showing ${handled.equation}`}</title>
       <g
         ref={groupRef}
         transform="scale(1,-1)"
@@ -444,12 +447,15 @@ function PlaneFigure({
           ref={slopeRef}
           role="slider"
           tabIndex={0}
-          aria-label={snap ? "Slope handle, snapped to a simple fraction" : "Slope handle"}
-          aria-orientation="vertical"
-          aria-valuemin={M_MIN}
-          aria-valuemax={M_MAX}
-          aria-valuenow={Number(handled.m.toFixed(2))}
-          aria-valuetext={`slope ${handled.slopeSpoken}, ${handled.equationSpoken}`}
+          aria-label={snap ? "Line point, snapped to a whole-number grid point" : "Line point"}
+          aria-valuemin={-PLANE}
+          aria-valuemax={PLANE}
+          aria-valuenow={Number(handled.point.y.toFixed(2))}
+          aria-valuetext={
+            handled.vertical
+              ? `Undefined slope. Vertical line, ${handled.equationSpoken}.`
+              : `Point (${handled.point.x}, ${handled.point.y}). Slope ${handled.slopeSpoken}. ${handled.equationSpoken}.`
+          }
           aria-describedby={hintId}
           className="group cursor-grab outline-none"
           onPointerDown={onSlopeDown}
@@ -500,8 +506,8 @@ function PlaneFigure({
         ) : null}
       </g>
       <desc id={hintId}>
-        Drag the point on the y-axis to change the intercept. Drag the point with the blue center to change the slope.
-        Arrow keys step the focused point. Left and right arrows on the slope point change the run.
+        Drag the point on the y-axis to change the intercept. Drag the point with the blue center anywhere on the grid, including left and below.
+        Arrow keys move the focused point. On the y-axis the slope is undefined.
       </desc>
     </svg>
   );
@@ -512,92 +518,115 @@ export function SlopeIntercept() {
   const [snap, setSnap] = useState(true);
   const [showTriangle, setShowTriangle] = useState(true);
   const [which, setWhich] = useState<"a" | "b">("a");
-  const [m, setM] = useState(START_M);
   const [b, setB] = useState(START_B);
-  const [run, setRun] = useState(preferredRun(START_M));
-  const [m2, setM2] = useState(COMPARE_M);
+  const [point, setPoint] = useState<PlanePoint>(() => initialPoint(START_M, START_B));
   const [b2, setB2] = useState(COMPARE_B);
-  const [run2, setRun2] = useState(preferredRun(COMPARE_M));
+  const [point2, setPoint2] = useState<PlanePoint>(() => initialPoint(COMPARE_M, COMPARE_B));
   const [matchIndex, setMatchIndex] = useState(0);
 
   const editingB = mode === "compare" && which === "b";
+  const bRef = useRef(b);
+  const pointRef = useRef(point);
+  const b2Ref = useRef(b2);
+  const point2Ref = useRef(point2);
+  bRef.current = b;
+  pointRef.current = point;
+  b2Ref.current = b2;
+  point2Ref.current = point2;
 
-  const applyM = useCallback(
-    (next: number, nextRun?: number) => {
-      if (editingB) {
-        setM2(next);
-        setRun2(nextRun ?? preferredRun(next));
-        return;
-      }
-      setM(next);
-      setRun(nextRun ?? preferredRun(next));
-    },
-    [editingB],
-  );
-
-  const applyB = useCallback(
-    (next: number) => {
-      if (editingB) setB2(next);
-      else setB(next);
-    },
-    [editingB],
-  );
+  const commitLine = useCallback((whichLine: "a" | "b", nextB: number, nextPoint: PlanePoint) => {
+    if (whichLine === "b") {
+      b2Ref.current = nextB;
+      point2Ref.current = nextPoint;
+      setB2(nextB);
+      setPoint2(nextPoint);
+      return;
+    }
+    bRef.current = nextB;
+    pointRef.current = nextPoint;
+    setB(nextB);
+    setPoint(nextPoint);
+  }, []);
 
   const onIntercept = useCallback(
-    (pointerY: number) => applyB(interceptFromPoint(pointerY, snap)),
-    [applyB, snap],
+    (pointerY: number) => {
+      const whichLine = editingB ? "b" : "a";
+      const current = editingB ? point2Ref.current : pointRef.current;
+      const prevB = editingB ? b2Ref.current : bRef.current;
+      const nextB = placeIntercept(pointerY, snap, current);
+      commitLine(whichLine, nextB, followIntercept(current, prevB, nextB, snap));
+    },
+    [commitLine, editingB, snap],
   );
 
   const onSlope = useCallback(
     (pointerX: number, pointerY: number) => {
-      const intercept = editingB ? b2 : b;
-      const next = slopeFromPoint(pointerX, pointerY, intercept, snap);
-      applyM(next.m, next.run);
+      const whichLine = editingB ? "b" : "a";
+      const intercept = editingB ? b2Ref.current : bRef.current;
+      const next = placeSlopePoint(pointerX, pointerY, intercept, snap);
+      commitLine(whichLine, intercept, next);
     },
-    [applyM, b, b2, editingB, snap],
+    [commitLine, editingB, snap],
   );
 
   const onStepIntercept = useCallback(
     (direction: -1 | 1) => {
-      const current = editingB ? b2 : b;
-      applyB(stepIntercept(current, direction, snap));
+      const whichLine = editingB ? "b" : "a";
+      const current = editingB ? point2Ref.current : pointRef.current;
+      const prevB = editingB ? b2Ref.current : bRef.current;
+      const nextB = placeIntercept(stepIntercept(prevB, direction, snap), snap, current, direction);
+      commitLine(whichLine, nextB, followIntercept(current, prevB, nextB, snap));
     },
-    [applyB, b, b2, editingB, snap],
+    [commitLine, editingB, snap],
   );
 
   const onStepSlope = useCallback(
     (direction: -1 | 1) => {
-      const current = editingB ? m2 : m;
-      applyM(stepSlope(current, direction, snap));
+      const whichLine = editingB ? "b" : "a";
+      const current = editingB ? point2Ref.current : pointRef.current;
+      const intercept = editingB ? b2Ref.current : bRef.current;
+      commitLine(whichLine, intercept, stepSlopePoint(current, intercept, direction, snap));
     },
-    [applyM, editingB, m, m2, snap],
+    [commitLine, editingB, snap],
   );
 
-  const onStepRun = useCallback(
-    (direction: -1 | 1) => {
-      if (editingB) {
-        setRun2(visibleRun(m2, b2, run2 + direction));
-        return;
-      }
-      setRun(visibleRun(m, b, run + direction));
+  const onNudgePoint = useCallback(
+    (dx: number, dy: number) => {
+      const whichLine = editingB ? "b" : "a";
+      const current = editingB ? point2Ref.current : pointRef.current;
+      const intercept = editingB ? b2Ref.current : bRef.current;
+      commitLine(whichLine, intercept, nudgeSlopePoint(current, intercept, dx, dy, snap));
     },
-    [b, b2, editingB, m, m2, run, run2],
+    [commitLine, editingB, snap],
+  );
+
+  const onSliderM = useCallback(
+    (next: number) => {
+      const whichLine = editingB ? "b" : "a";
+      const current = editingB ? point2Ref.current : pointRef.current;
+      const intercept = editingB ? b2Ref.current : bRef.current;
+      commitLine(whichLine, intercept, pointFromSlope(next, intercept, current.x, snap));
+    },
+    [commitLine, editingB, snap],
+  );
+
+  const onSliderB = useCallback(
+    (next: number) => {
+      onIntercept(next);
+    },
+    [onIntercept],
   );
 
   const toggleSnap = () => {
     const next = !snap;
     setSnap(next);
     if (!next) return;
-    const mA = snapSlope(m);
-    const bA = interceptFromPoint(b, true);
-    const mB = snapSlope(m2);
-    const bB = interceptFromPoint(b2, true);
-    setM(mA);
-    setB(bA);
-    setRun(preferredRun(mA));
-    setM2(mB);
-    setB2(bB);
-    setRun2(preferredRun(mB));
+    const lineA = snapHandles(b, point);
+    const lineB = snapHandles(b2, point2);
+    setB(lineA.b);
+    setPoint(lineA.point);
+    setB2(lineB.b);
+    setPoint2(lineB.point);
   };
 
   const selectMode = (next: LabMode) => {
@@ -607,18 +636,16 @@ export function SlopeIntercept() {
     const target = MATCH_TARGETS[0];
     const opening = openingFor(target);
     setMatchIndex(0);
-    setM(opening.m);
     setB(opening.b);
-    setRun(preferredRun(opening.m));
+    setPoint(initialPoint(opening.m, opening.b));
   };
 
   const nextTarget = () => {
     const next = (matchIndex + 1) % MATCH_TARGETS.length;
     const opening = openingFor(MATCH_TARGETS[next]);
     setMatchIndex(next);
-    setM(opening.m);
     setB(opening.b);
-    setRun(preferredRun(opening.m));
+    setPoint(initialPoint(opening.m, opening.b));
   };
 
   const reset = useCallback(() => {
@@ -626,12 +653,10 @@ export function SlopeIntercept() {
     setSnap(true);
     setShowTriangle(true);
     setWhich("a");
-    setM(START_M);
     setB(START_B);
-    setRun(preferredRun(START_M));
-    setM2(COMPARE_M);
+    setPoint(initialPoint(START_M, START_B));
     setB2(COMPARE_B);
-    setRun2(preferredRun(COMPARE_M));
+    setPoint2(initialPoint(COMPARE_M, COMPARE_B));
     setMatchIndex(0);
   }, []);
 
@@ -681,21 +706,19 @@ export function SlopeIntercept() {
           snap={snap}
           showTriangle={showTriangle}
           which={which}
-          m={m}
           b={b}
-          run={run}
-          m2={m2}
+          point={point}
           b2={b2}
-          run2={run2}
+          point2={point2}
           matchIndex={matchIndex}
           onWhich={setWhich}
           onIntercept={onIntercept}
           onSlope={onSlope}
           onStepIntercept={onStepIntercept}
           onStepSlope={onStepSlope}
-          onStepRun={onStepRun}
-          onSliderM={(value) => applyM(snap ? snapSlope(value) : value)}
-          onSliderB={(value) => applyB(interceptFromPoint(value, snap))}
+          onNudgePoint={onNudgePoint}
+          onSliderM={onSliderM}
+          onSliderB={onSliderB}
           onReset={reset}
         />
       </MathLabFrame>
@@ -703,24 +726,26 @@ export function SlopeIntercept() {
   );
 }
 
+function pointsDiffer(left: PlanePoint, right: PlanePoint) {
+  return Math.abs(left.x - right.x) > 1e-9 || Math.abs(left.y - right.y) > 1e-9;
+}
+
 function SlopeStage({
   mode,
   snap,
   showTriangle,
   which,
-  m,
   b,
-  run,
-  m2,
+  point,
   b2,
-  run2,
+  point2,
   matchIndex,
   onWhich,
   onIntercept,
   onSlope,
   onStepIntercept,
   onStepSlope,
-  onStepRun,
+  onNudgePoint,
   onSliderM,
   onSliderB,
   onReset,
@@ -729,19 +754,17 @@ function SlopeStage({
   snap: boolean;
   showTriangle: boolean;
   which: "a" | "b";
-  m: number;
   b: number;
-  run: number;
-  m2: number;
+  point: PlanePoint;
   b2: number;
-  run2: number;
+  point2: PlanePoint;
   matchIndex: number;
   onWhich: (which: "a" | "b") => void;
   onIntercept: (pointerY: number) => void;
   onSlope: (pointerX: number, pointerY: number) => void;
   onStepIntercept: (direction: -1 | 1) => void;
   onStepSlope: (direction: -1 | 1) => void;
-  onStepRun: (direction: -1 | 1) => void;
+  onNudgePoint: (dx: number, dy: number) => void;
   onSliderM: (value: number) => void;
   onSliderB: (value: number) => void;
   onReset: () => void;
@@ -749,10 +772,10 @@ function SlopeStage({
   const { projector, exit } = useMathLabProjector();
   const slopeId = useId();
   const interceptId = useId();
-  const lineA = lineReadout(m, b, run);
-  const lineB = lineReadout(m2, b2, run2);
+  const lineA = lineReadout(b, point);
+  const lineB = lineReadout(b2, point2);
   const target = MATCH_TARGETS[matchIndex] ?? MATCH_TARGETS[0];
-  const targetLine = lineReadout(target.m, target.b, preferredRun(target.m));
+  const targetLine = lineReadout(target.b, initialPoint(target.m, target.b));
   const editingB = mode === "compare" && which === "b";
   const active = editingB ? lineB : lineA;
   const matched = mode === "match" && linesMatch(lineA, targetLine);
@@ -763,7 +786,7 @@ function SlopeStage({
         : "Match the dashed line. Its equation stays hidden until the two agree."
       : mode === "compare"
         ? "Line A is black. Line B is blue. The sliders edit the selected line."
-        : "Drag the point on the y-axis, or the point with the blue center.";
+        : "Drag the point on the y-axis, or the blue point anywhere on the grid.";
 
   const announcement =
     mode === "match"
@@ -796,10 +819,11 @@ function SlopeStage({
     return () => window.removeEventListener("keydown", onKey);
   }, [exit, onReset, projector]);
 
-  const slopeNow = editingB ? m2 : m;
+  const activePoint = editingB ? point2 : point;
   const interceptNow = editingB ? b2 : b;
-  const canDecreaseSlope = Math.abs(stepSlope(slopeNow, -1, snap) - slopeNow) > 1e-9;
-  const canIncreaseSlope = Math.abs(stepSlope(slopeNow, 1, snap) - slopeNow) > 1e-9;
+  const slopeNow = active.m ?? 0;
+  const canDecreaseSlope = pointsDiffer(stepSlopePoint(activePoint, interceptNow, -1, snap), activePoint);
+  const canIncreaseSlope = pointsDiffer(stepSlopePoint(activePoint, interceptNow, 1, snap), activePoint);
   const canDecreaseIntercept = Math.abs(stepIntercept(interceptNow, -1, snap) - interceptNow) > 1e-9;
   const canIncreaseIntercept = Math.abs(stepIntercept(interceptNow, 1, snap) - interceptNow) > 1e-9;
 
@@ -811,7 +835,10 @@ function SlopeStage({
       data-slope={active.slopeText}
       data-intercept={active.interceptText}
       data-rise={active.triangle?.riseText ?? ""}
-      data-run={active.triangle?.runText ?? ""}
+      data-run={active.triangle?.runText ?? (active.vertical ? "0" : "")}
+      data-vertical={active.vertical ? "true" : "false"}
+      data-point-x={active.point.x}
+      data-point-y={active.point.y}
       data-matched={matched ? "true" : "false"}
       data-snap={snap ? "true" : "false"}
     >
@@ -849,8 +876,7 @@ function SlopeStage({
           onIntercept={onIntercept}
           onSlope={onSlope}
           onStepIntercept={onStepIntercept}
-          onStepSlope={onStepSlope}
-          onStepRun={onStepRun}
+          onNudgePoint={onNudgePoint}
         />
       </div>
 
@@ -891,7 +917,7 @@ function SlopeStage({
               min={M_MIN}
               max={M_MAX}
               step={snap ? "any" : 0.1}
-              value={slopeNow}
+              value={Math.min(M_MAX, Math.max(M_MIN, slopeNow))}
               aria-label="Slope m"
               aria-valuetext={active.slopeSpoken}
               className="w-full cursor-pointer"
@@ -916,7 +942,7 @@ function SlopeStage({
               type="range"
               min={B_MIN}
               max={B_MAX}
-              step={snap ? "any" : 0.1}
+              step={snap ? 1 : 0.1}
               value={interceptNow}
               aria-label="Intercept b"
               aria-valuetext={active.interceptSpoken}
@@ -955,7 +981,7 @@ function SlopeStage({
         </span>
       </p>
       <p className="mt-2 max-w-3xl text-sm text-ink-muted">
-        Drag either point, or use the sliders. Arrows step the focused point. Escape {projector ? "leaves full screen" : "resets the lab"}.
+        Drag either point, or use the sliders. Arrows move the focused point. A point on the y-axis makes a vertical line. Escape {projector ? "leaves full screen" : "resets the lab"}.
       </p>
     </div>
   );

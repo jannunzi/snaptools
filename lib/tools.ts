@@ -980,7 +980,7 @@ export const tools: Tool[] = [
     title: "Slope–Intercept Explorer",
     tagline: "Drag the line. Read y = mx + b.",
     description:
-      "A slope intercept explorer for an interactive y = mx + b graph. Drag the intercept and the slope, and the line updates with a graph slope rise run triangle. Snap to whole numbers and simple fractions, compare a second line, or match a dashed target. Free, no login, ready for a classroom projector.",
+      "A slope intercept explorer for an interactive y = mx + b graph. Drag the intercept and a second point anywhere on the grid. Snap to whole-number points, read signed rise and run, and see undefined slope on a vertical line. Compare a second line, or match a dashed target. Free, no login, ready for a classroom projector.",
     keywords: [
       "slope intercept explorer",
       "interactive y=mx+b",
@@ -993,7 +993,7 @@ export const tools: Tool[] = [
     audience: "Algebra 1 on a projector or iPad",
     status: "live",
     howTo:
-      "Project this page and tap Full screen. Explore opens on y = 2x + 1, with a rise 4, run 2 triangle — the same slope as 2. Drag the point on the y-axis down to 0 so the line crosses the origin, then drag the other point until the triangle reads rise 1, run 2. The equation becomes y = (1/2)x. Snap is on, so the line catches whole numbers, halves, thirds, and fourths. Compare adds a second line. Match asks the room to cover the dashed line; its equation stays hidden until the two agree. One idea fits in five minutes. See every lab on",
+      "Project this page and tap Full screen. Explore opens on y = 2x + 1, with a rise 4, run 2 triangle — the same slope as 2. Drag the blue point anywhere on the grid, including left of the y-axis: run shows a minus when the point is to the left. Drag it straight above or below the intercept and the line is vertical, x = 0, with undefined slope. Snap lands on whole-number points. Compare adds a second line. Match asks the room to cover the dashed line; its equation stays hidden until the two agree. One idea fits in five minutes. See every lab on",
     tipLink: { href: "/math-labs", label: "Math Labs" },
     books: [
       {
