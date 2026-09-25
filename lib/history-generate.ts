@@ -1,3 +1,5 @@
+import { eventFitsCategory } from "@/lib/history-fit";
+import { parseWikipediaField } from "@/lib/history-wikipedia";
 import {
   eventId,
   formatYearRange,
@@ -16,6 +18,7 @@ const SYSTEM_PROMPT = [
   "You are a careful historian writing captions for a horizontal world-history timeline.",
   "Return only JSON of the form {\"events\":[...]} with no markdown.",
   "Each event must include: year (number; negative = BCE), endYear (number or null), title, summary, significance (1-5), projected (boolean).",
+  "Optional wikipedia: the canonical English Wikipedia article title or slug when you are confident the page exists (for example \"Roman Empire\" or \"Apollo_11\"). Omit rather than guess.",
   "Optional month (1-12) and day (1-31) refine the start date when the civil date is known.",
   "For empires, dynasties, wars, lives, voyages, and other spans, set endYear to the conventional end. If it still exists today, set endYear to the present year.",
   "Point events (an invention, a single work, a single day) use endYear null.",
@@ -23,6 +26,9 @@ const SYSTEM_PROMPT = [
   "If the window is after the present year, mark projected true and write cautious forecasts, not science fiction.",
   "No mythology presented as fact. No copyrighted long quotations. One or two sentences per summary.",
   "Titles stay short. Events must belong to the requested category and fall inside the year window.",
+  "Empires means polities, dynasties, and states — never battles, sieges, campaigns, or wars. Battle of Tours, the Umayyad siege of Constantinople, and similar fights belong only in Wars. If the category is Empires, do not list military actions even when they involve an empire.",
+  "For Empires include long-lived states when they fall in the window — examples: Roman Republic (c. 509–27 BCE), Roman Empire (27 BCE–476 CE, West), Eastern Roman / Byzantine Empire (330–1453), Sassanid (to 651), Umayyad, Abbasid, Carolingian, Holy Roman Empire (from 800/962), Tang, Song, First Bulgarian Empire, Ghana Empire, Khmer Empire. Do not treat 27 BCE as the start of Rome as a state.",
+  "If the category label is a specific subject (for example WWII, fashion, or ships), fill that subject in the window — do not substitute a generic world-history list.",
 ].join(" ");
 
 function clampSignificance(value: unknown): 1 | 2 | 3 | 4 | 5 {
@@ -92,7 +98,7 @@ function parseGeneratedEvents(
     const projected =
       Boolean(row.projected) || year > NOW_YEAR || (endYear ?? year) > NOW_YEAR;
 
-    events.push({
+    const event: HistoryEvent = {
       id: eventId(category, year, title),
       category,
       year,
@@ -103,7 +109,12 @@ function parseGeneratedEvents(
       projected,
       source: "ai",
       granularity,
-    });
+    };
+    const wikipedia =
+      parseWikipediaField(row.wikipedia) ?? parseWikipediaField(row.wikiTitle);
+    if (wikipedia) event.wikipedia = wikipedia;
+    if (!eventFitsCategory(event, category)) continue;
+    events.push(event);
   }
 
   return events;
@@ -144,12 +155,18 @@ export async function generateHistoryWindow(options: {
     `Category: ${category.label} — ${category.hint}`,
     `Window: ${formatYearRange(options.window.start, options.window.end, options.granularity)} (start inclusive, end exclusive).`,
     `Granularity: ${options.granularity}. Aim for ${spec.targetCount} distinct events at this resolution.`,
+    options.window.end <= 1
+      ? `This window is BCE (negative years). If the period is historically rich for this category, prefer closer to ${spec.targetCount} well-known in-window events rather than a near-empty list.`
+      : "",
     precisionHint(options.granularity),
     `Present year: ${NOW_YEAR}. Years after that are forecasts.`,
     `Do not repeat these already-shown titles: ${known}.`,
     `For long-lived subjects (empires, wars, composers' lives, expeditions) endYear is required.`,
-    "Return JSON: {\"events\":[{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false}]}",
-  ].join("\n");
+    "Optional wikipedia is the English article title when obvious; omit if unsure.",
+    "Return JSON: {\"events\":[{\"year\":1969,\"month\":7,\"day\":20,\"endYear\":null,\"title\":\"Apollo 11 landing\",\"summary\":\"...\",\"significance\":5,\"projected\":false,\"wikipedia\":\"Apollo 11\"}]}",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const payload = await xaiChatJson({
     apiKey: options.apiKey,

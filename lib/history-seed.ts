@@ -16,6 +16,8 @@ function ev(
   extras: {
     endYear?: number;
     projected?: boolean;
+    wikipedia?: string;
+    wikiTitle?: string;
   } = {},
 ): HistoryEvent {
   return {
@@ -30,7 +32,7 @@ function ev(
   };
 }
 
-export const historySeedEvents: HistoryEvent[] = [
+const SEED_EVENTS: HistoryEvent[] = [
   ev(
     "empires",
     -2334,
@@ -49,6 +51,14 @@ export const historySeedEvents: HistoryEvent[] = [
   ),
   ev(
     "empires",
+    -509,
+    "Roman Republic",
+    "Rome replaces its kings with annually elected magistrates; the republic lasts until Octavian’s settlement.",
+    5,
+    { endYear: -27 },
+  ),
+  ev(
+    "empires",
     -221,
     "Qin unifies China",
     "Qin Shi Huang ends the Warring States and standardizes writing, roads, and measures.",
@@ -58,17 +68,98 @@ export const historySeedEvents: HistoryEvent[] = [
   ev(
     "empires",
     -27,
-    "Roman Empire begins",
-    "Octavian becomes Augustus; Rome shifts from republic to imperial rule.",
+    "Roman Empire",
+    "Augustus ends the republic; the western imperial state lasts until 476 CE.",
     5,
     { endYear: 476 },
   ),
   ev(
     "empires",
+    224,
+    "Sassanid Empire",
+    "Ardashir I overthrows the Parthians; Sasanian Iran lasts until the Arab conquests.",
+    5,
+    { endYear: 651 },
+  ),
+  ev(
+    "empires",
     330,
-    "Constantinople founded",
-    "Constantine makes the city on the Bosporus the new Roman capital.",
+    "Eastern Roman / Byzantine Empire",
+    "Constantinople becomes the Roman capital; the eastern state continues until 1453.",
+    5,
+    { endYear: 1453 },
+  ),
+  ev(
+    "empires",
+    300,
+    "Ghana Empire",
+    "A West African trading empire on the Sahel gold and salt routes, before Mali.",
     4,
+    { endYear: 1200 },
+  ),
+  ev(
+    "empires",
+    618,
+    "Tang dynasty",
+    "Li Yuan founds a cosmopolitan Chinese empire that sets a high-water mark for medieval East Asia.",
+    5,
+    { endYear: 907 },
+  ),
+  ev(
+    "empires",
+    661,
+    "Umayyad Caliphate",
+    "The Umayyads rule from Damascus and stretch from Iberia to Central Asia.",
+    5,
+    { endYear: 750 },
+  ),
+  ev(
+    "empires",
+    681,
+    "First Bulgarian Empire",
+    "Asparuh’s Bulgars found a state that rivals Byzantium in the Balkans.",
+    4,
+    { endYear: 1018 },
+  ),
+  ev(
+    "empires",
+    750,
+    "Abbasid Caliphate",
+    "The Abbasids move the caliphal center to Iraq; Baghdad becomes a world city until the Mongol sack.",
+    5,
+    { endYear: 1258 },
+  ),
+  ev(
+    "empires",
+    800,
+    "Carolingian Empire",
+    "Charlemagne is crowned emperor; a Frankish imperial order lasts through the ninth century.",
+    4,
+    { endYear: 888 },
+  ),
+  ev(
+    "empires",
+    802,
+    "Khmer Empire",
+    "Jayavarman II founds a mainland Southeast Asian empire centered on Angkor.",
+    4,
+    { endYear: 1431 },
+  ),
+  ev(
+    "empires",
+    960,
+    "Song dynasty",
+    "Zhao Kuangyin reunifies most of China; the Song era is dense with cities, print, and commerce.",
+    5,
+    { endYear: 1279 },
+  ),
+  ev(
+    "empires",
+    962,
+    "Holy Roman Empire",
+    "Otto I is crowned emperor; a Central European imperial title lasts until 1806.",
+    5,
+    { endYear: 1806 },
   ),
   ev(
     "empires",
@@ -131,6 +222,34 @@ export const historySeedEvents: HistoryEvent[] = [
     -3500,
     "The wheel",
     "Wheeled vehicles appear in Mesopotamia and the steppe, transforming haulage.",
+    5,
+  ),
+  ev(
+    "inventions",
+    -3000,
+    "Control of fire",
+    "By the Bronze Age, keeping and kindling fire is already a human universal — cooking, ceramics, and metalwork depend on it.",
+    5,
+  ),
+  ev(
+    "inventions",
+    -2000,
+    "Spoked-wheel chariot",
+    "Light horse chariots become the prestige weapon of Bronze Age armies.",
+    4,
+  ),
+  ev(
+    "inventions",
+    -1200,
+    "Iron working",
+    "Bloomery iron spreads after the Bronze Age collapse, making metal tools far more common.",
+    5,
+  ),
+  ev(
+    "inventions",
+    -1050,
+    "Phoenician alphabet",
+    "A small consonant alphabet becomes the ancestor of later Mediterranean scripts.",
     5,
   ),
   ev(
@@ -298,6 +417,21 @@ export const historySeedEvents: HistoryEvent[] = [
 
   ev(
     "wars",
+    -1274,
+    "Battle of Kadesh",
+    "Ramesses II and Muwatalli II fight the best-documented chariot battle of the Bronze Age.",
+    5,
+  ),
+  ev(
+    "wars",
+    -1200,
+    "Bronze Age collapse",
+    "Palaces from Greece to the Levant fall; Sea Peoples and inland wars remake the eastern Mediterranean.",
+    5,
+    { endYear: -1150 },
+  ),
+  ev(
+    "wars",
     -499,
     "Greco-Persian Wars",
     "Greek city-states resist Achaemenid invasions at Marathon, Salamis, and Plataea.",
@@ -311,6 +445,21 @@ export const historySeedEvents: HistoryEvent[] = [
     "Rome and Carthage fight three wars for the western Mediterranean.",
     5,
     { endYear: -146 },
+  ),
+  ev(
+    "wars",
+    717,
+    "Umayyad siege of Constantinople",
+    "Maslama’s Umayyad army and fleet fail to take the Byzantine capital; Greek fire and the Theodosian Walls hold.",
+    4,
+    { endYear: 718 },
+  ),
+  ev(
+    "wars",
+    732,
+    "Battle of Tours",
+    "Charles Martel’s Franks halt an Umayyad raid near Poitiers — a war, not an empire.",
+    4,
   ),
   ev(
     "wars",
@@ -742,6 +891,153 @@ export const historySeedEvents: HistoryEvent[] = [
     { projected: true },
   ),
 ];
+
+/** Canonical English Wikipedia titles for well-known seeds. */
+const SEED_WIKIPEDIA: Record<string, string> = {
+  "Akkadian Empire": "Akkadian Empire",
+  "Achaemenid Persian Empire": "Achaemenid Empire",
+  "Roman Republic": "Roman Republic",
+  "Qin unifies China": "Qin dynasty",
+  "Roman Empire": "Roman Empire",
+  "Sassanid Empire": "Sasanian Empire",
+  "Eastern Roman / Byzantine Empire": "Byzantine Empire",
+  "Ghana Empire": "Ghana Empire",
+  "Tang dynasty": "Tang dynasty",
+  "Umayyad Caliphate": "Umayyad Caliphate",
+  "First Bulgarian Empire": "First Bulgarian Empire",
+  "Abbasid Caliphate": "Abbasid Caliphate",
+  "Carolingian Empire": "Carolingian Empire",
+  "Khmer Empire": "Khmer Empire",
+  "Song dynasty": "Song dynasty",
+  "Holy Roman Empire": "Holy Roman Empire",
+  "Mongol Empire": "Mongol Empire",
+  "Ottoman Empire": "Ottoman Empire",
+  "Aztec Triple Alliance": "Aztec Empire",
+  "Mughal Empire": "Mughal Empire",
+  "Kingdom of Great Britain": "Kingdom of Great Britain",
+  "Soviet Union": "Soviet Union",
+  "Writing in Mesopotamia": "Cuneiform",
+  "The wheel": "Wheel",
+  "Control of fire": "Control of fire by early humans",
+  "Spoked-wheel chariot": "Chariot",
+  "Iron working": "Iron Age",
+  "Phoenician alphabet": "Phoenician alphabet",
+  "Paper in Han China": "Cai Lun",
+  "Gutenberg printing press": "Printing press",
+  "Refracting telescope": "Refracting telescope",
+  "Newcomen steam engine": "Newcomen atmospheric engine",
+  "Smallpox vaccine": "Smallpox vaccine",
+  Telephone: "Telephone",
+  "Powered airplane": "Wright Flyer",
+  Penicillin: "Penicillin",
+  Transistor: "Transistor",
+  "World Wide Web": "World Wide Web",
+  iPhone: "iPhone",
+  "Hildegard of Bingen": "Hildegard of Bingen",
+  "Johann Sebastian Bach": "Johann Sebastian Bach",
+  "Wolfgang Amadeus Mozart": "Wolfgang Amadeus Mozart",
+  "Ludwig van Beethoven": "Ludwig van Beethoven",
+  "Frédéric Chopin": "Frédéric Chopin",
+  "Duke Ellington": "Duke Ellington",
+  "Billie Holiday records Summertime": "Billie Holiday",
+  "The Beatles’ first single": "The Beatles",
+  "Bob Dylan goes electric": "Bob Dylan",
+  "Rapper’s Delight": "Rapper's Delight",
+  Thriller: "Thriller (album)",
+  "Battle of Kadesh": "Battle of Kadesh",
+  "Bronze Age collapse": "Late Bronze Age collapse",
+  "Greco-Persian Wars": "Greco-Persian Wars",
+  "Punic Wars": "Punic Wars",
+  "Umayyad siege of Constantinople": "Siege of Constantinople (717–718)",
+  "Battle of Tours": "Battle of Tours",
+  "First Crusade": "First Crusade",
+  "Hundred Years’ War": "Hundred Years' War",
+  "Thirty Years’ War": "Thirty Years' War",
+  "American Revolutionary War": "American Revolutionary War",
+  "Napoleonic Wars": "Napoleonic Wars",
+  "American Civil War": "American Civil War",
+  "World War I": "World War I",
+  "World War II": "World War II",
+  "D-Day": "Normandy landings",
+  "Cold War": "Cold War",
+  "Zhang Qian’s missions": "Zhang Qian",
+  "Zheng He’s first voyage": "Zheng He",
+  "Columbus reaches the Caribbean": "Christopher Columbus",
+  "Vasco da Gama reaches India": "Vasco da Gama",
+  "Magellan–Elcano circumnavigation": "Magellan expedition",
+  "Cook’s Endeavour voyage": "First voyage of James Cook",
+  "Lewis and Clark expedition": "Lewis and Clark Expedition",
+  "Amundsen at the South Pole": "Amundsen's South Pole expedition",
+  "Apollo 11 Moon landing": "Apollo 11",
+  "Voyager launches": "Voyager program",
+  "Curiosity lands on Mars": "Curiosity (rover)",
+  "Euclid’s Elements": "Euclid's Elements",
+  "Copernican Revolution": "Copernican Revolution",
+  "Newton’s Principia": "Philosophiæ Naturalis Principia Mathematica",
+  "On the Origin of Species": "On the Origin of Species",
+  "Periodic table": "Periodic table",
+  "Einstein’s annus mirabilis": "Annus mirabilis papers",
+  "Fleming and penicillin": "Alexander Fleming",
+  "Structure of DNA": "Nucleic acid double helix",
+  "Apollo science return": "Moon rock",
+  "Higgs boson": "Higgs boson",
+  "CRISPR gene editing": "CRISPR gene editing",
+  "Parthenon begun": "Parthenon",
+  "Terracotta Army": "Terracotta Army",
+  "Hagia Sophia dedicated": "Hagia Sophia",
+  "Leonardo paints the Mona Lisa": "Mona Lisa",
+  "Michelangelo’s David": "David (Michelangelo)",
+  "Rembrandt’s Night Watch": "The Night Watch",
+  "First Impressionist exhibition": "Impressionism",
+  "Picasso’s Les Demoiselles d’Avignon": "Les Demoiselles d'Avignon",
+  Fountain: "Fountain (Duchamp)",
+  "Warhol’s soup cans": "Campbell's Soup Cans",
+  "First recorded Olympic Games": "Ancient Olympic Games",
+  "Football Association founded": "The Football Association",
+  "First modern Olympics": "1896 Summer Olympics",
+  "First World Series": "1903 World Series",
+  "First FIFA World Cup": "1930 FIFA World Cup",
+  "Jackie Robinson debuts": "Jackie Robinson",
+  "Super Bowl I": "Super Bowl I",
+  "Title IX": "Title IX",
+  "Miracle on Ice": "Miracle on Ice",
+  "First FIFA Women's World Cup": "1991 FIFA Women's World Cup",
+  "Usain Bolt in Beijing": "Usain Bolt",
+  "Simone Biles in Rio": "Simone Biles",
+  "Artemis lunar return (projected)": "Artemis program",
+  "Commercial fusion pilots (projected)": "Fusion power",
+  "Crewed Mars landing (projected)": "Human mission to Mars",
+};
+
+export const historySeedEvents: HistoryEvent[] = SEED_EVENTS.map((event) => {
+  const wikipedia = SEED_WIKIPEDIA[event.title];
+  return wikipedia ? { ...event, wikipedia } : event;
+});
+
+/** Older seed ids/titles that must not linger in Mongo window caches. */
+export const RETIRED_HISTORY_EVENT_IDS = new Set([
+  "empires--27-roman-empire-begins",
+  "empires-330-constantinople-founded",
+]);
+
+export const RETIRED_HISTORY_EVENT_TITLES = new Set([
+  "Roman Empire begins",
+]);
+
+export function isRetiredHistoryEvent(event: {
+  id: string;
+  title?: string;
+}) {
+  if (RETIRED_HISTORY_EVENT_IDS.has(event.id)) return true;
+  if (event.title && RETIRED_HISTORY_EVENT_TITLES.has(event.title)) return true;
+  return false;
+}
+
+export function withoutRetiredHistoryEvents<T extends { id: string; title?: string }>(
+  events: T[],
+) {
+  return events.filter((event) => !isRetiredHistoryEvent(event));
+}
 
 export function seedEventsFor(
   category: string,
