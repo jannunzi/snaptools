@@ -92,6 +92,18 @@ body {
   outline-offset: 3px;
 }
 
+/*
+  SVG slider thumbs draw their own keyboard cue with
+  group-focus-visible:stroke-secondary. Do not add a CSS outline here.
+  Chrome paints outline on SVG elements in user space, so the 2px ring
+  above becomes a solid block across a scaled chart. This rule stays
+  unlayered: Tailwind's focus-visible:outline-none lives in the utilities
+  layer and cannot override the outline above.
+*/
+svg [role="slider"]:focus-visible {
+  outline: none;
+}
+
 .font-display {
   font-family: var(--font-display);
   letter-spacing: -0.03em;
