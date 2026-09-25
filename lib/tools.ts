@@ -1026,20 +1026,22 @@ export const tools: Tool[] = [
     title: "Venn Diagram Lab",
     tagline: "Shade the sets. Read a correct formula.",
     description:
-      "An interactive Venn diagram for two or three sets inside a universal set. Shade a union, intersection, complement, or exactly-one region and the inclusion-exclusion formula fills in with your counts. The shading matches the formula. Free, no login, ready for a classroom projector.",
+      "An interactive Venn diagram for two or three sets inside a universal set. Shade a union, intersection, complement, or exactly-one region and the inclusion-exclusion formula fills in with your counts. Switch to elements and read A ∪ B in roster notation, or open De Morgan’s laws and see both sides shade the same region. The shading matches the formula. Free, no login, ready for a classroom projector.",
     keywords: [
       "interactive venn diagram",
       "venn diagram formula",
       "inclusion exclusion",
       "three circle venn diagram",
       "sets union intersection",
+      "de morgan laws venn diagram",
+      "roster notation",
     ],
     day: 26,
     publishedOn: "2026-09-25",
     audience: "Grades 5–8 on a projector or iPad",
     status: "live",
     howTo:
-      "Project this page and tap Full screen. Explore opens on two sets, shaded as A ∪ B: everything in A or B, not only the overlap. The line under the diagram is n(A) + n(B) − n(A ∩ B), with the counts filled in. Change a region count and the total follows. Tap a region to shade it yourself. When the shading matches a formula, the lab names it. Switch to 3 sets for at least one, exactly one, exactly two, and all three. Exactly one subtracts each pairwise overlap and adds the center back, because that center was removed twice. Word problem gives soccer, chess, and music totals. Fill each region, then tap Check. One idea fits in five minutes. See every lab on",
+      "Project this page and tap Full screen. Explore opens on two sets, shaded as A ∪ B: everything in A or B, not only the overlap. The line under the diagram is n(A) + n(B) − n(A ∩ B), with the counts filled in. Change a region count and the total follows. Tap a region to shade it yourself. When the shading matches a formula, the lab names it. Elements replaces the counts with members such as A = {1, 2, 3, 4} and B = {2, 4, 6, 8}. Drag a member into a region and the lab writes A ∪ B = {1, 2, 3, 4, 6, 8} plus the set-builder line. De Morgan puts (A ∪ B)′ beside A′ ∩ B′, and (A ∩ B)′ beside A′ ∪ B′. Both diagrams in a row shade the same region. Switch to 3 sets for at least one, exactly one, exactly two, and all three. Exactly one subtracts each pairwise overlap and adds the center back, because that center was removed twice. Word problem gives soccer, chess, and music totals. Fill each region, then tap Check. One idea fits in five minutes. See every lab on",
     tipLink: { href: "/math-labs", label: "Math Labs" },
     books: [
       {
