@@ -24,6 +24,7 @@ import { SpellingPractice } from "@/components/tools/SpellingPractice";
 import { StatesAndCapitals } from "@/components/tools/StatesAndCapitals";
 import { TellingTime } from "@/components/tools/TellingTime";
 import { UnitCircle } from "@/components/tools/UnitCircle";
+import { VennDiagram } from "@/components/tools/VennDiagram";
 import type { Tool } from "@/lib/tools";
 
 export function ToolBody({ tool }: { tool: Tool }) {
@@ -64,6 +65,8 @@ export function ToolBody({ tool }: { tool: Tool }) {
       return <SineFromCircle />;
     case "slope-intercept":
       return <SlopeIntercept />;
+    case "venn-diagram":
+      return <VennDiagram />;
     case "sight-words":
       return <SightWords />;
     case "place-value":

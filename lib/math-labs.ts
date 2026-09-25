@@ -3,7 +3,7 @@
  * (`format: "lab"` on the tool) beside the fluency drills.
  *
  * Shipped: Fraction Wall, Area vs Perimeter Tiles, Pythagoras, Unit Circle,
- * Sine from Circle, Slope–Intercept Explorer.
+ * Sine from Circle, Slope–Intercept Explorer, Venn Diagram.
  * The index page is /math-labs (`getMathLabTools()` in lib/tools.ts).
  */
 
@@ -16,6 +16,7 @@ export const PLANNED_MATH_LABS = [
   { id: "sine-from-circle", title: "Sine from Circle", slug: "sine-from-circle" },
   { id: "area-perimeter", title: "Area vs Perimeter", slug: "area-perimeter" },
   { id: "slope", title: "Slope–Intercept Explorer", slug: "slope-intercept" },
+  { id: "venn", title: "Venn Diagram", slug: "venn-diagram" },
 ] as const;
 
 export type PlannedMathLabId = (typeof PLANNED_MATH_LABS)[number]["id"];
