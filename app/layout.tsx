@@ -66,6 +66,8 @@ export const metadata: Metadata = {
     "interactive venn diagram",
     "venn diagram formula",
     "inclusion exclusion",
+    "de morgan laws venn diagram",
+    "roster notation",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,

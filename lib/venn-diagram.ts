@@ -50,7 +50,50 @@ export type ExpressionId =
 
 export type Counts = Record<RegionId, number>;
 
-export type LabMode = "explore" | "problem";
+export type LabMode = "explore" | "problem" | "demorgan";
+
+export type Representation = "counts" | "elements";
+
+export type ElementSets = {
+  universe: string[];
+  A: string[];
+  B: string[];
+  C: string[];
+};
+
+export type MemberDraft = {
+  U: string;
+  A: string;
+  B: string;
+  C: string;
+};
+
+export type ElementReading = {
+  title: string;
+  left: string;
+  roster: string;
+  equation: string;
+  builder: string;
+  spoken: string;
+  elements: string[];
+};
+
+export type DeMorganSide = {
+  title: string;
+  spoken: string;
+  builder: string;
+  builderSpoken: string;
+  regions: readonly RegionId[];
+};
+
+export type DeMorganPair = {
+  id: "complement-union" | "complement-intersection";
+  law: string;
+  spoken: string;
+  why: string;
+  left: DeMorganSide;
+  right: DeMorganSide;
+};
 
 type Pt = { x: number; y: number };
 
@@ -1593,6 +1636,434 @@ function nearBoundary(point: Pt, circles: readonly Circle[], pad: number) {
   });
 }
 
+const MAX_ELEMENTS = 16;
+const TOKEN = /^[A-Za-z0-9]+$/;
+
+export const NUMBER_ELEMENTS: ElementSets = {
+  universe: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+  A: ["1", "2", "3", "4"],
+  B: ["2", "4", "6", "8"],
+  C: ["3", "4", "5", "6"],
+};
+
+export const LETTER_ELEMENTS: ElementSets = {
+  universe: ["a", "b", "c", "d", "e", "f", "g", "h"],
+  A: ["a", "b", "c", "d"],
+  B: ["b", "d", "f", "h"],
+  C: ["c", "d", "e", "f"],
+};
+
+export const DE_MORGAN: readonly DeMorganPair[] = [
+  {
+    id: "complement-union",
+    law: "(A ∪ B)′ = A′ ∩ B′",
+    spoken: "The complement of A union B equals A complement intersect B complement.",
+    why: "Outside both circles is exactly what is missing from A and missing from B.",
+    left: {
+      title: "(A ∪ B)′",
+      spoken: "complement of A union B",
+      builder: "{ x ∈ U | x ∉ A ∪ B }",
+      builderSpoken: "the set of x in U such that x is not in A union B",
+      regions: ["outside"],
+    },
+    right: {
+      title: "A′ ∩ B′",
+      spoken: "A complement intersect B complement",
+      builder: "{ x ∈ U | x ∉ A and x ∉ B }",
+      builderSpoken: "the set of x in U such that x is not in A and x is not in B",
+      regions: ["outside"],
+    },
+  },
+  {
+    id: "complement-intersection",
+    law: "(A ∩ B)′ = A′ ∪ B′",
+    spoken: "The complement of A intersect B equals A complement union B complement.",
+    why: "Everything except the overlap is what misses A or misses B.",
+    left: {
+      title: "(A ∩ B)′",
+      spoken: "complement of A intersect B",
+      builder: "{ x ∈ U | x ∉ A ∩ B }",
+      builderSpoken: "the set of x in U such that x is not in A intersect B",
+      regions: ["onlyA", "onlyB", "outside"],
+    },
+    right: {
+      title: "A′ ∪ B′",
+      spoken: "A complement union B complement",
+      builder: "{ x ∈ U | x ∉ A or x ∉ B }",
+      builderSpoken: "the set of x in U such that x is not in A or x is not in B",
+      regions: ["onlyA", "onlyB", "outside"],
+    },
+  },
+];
+
+export function parseMembers(raw: string): string[] {
+  const seen = new Set<string>();
+  const members: string[] = [];
+  for (const part of raw.split(/[,;\s{}]+/)) {
+    const token = part.trim();
+    if (!token || !TOKEN.test(token) || token.length > 12 || seen.has(token)) continue;
+    seen.add(token);
+    members.push(token);
+    if (members.length >= MAX_ELEMENTS) break;
+  }
+  return members;
+}
+
+export function formatMembers(items: readonly string[]) {
+  return items.join(", ");
+}
+
+export function memberDraftFrom(model: ElementSets): MemberDraft {
+  return {
+    U: formatMembers(model.universe),
+    A: formatMembers(model.A),
+    B: formatMembers(model.B),
+    C: formatMembers(model.C),
+  };
+}
+
+function orderedMembers(universe: readonly string[], members: readonly string[]) {
+  const wanted = new Set(members);
+  return universe.filter((item) => wanted.has(item));
+}
+
+function normalizeElements(model: ElementSets): ElementSets {
+  const universe = parseMembers(formatMembers(model.universe));
+  return {
+    universe,
+    A: orderedMembers(universe, model.A),
+    B: orderedMembers(universe, model.B),
+    C: orderedMembers(universe, model.C),
+  };
+}
+
+export function withUniverse(model: ElementSets, raw: string): ElementSets {
+  return normalizeElements({ ...model, universe: parseMembers(raw) });
+}
+
+export function withSet(model: ElementSets, which: "A" | "B" | "C", raw: string): ElementSets {
+  const members = parseMembers(raw);
+  const universe = [...model.universe];
+  for (const member of members) {
+    if (!universe.includes(member) && universe.length < MAX_ELEMENTS) universe.push(member);
+  }
+  return normalizeElements({ ...model, universe, [which]: members });
+}
+
+export function regionOf(model: ElementSets, element: string, sets: SetCount): RegionId {
+  const inA = model.A.includes(element);
+  const inB = model.B.includes(element);
+  const inC = sets === 3 && model.C.includes(element);
+  if (inA && inB && inC) return "abc";
+  if (inA && inB) return "ab";
+  if (inB && inC) return "bc";
+  if (inC && inA) return "ca";
+  if (inA) return "onlyA";
+  if (inB) return "onlyB";
+  if (inC) return "onlyC";
+  return "outside";
+}
+
+export function elementsInRegion(model: ElementSets, region: RegionId, sets: SetCount) {
+  return model.universe.filter((element) => regionOf(model, element, sets) === region);
+}
+
+export function elementsIn(model: ElementSets, regions: readonly RegionId[], sets: SetCount) {
+  const wanted = new Set(regions);
+  return model.universe.filter((element) => wanted.has(regionOf(model, element, sets)));
+}
+
+export function placeElement(
+  model: ElementSets,
+  element: string,
+  region: RegionId,
+  sets: SetCount,
+): ElementSets {
+  if (!model.universe.includes(element)) return model;
+  const inA = region === "onlyA" || region === "ab" || region === "ca" || region === "abc";
+  const inB = region === "onlyB" || region === "ab" || region === "bc" || region === "abc";
+  const inC =
+    sets === 3
+      ? region === "onlyC" || region === "bc" || region === "ca" || region === "abc"
+      : model.C.includes(element);
+  const next = (list: readonly string[], include: boolean) => {
+    const without = list.filter((item) => item !== element);
+    return include ? [...without, element] : without;
+  };
+  return normalizeElements({
+    universe: model.universe,
+    A: next(model.A, inA),
+    B: next(model.B, inB),
+    C: next(model.C, inC),
+  });
+}
+
+export function compareElements(left: string, right: string) {
+  const leftNumber = /^(?:0|[1-9]\d*)$/.test(left);
+  const rightNumber = /^(?:0|[1-9]\d*)$/.test(right);
+  if (leftNumber && rightNumber) return Number(left) - Number(right);
+  if (leftNumber) return -1;
+  if (rightNumber) return 1;
+  return left.localeCompare(right);
+}
+
+export function roster(elements: readonly string[]) {
+  if (elements.length === 0) return "∅";
+  return `{${[...elements].sort(compareElements).join(", ")}}`;
+}
+
+function spokenRoster(elements: readonly string[]) {
+  if (elements.length === 0) return "the empty set";
+  return `the set ${[...elements].sort(compareElements).join(", ")}`;
+}
+
+function leftSymbol(id: ExpressionId, sets: SetCount) {
+  switch (id) {
+    case "union":
+    case "atLeastOne":
+      return sets === 2 ? "A ∪ B" : "A ∪ B ∪ C";
+    case "intersection":
+    case "pairAB":
+      return "A ∩ B";
+    case "pairBC":
+      return "B ∩ C";
+    case "pairCA":
+      return "C ∩ A";
+    case "allThree":
+      return "A ∩ B ∩ C";
+    case "onlyA":
+      return sets === 2 ? "A ∩ B′" : "A ∩ B′ ∩ C′";
+    case "onlyB":
+      return sets === 2 ? "B ∩ A′" : "B ∩ A′ ∩ C′";
+    case "onlyC":
+      return "C ∩ A′ ∩ B′";
+    case "abOnly":
+      return "A ∩ B ∩ C′";
+    case "bcOnly":
+      return "B ∩ C ∩ A′";
+    case "caOnly":
+      return "C ∩ A ∩ B′";
+    case "symDiff":
+      return "A Δ B";
+    case "neither":
+      return sets === 2 ? "(A ∪ B)′" : "(A ∪ B ∪ C)′";
+    case "complementA":
+      return "A′";
+    case "complementB":
+      return "B′";
+    case "complementC":
+      return "C′";
+    case "exactlyOne":
+      return "exactly one of A, B, C";
+    case "exactlyTwo":
+      return "exactly two of A, B, C";
+    case "setA":
+      return "A";
+    case "setB":
+      return "B";
+    case "setC":
+      return "C";
+    case "universe":
+      return "U";
+    default: {
+      const never: never = id;
+      return never;
+    }
+  }
+}
+
+function builderFor(id: ExpressionId | null, sets: SetCount) {
+  if (id === null) {
+    return {
+      builder: "{ x ∈ U | x is in the shaded region }",
+      spoken: "the set of x in U such that x is in the shaded region",
+    };
+  }
+  switch (id) {
+    case "union":
+      return {
+        builder: "{ x ∈ U | x ∈ A or x ∈ B }",
+        spoken: "the set of x in U such that x is in A or x is in B",
+      };
+    case "atLeastOne":
+      return sets === 2
+        ? {
+            builder: "{ x ∈ U | x ∈ A or x ∈ B }",
+            spoken: "the set of x in U such that x is in A or x is in B",
+          }
+        : {
+            builder: "{ x ∈ U | x ∈ A or x ∈ B or x ∈ C }",
+            spoken: "the set of x in U such that x is in A or x is in B or x is in C",
+          };
+    case "intersection":
+    case "pairAB":
+      return {
+        builder: "{ x ∈ U | x ∈ A and x ∈ B }",
+        spoken: "the set of x in U such that x is in A and x is in B",
+      };
+    case "pairBC":
+      return {
+        builder: "{ x ∈ U | x ∈ B and x ∈ C }",
+        spoken: "the set of x in U such that x is in B and x is in C",
+      };
+    case "pairCA":
+      return {
+        builder: "{ x ∈ U | x ∈ C and x ∈ A }",
+        spoken: "the set of x in U such that x is in C and x is in A",
+      };
+    case "allThree":
+      return {
+        builder: "{ x ∈ U | x ∈ A and x ∈ B and x ∈ C }",
+        spoken: "the set of x in U such that x is in A and x is in B and x is in C",
+      };
+    case "onlyA":
+      return sets === 2
+        ? {
+            builder: "{ x ∈ U | x ∈ A and x ∉ B }",
+            spoken: "the set of x in U such that x is in A and x is not in B",
+          }
+        : {
+            builder: "{ x ∈ U | x ∈ A and x ∉ B and x ∉ C }",
+            spoken: "the set of x in U such that x is in A and x is not in B and x is not in C",
+          };
+    case "onlyB":
+      return sets === 2
+        ? {
+            builder: "{ x ∈ U | x ∈ B and x ∉ A }",
+            spoken: "the set of x in U such that x is in B and x is not in A",
+          }
+        : {
+            builder: "{ x ∈ U | x ∈ B and x ∉ A and x ∉ C }",
+            spoken: "the set of x in U such that x is in B and x is not in A and x is not in C",
+          };
+    case "onlyC":
+      return {
+        builder: "{ x ∈ U | x ∈ C and x ∉ A and x ∉ B }",
+        spoken: "the set of x in U such that x is in C and x is not in A and x is not in B",
+      };
+    case "abOnly":
+      return {
+        builder: "{ x ∈ U | x ∈ A and x ∈ B and x ∉ C }",
+        spoken: "the set of x in U such that x is in A and x is in B and x is not in C",
+      };
+    case "bcOnly":
+      return {
+        builder: "{ x ∈ U | x ∈ B and x ∈ C and x ∉ A }",
+        spoken: "the set of x in U such that x is in B and x is in C and x is not in A",
+      };
+    case "caOnly":
+      return {
+        builder: "{ x ∈ U | x ∈ C and x ∈ A and x ∉ B }",
+        spoken: "the set of x in U such that x is in C and x is in A and x is not in B",
+      };
+    case "symDiff":
+      return {
+        builder: "{ x ∈ U | x is in A or B, but not both }",
+        spoken: "the set of x in U such that x is in A or B, but not both",
+      };
+    case "neither":
+      return sets === 2
+        ? {
+            builder: "{ x ∈ U | x ∉ A and x ∉ B }",
+            spoken: "the set of x in U such that x is not in A and x is not in B",
+          }
+        : {
+            builder: "{ x ∈ U | x ∉ A and x ∉ B and x ∉ C }",
+            spoken: "the set of x in U such that x is not in A and x is not in B and x is not in C",
+          };
+    case "complementA":
+      return {
+        builder: "{ x ∈ U | x ∉ A }",
+        spoken: "the set of x in U such that x is not in A",
+      };
+    case "complementB":
+      return {
+        builder: "{ x ∈ U | x ∉ B }",
+        spoken: "the set of x in U such that x is not in B",
+      };
+    case "complementC":
+      return {
+        builder: "{ x ∈ U | x ∉ C }",
+        spoken: "the set of x in U such that x is not in C",
+      };
+    case "exactlyOne":
+      return {
+        builder: "{ x ∈ U | x is in exactly one of A, B, and C }",
+        spoken: "the set of x in U such that x is in exactly one of A, B, and C",
+      };
+    case "exactlyTwo":
+      return {
+        builder: "{ x ∈ U | x is in exactly two of A, B, and C }",
+        spoken: "the set of x in U such that x is in exactly two of A, B, and C",
+      };
+    case "setA":
+      return {
+        builder: "{ x ∈ U | x ∈ A }",
+        spoken: "the set of x in U such that x is in A",
+      };
+    case "setB":
+      return {
+        builder: "{ x ∈ U | x ∈ B }",
+        spoken: "the set of x in U such that x is in B",
+      };
+    case "setC":
+      return {
+        builder: "{ x ∈ U | x ∈ C }",
+        spoken: "the set of x in U such that x is in C",
+      };
+    case "universe":
+      return {
+        builder: "{ x | x ∈ U }",
+        spoken: "the set of x such that x is in U",
+      };
+    default: {
+      const never: never = id;
+      return never;
+    }
+  }
+}
+
+export function elementReading(
+  id: ExpressionId | null,
+  model: ElementSets,
+  sets: SetCount,
+  shaded: readonly RegionId[],
+): ElementReading {
+  const regions = id ? regionsOf(id, sets) : shaded;
+  const elements = elementsIn(model, regions, sets);
+  const listed = roster(elements);
+  const left = id ? leftSymbol(id, sets) : "Shaded";
+  const built = builderFor(id, sets);
+  const title = id ? patternFor(id, sets).title : elements.length === 0 ? "Nothing shaded" : "Custom shading";
+  return {
+    title,
+    left,
+    roster: listed,
+    equation: `${left} = ${listed}`,
+    builder: built.builder,
+    spoken: `${title}. ${left} equals ${spokenRoster(elements)}. ${built.spoken}.`,
+    elements,
+  };
+}
+
+export function deMorganValue(model: ElementSets, regions: readonly RegionId[]) {
+  return roster(elementsIn(model, regions, 2));
+}
+
+export function deMorganCount(counts: Counts, regions: readonly RegionId[], sets: SetCount) {
+  const two =
+    sets === 2
+      ? counts
+      : {
+          ...ZERO_COUNTS,
+          onlyA: counts.onlyA + counts.ca,
+          onlyB: counts.onlyB + counts.bc,
+          ab: counts.ab + counts.abc,
+          outside: counts.outside + counts.onlyC,
+        };
+  return sumRegions(two, regions);
+}
+
 export function auditVennDiagram() {
   const signatures = new Map<string, string>();
   for (const pattern of PATTERNS) {
@@ -1661,6 +2132,54 @@ export function auditVennDiagram() {
     }
     const grade = gradeProblem(problem, draftFromSolution(problem));
     if (!grade.correct) throw new Error(`${problem.id} does not grade its own solution`);
+  }
+
+  const numbers = NUMBER_ELEMENTS;
+  const unionReading = elementReading("union", numbers, 2, regionsOf("union", 2));
+  if (unionReading.equation !== "A ∪ B = {1, 2, 3, 4, 6, 8}") {
+    throw new Error(`Union roster was ${unionReading.equation}`);
+  }
+  if (unionReading.builder !== "{ x ∈ U | x ∈ A or x ∈ B }") {
+    throw new Error(`Union builder was ${unionReading.builder}`);
+  }
+  const exactlyOne = elementReading("exactlyOne", numbers, 3, regionsOf("exactlyOne", 3));
+  if (exactlyOne.roster !== "{1, 5, 8}") {
+    throw new Error(`Exactly one roster was ${exactlyOne.roster}`);
+  }
+  const letters = elementReading("union", LETTER_ELEMENTS, 2, regionsOf("union", 2));
+  if (letters.roster !== "{a, b, c, d, f, h}") {
+    throw new Error(`Letter union was ${letters.roster}`);
+  }
+  for (const pair of DE_MORGAN) {
+    if (signature(pair.left.regions) !== signature(pair.right.regions)) {
+      throw new Error(`${pair.law} shades different regions`);
+    }
+    const left = deMorganValue(numbers, pair.left.regions);
+    const right = deMorganValue(numbers, pair.right.regions);
+    if (left !== right) throw new Error(`${pair.law} rosters differ: ${left} vs ${right}`);
+    const leftCount = deMorganCount(DEFAULT_COUNTS_2, pair.left.regions, 2);
+    const rightCount = deMorganCount(DEFAULT_COUNTS_2, pair.right.regions, 2);
+    if (leftCount !== rightCount) throw new Error(`${pair.law} counts differ`);
+  }
+  if (deMorganValue(numbers, ["outside"]) !== "{5, 7, 9, 10}") {
+    throw new Error("Complement of the union roster is wrong");
+  }
+  if (deMorganValue(numbers, ["onlyA", "onlyB", "outside"]) !== "{1, 3, 5, 6, 7, 8, 9, 10}") {
+    throw new Error("Complement of the intersection roster is wrong");
+  }
+  if (deMorganCount(DEFAULT_COUNTS_2, ["outside"], 2) !== 5) {
+    throw new Error("De Morgan complement-union count is wrong");
+  }
+  if (deMorganCount(DEFAULT_COUNTS_2, ["onlyA", "onlyB", "outside"], 2) !== 40) {
+    throw new Error("De Morgan complement-intersection count is wrong");
+  }
+  const moved = placeElement(numbers, "2", "onlyA", 2);
+  if (regionOf(moved, "2", 2) !== "onlyA" || moved.B.includes("2") || !moved.A.includes("2")) {
+    throw new Error("Moving 2 to only A did not update membership");
+  }
+  const edited = withSet(numbers, "A", "1, 2, 9");
+  if (roster(edited.A) !== "{1, 2, 9}" || !edited.universe.includes("9")) {
+    throw new Error("Editing set A did not keep the universe in sync");
   }
 
   for (const sets of [2, 3] as const) {
