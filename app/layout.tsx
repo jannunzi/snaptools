@@ -63,6 +63,9 @@ export const metadata: Metadata = {
     "slope intercept explorer",
     "interactive y=mx+b",
     "graph slope rise run",
+    "interactive venn diagram",
+    "venn diagram formula",
+    "inclusion exclusion",
   ],
   openGraph: {
     title: `${siteName} — ${siteTagline}`,

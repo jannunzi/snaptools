@@ -7,9 +7,10 @@ import { getMathLabTools } from "@/lib/tools";
 export const metadata: Metadata = {
   title: "Math Labs",
   description:
-    "Free projector manipulatives: fraction bars, area and perimeter, Pythagoras, the unit circle, sine, and slope. No login.",
+    "Free projector manipulatives: fraction bars, area and perimeter, Pythagoras, the unit circle, sine, slope, and Venn diagrams. No login.",
   keywords: [
     "math labs",
+    "interactive venn diagram",
     "slope intercept explorer",
     "interactive fraction wall",
     "interactive unit circle",
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Math Labs",
     description:
-      "Free projector manipulatives: fraction bars, area and perimeter, Pythagoras, the unit circle, sine, and slope. No login.",
+      "Free projector manipulatives: fraction bars, area and perimeter, Pythagoras, the unit circle, sine, slope, and Venn diagrams. No login.",
     url: `${getSiteUrl()}/math-labs`,
   },
 };
